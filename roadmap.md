@@ -12,6 +12,28 @@ Tick tasks off as they merge. `[ ]` = todo, `[x]` = merged.
 
 ---
 
+## Current status
+
+_Last updated: 2026-07-01._
+
+**Baseline already on `main` (pre-roadmap scaffolding):** a monorepo with two folders —
+- `app/` — Expo SDK 57 + Expo Router. Five placeholder tabs (Today, Diary, Prep, Train,
+  Progress), each a shared `ScreenScaffold` empty state. Typechecks; runs in Expo Go.
+- `api/` — Express + TypeScript + Prisma (SQLite). Scaffolded `/health`, `/foods`, `/batches`
+  routes with per-portion macro maths (`src/macros.ts`); initial migration applied. Typechecks.
+
+**Completed roadmap tasks:**
+- [x] **P0-1** — GitHub remote + PR workflow (`origin` = `github.com:djmahony/batchFit.git`,
+  `gh` authed, `main` pushed).
+
+**Next up (in order):** **P0-2** (API test harness) → **P0-3** (reconcile docs) → **F1-1**
+(User & profile data model). Confirm which to start when resuming.
+
+**Workflow reminder:** every task is its own branch → small commits as you go → push the
+branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
+
+---
+
 ## Working agreement
 
 - **One branch + one PR per task.** Base branch is `main`.
@@ -44,9 +66,9 @@ production hosting, monetisation, push notifications. These are Phase-2/3 busine
 
 Small groundwork that unblocks the workflow. Needed once.
 
-- [ ] **P0-1 — GitHub remote + PR workflow.** Create the GitHub repo, add it as `origin`,
-  push `main`. Confirm `gh` CLI is authenticated so PRs can be opened. *(Needs your input:
-  where the repo lives.)*
+- [x] **P0-1 — GitHub remote + PR workflow.** ✅ Done. `origin` =
+  `github.com:djmahony/batchFit.git`, `gh` authenticated (account `djmahony`, `repo` scope),
+  `main` pushed.
 - [ ] **P0-2 — API test harness.** Add a test runner to `api/` (Vitest + Supertest) and a
   `test` script, so endpoint tasks can ship with a test. One trivial `/health` test to prove wiring.
 - [ ] **P0-3 — Reconcile the docs.** Update `CLAUDE.md` and `mvp-spec.md` to reflect the

@@ -1,0 +1,90 @@
+// BatchFit API schema — Phase-3 backend seed.
+// Scope: the batch-cooking differentiator (Recipe = template, Batch = one cook
+// with snapshotted amounts + portion inventory). Diary, workouts, weight and
+// user targets are intentionally NOT modelled yet — add them when sync work needs them.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// A reference food with macros per 100g. The five tracked nutrients throughout
+/// BatchFit are: calories, protein, fat, carbs, fibre.
+model Food {
+  id       String @id @default(cuid())
+  name     String
+  brand    String?
+
+  // Macros per 100g.
+  kcal     Float
+  protein  Float
+  fat      Float
+  carbs    Float
+  fibre    Float
+
+  recipeIngredients RecipeIngredient[]
+  batchIngredients  BatchIngredient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A reusable template: an ingredient list + a default portion count.
+/// Cooking a recipe produces a Batch (which snapshots the actual amounts used).
+model Recipe {
+  id              String @id @default(cuid())
+  name            String
+  defaultPortions Int    @default(1)
+
+  ingredients RecipeIngredient[]
+  batches     Batch[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RecipeIngredient {
+  id       String @id @default(cuid())
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId String
+  food     Food   @relation(fields: [foodId], references: [id])
+  foodId   String
+  grams    Float
+
+  @@index([recipeId])
+}
+
+/// One actual cook. Amounts are snapshotted here (real cooking varies cook-to-cook),
+/// so editing the source recipe never rewrites a batch. `portionsRemaining` is the
+/// live inventory count and is decremented when a portion is eaten.
+model Batch {
+  id                String  @id @default(cuid())
+  name              String
+  recipe            Recipe? @relation(fields: [recipeId], references: [id])
+  recipeId          String?
+  portionsTotal     Int
+  portionsRemaining Int
+  cookedAt          DateTime @default(now())
+
+  ingredients BatchIngredient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recipeId])
+}
+
+model BatchIngredient {
+  id      String @id @default(cuid())
+  batch   Batch  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  batchId String
+  food    Food   @relation(fields: [foodId], references: [id])
+  foodId  String
+  grams   Float
+
+  @@index([batchId])
+}

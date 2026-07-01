@@ -57,6 +57,38 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 These guidelines are working if: fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
+## Working from the roadmap
+
+`roadmap.md` is the single source of truth for what to build, in what order, and how far we've
+got. It is a living document — **Phases → Features → Tasks** — with a **Current status** section
+at the top (baseline, completed tasks, what's next). When prose elsewhere (including this file)
+disagrees with `roadmap.md`'s Current status about what exists, **trust `roadmap.md`.**
+
+### When the user says "continue" (or similar)
+
+1. Read `roadmap.md`; go to **Current status → Next up** and find the first unchecked `[ ]`
+   task in that order.
+2. Get onto an up-to-date `main`: `git checkout main && git pull --ff-only`.
+3. Do that one task following the workflow below. If which task is next is genuinely ambiguous,
+   ask; otherwise proceed without waiting for further permission.
+
+### Task workflow — one task = one branch = one PR
+
+- **Branch** off `main`: `feat/<area>-<slug>` (area = `api` or `app`), or `chore/` / `fix/` /
+  `docs/`.
+- **Commit in small chunks as you go** — no need to ask permission to commit.
+- On the same branch, **update `roadmap.md`**: tick the task `[x]` and advance **Current status**
+  (Completed / Next up) so the doc always reflects reality.
+- **Push** the branch and **open a PR into `main`** (`gh pr create`). The user reviews and
+  merges — do not merge it yourself.
+- **Never commit feature work directly to `main`.**
+
+### Definition of done (per task)
+
+The touched project typechecks (`tsc --noEmit`), any added tests pass, `roadmap.md` is updated,
+and the PR is open against `main`. Because status lives in `roadmap.md`, a fresh session can read
+it and resume exactly where the last one stopped.
+
 ## Repository status: pre-build
 
 There is **no application code, build system, package manager, or test suite in this repo yet.** It currently contains only planning and design artifacts. Do not assume any tooling exists — if asked to "build", "test", or "run", there is nothing to run until the app is scaffolded. When scaffolding begins, the intended stack is a **React Native / Expo** app (phone-first, portrait-only, iOS + Android) that is **fully offline / local-first** for the MVP (no network, accounts, or sync — those are Phase 3).

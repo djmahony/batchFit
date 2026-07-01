@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{background:#FBFAF8;color:#18211C;font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum";}
+    ::selection{background:#FB6E4E;color:#fff}
+    image-slot{display:block!important;width:100%!important;height:100%!important;}
+  </style>
+</helmet>
+
+<div style="background:{{ bg }};">
+
+  <!-- ============ SAMPLE HOMEPAGE ============ -->
+  <div data-screen-label="Homepage">
+
+    <!-- NAV -->
+    <nav style="max-width:1180px;margin:0 auto;padding:26px 32px 22px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:11px;">
+        <svg width="30" height="30" viewBox="0 0 100 100" aria-label="BatchFit mark">
+          <rect x="12" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+          <rect x="53.5" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+          <rect x="12" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+          <rect x="53.5" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+          <rect x="12" y="67" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+          <rect x="53.5" y="67" width="34.5" height="21" rx="6" fill="#FB6E4E"></rect>
+        </svg>
+        <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.02em;color:#18211C;">BatchFit</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:30px;">
+        <a href="#flow" style="font-size:15px;font-weight:500;color:#3C443E;text-decoration:none;">How it works</a>
+        <a href="#toolkit" style="font-size:15px;font-weight:500;color:#3C443E;text-decoration:none;">Features</a>
+        <a href="#join" style="font-size:15px;font-weight:600;color:#18211C;text-decoration:none;border-bottom:2px solid #2E9E5B;padding-bottom:2px;">Join the waitlist</a>
+      </div>
+    </nav>
+
+    <!-- EYEBROW RULE -->
+    <div style="max-width:1180px;margin:0 auto;padding:8px 32px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid #E4E2D8;padding-top:15px;">
+        <span style="font-family:'Hanken Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.24em;color:#2E9E5B;">PREP. TRACK. GET FIT.</span>
+        <span style="font-size:12px;font-weight:600;letter-spacing:0.05em;color:#9AA39C;">A meal-prep weight tracker</span>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <section style="position:relative;width:100%;overflow:hidden;margin-top:6px;background-color:#EFE6D6;background-image:linear-gradient(90deg, rgba(238,228,210,0.99) 0%, rgba(238,228,210,0.96) 30%, rgba(238,228,210,0.62) 44%, rgba(238,228,210,0.14) 60%, rgba(238,228,210,0) 72%), url('assets/hero-meals.png');background-repeat:no-repeat, no-repeat;background-position:left center, right center;background-size:cover, cover;">
+      <div style="max-width:1180px;margin:0 auto;padding:74px 32px 84px;position:relative;min-height:548px;">
+       <div style="max-width:430px;">
+        <h1 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:66px;line-height:0.98;letter-spacing:-0.035em;margin:0;color:#16201A;text-wrap:balance;">Cook once.<br>Eat all week.<br><span style="color:#2E9E5B;">Macros sorted.</span></h1>
+        <p style="font-size:18px;line-height:1.55;color:#4A554D;max-width:440px;margin:26px 0 0;">BatchFit is the tracker built around batch cooking. Log a cook once, get exact macros <em style="font-style:normal;color:#18211C;font-weight:600;">per portion</em>, and always know how many prepped meals are left in the fridge.</p>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:32px;">
+          <a href="#join" style="font-size:16px;font-weight:600;background:#2E9E5B;color:#fff;text-decoration:none;padding:14px 24px;border-radius:{{ radBtn }};">Join the waitlist</a>
+          <a href="#flow" style="font-size:16px;font-weight:600;color:#18211C;text-decoration:none;padding:14px 4px;">See how it works →</a>
+        </div>
+        <div style="margin-top:38px;border-top:1px solid #E4E2D8;padding-top:16px;display:flex;align-items:center;gap:20px;">
+          <span style="font-size:12px;font-weight:700;letter-spacing:0.13em;color:#3C443E;">NO ADS</span>
+          <span style="width:1px;height:11px;background:#D6D4CA;"></span>
+          <span style="font-size:12px;font-weight:700;letter-spacing:0.13em;color:#3C443E;">NO DATA-SELLING</span>
+          <span style="width:1px;height:11px;background:#D6D4CA;"></span>
+          <span style="font-size:12px;font-weight:700;letter-spacing:0.13em;color:#3C443E;">NO SHAME</span>
+        </div>
+       </div>
+
+       <!-- FLOATING CARD over the meals -->
+       <div style="position:absolute;right:24px;bottom:38px;width:320px;background:#fff;border:1px solid #ECEBE4;border-radius:18px;padding:20px;box-shadow:0 30px 70px -26px rgba(20,36,27,0.5);">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9AA39C;">TODAY'S BATCH</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:#2E9E5B;background:#E9F3EC;padding:5px 9px;border-radius:6px;">BATCH</span>
+          </div>
+          <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em;margin-top:6px;">Chicken &amp; Rice</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px;">
+            <div style="background:#F6F5F0;border-radius:8px;padding:8px 4px;text-align:center;"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;">612</div><div style="font-size:9px;font-weight:600;color:#8A938C;">kcal</div></div>
+            <div style="background:#F6F5F0;border-radius:8px;padding:8px 4px;text-align:center;"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;">48g</div><div style="font-size:9px;font-weight:600;color:#8A938C;">prot</div></div>
+            <div style="background:#F6F5F0;border-radius:8px;padding:8px 4px;text-align:center;"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;">71g</div><div style="font-size:9px;font-weight:600;color:#8A938C;">carb</div></div>
+            <div style="background:#F6F5F0;border-radius:8px;padding:8px 4px;text-align:center;"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;">14g</div><div style="font-size:9px;font-weight:600;color:#8A938C;">fat</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:13px;border-top:1px solid #EFEEE7;">
+            <svg width="34" height="34" viewBox="0 0 100 100" style="flex:none;">
+              <rect x="12" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="53.5" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="12" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="53.5" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="12" y="67" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="53.5" y="67" width="34.5" height="21" rx="6" fill="#FB6E4E"></rect>
+            </svg>
+            <div><div style="font-size:14px;font-weight:700;">6 portions left</div><div style="font-size:11px;font-weight:500;color:#7C857E;">≈ 2 days stocked</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW (dark, full-bleed, image-led) -->
+    <section id="flow" style="background:#14241B;color:#F6F5F0;margin-top:48px;">
+      <div style="max-width:1180px;margin:0 auto;padding:76px 32px 84px;">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;">
+          <h2 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:42px;letter-spacing:-0.03em;margin:0;max-width:600px;line-height:1.04;">One cook becomes a week of meals — counted, not guessed.</h2>
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.14em;color:#FB6E4E;padding-bottom:8px;">THE BATCH-COOKING ENGINE</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:44px;">
+          <div>
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="bf-step1" shape="rounded" radius="16" placeholder="Drop a photo — cooking a big batch" style="display:block;width:100%;height:300px;" hint-size="100%,300px"></x-import>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:18px;">
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;color:#5FC78A;">01</span>
+              <span style="height:1px;flex:1;background:#2A4233;"></span>
+            </div>
+            <h3 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:20px;margin:12px 0 0;">Cook a batch</h3>
+            <p style="font-size:15px;line-height:1.5;color:#A6B4AA;margin:8px 0 0;">Add ingredients by weight. BatchFit totals the whole cook — calories, protein, carbs, fat and fibre.</p>
+          </div>
+          <div>
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="bf-step2" shape="rounded" radius="16" placeholder="Drop a photo — portioning into containers" style="display:block;width:100%;height:300px;" hint-size="100%,300px"></x-import>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:18px;">
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;color:#5FC78A;">02</span>
+              <span style="height:1px;flex:1;background:#2A4233;"></span>
+            </div>
+            <h3 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:20px;margin:12px 0 0;">Split into portions</h3>
+            <p style="font-size:15px;line-height:1.5;color:#A6B4AA;margin:8px 0 0;">Tell it how many meals. You get exact macros per portion — every cook, every time.</p>
+          </div>
+          <div>
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="bf-step3" shape="rounded" radius="16" placeholder="Drop a photo — stocked fridge of meals" style="display:block;width:100%;height:300px;" hint-size="100%,300px"></x-import>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:18px;">
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;color:#5FC78A;">03</span>
+              <span style="height:1px;flex:1;background:#2A4233;"></span>
+            </div>
+            <h3 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:20px;margin:12px 0 0;">Eat from stock</h3>
+            <p style="font-size:15px;line-height:1.5;color:#A6B4AA;margin:8px 0 0;">One tap logs a portion to today and counts it out of your inventory. Always know what's in the fridge.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOLKIT (with app shot) -->
+    <section id="toolkit" style="max-width:1180px;margin:0 auto;padding:80px 32px 40px;display:grid;grid-template-columns:0.85fr 1.15fr;gap:56px;align-items:center;">
+      <div style="position:relative;">
+        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="bf-app" shape="rounded" radius="20" placeholder="Drop an app screenshot" style="display:block;width:100%;height:460px;" hint-size="100%,460px"></x-import>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;letter-spacing:0.14em;color:#FB6E4E;">EVERYTHING ELSE, HANDLED</div>
+        <h2 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:34px;letter-spacing:-0.025em;margin:12px 0 0;max-width:440px;line-height:1.08;">A complete toolkit around the core.</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px;">
+          <div style="background:#fff;border:{{ cardBorder }};box-shadow:{{ cardShadow }};border-radius:{{ radCard }};padding:20px;">
+            <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;color:#2E9E5B;">01</div>
+            <h4 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;margin:12px 0 0;">Full macro logging</h4>
+            <p style="font-size:14px;line-height:1.45;color:#6B756D;margin:6px 0 0;">Calories, protein, carbs, fat and fibre — in one tap.</p>
+          </div>
+          <div style="background:#fff;border:{{ cardBorder }};box-shadow:{{ cardShadow }};border-radius:{{ radCard }};padding:20px;">
+            <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;color:#2E9E5B;">02</div>
+            <h4 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;margin:12px 0 0;">Strength &amp; workouts</h4>
+            <p style="font-size:14px;line-height:1.45;color:#6B756D;margin:6px 0 0;">Sets, reps, weight. Repeat last workout in a tap.</p>
+          </div>
+          <div style="background:#fff;border:{{ cardBorder }};box-shadow:{{ cardShadow }};border-radius:{{ radCard }};padding:20px;">
+            <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;color:#2E9E5B;">03</div>
+            <h4 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;margin:12px 0 0;">Bodyweight trend</h4>
+            <p style="font-size:14px;line-height:1.45;color:#6B756D;margin:6px 0 0;">Raw weigh-ins, smoothed into the trend that's the truth.</p>
+          </div>
+          <div style="background:#fff;border:{{ cardBorder }};box-shadow:{{ cardShadow }};border-radius:{{ radCard }};padding:20px;">
+            <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;color:#2E9E5B;">04</div>
+            <h4 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;margin:12px 0 0;">Adaptive targets</h4>
+            <p style="font-size:14px;line-height:1.45;color:#6B756D;margin:6px 0 0;">Calorie goals that adjust from your real intake.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRUST BAND -->
+    <section style="padding:40px 32px 24px;">
+      <div style="max-width:1180px;margin:0 auto;background:#14241B;border-radius:{{ radMock }};padding:60px 56px;display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:center;">
+        <div>
+          <h2 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-0.02em;line-height:1.05;margin:0;color:#F6F5F0;">No ads.<br>No data-selling.<br><span style="color:#5FC78A;">No shame.</span></h2>
+        </div>
+        <p style="font-size:18px;line-height:1.55;color:#B9C5BD;margin:0;">BatchFit makes money from a simple subscription — never from you. The diet-industry guilt trip isn't included. Just clarity, and the calm of a perfectly stocked fridge.</p>
+      </div>
+    </section>
+
+    <!-- FOOTER CTA -->
+    <section id="join" style="max-width:1180px;margin:40px auto 0;padding:0 32px;">
+      <div style="border-top:1px solid #E4E2D8;padding:72px 0 56px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:end;">
+        <div>
+          <h2 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:46px;letter-spacing:-0.03em;margin:0;line-height:1.0;">Be first to cook with BatchFit.</h2>
+          <p style="font-size:17px;color:#5A645C;margin:18px 0 0;max-width:420px;">The only tracker that thinks in batches, not just bites.</p>
+        </div>
+        <div>
+          <div style="display:flex;gap:10px;">
+            <input type="email" placeholder="you@email.com" style="font-family:'Hanken Grotesk',sans-serif;font-size:16px;padding:14px 18px;border-radius:{{ radBtn }};border:1px solid #DCDBD4;background:#fff;flex:1;color:#18211C;">
+            <button style="border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-size:16px;font-weight:700;color:#fff;background:#2E9E5B;padding:14px 26px;border-radius:{{ radBtn }};white-space:nowrap;">Join the waitlist</button>
+          </div>
+          <div style="font-size:13px;font-weight:600;letter-spacing:0.04em;color:#9AA39C;margin-top:12px;">Free while in beta · No card required</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:26px 0 56px;border-top:1px solid #E4E2D8;flex-wrap:wrap;gap:16px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <svg width="24" height="24" viewBox="0 0 100 100">
+            <rect x="12" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+            <rect x="53.5" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+            <rect x="12" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+            <rect x="53.5" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+            <rect x="12" y="67" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+            <rect x="53.5" y="67" width="34.5" height="21" rx="6" fill="#FB6E4E"></rect>
+          </svg>
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.02em;">BatchFit</span>
+        </div>
+        <span style="font-size:13px;color:#9AA39C;letter-spacing:0.04em;">Prep. Track. Get fit.  ·  © 2026 BatchFit</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ BRAND BOARD ============ -->
+  <div data-screen-label="Brand board" style="background:#14241B;color:#F6F5F0;">
+    <div style="max-width:1180px;margin:0 auto;padding:80px 32px;">
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.14em;color:#FB6E4E;">THE BRAND SYSTEM</div>
+      <h2 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:-0.025em;margin:14px 0 0;max-width:680px;line-height:1.06;">Every decision, with a reason behind it.</h2>
+      <p style="font-size:17px;line-height:1.55;color:#AEBBB2;max-width:600px;margin:16px 0 0;">The homepage above runs on the system below. Three logo routes built on the same idea you chose — <em style="font-style:normal;color:#F6F5F0;">a container subdivided into portions</em> — plus the colour and type that carry the brand.</p>
+
+      <!-- LOGO ROUTES -->
+      <h3 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.12em;color:#7E8C82;margin:64px 0 0;">01 · LOGO ROUTES</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:24px;">
+
+        <!-- 1a The Six -->
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:22px;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;">
+            <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;background:#2E9E5B;color:#fff;padding:4px 9px;border-radius:7px;">1a</span>
+            <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#FB6E4E;">RECOMMENDED</span>
+          </div>
+          <div style="background:#F6F5F0;padding:36px;display:flex;justify-content:center;">
+            <svg width="118" height="118" viewBox="0 0 100 100">
+              <rect x="12" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="53.5" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="12" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="53.5" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="12" y="67" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect>
+              <rect x="53.5" y="67" width="34.5" height="21" rx="6" fill="#FB6E4E"></rect>
+            </svg>
+          </div>
+          <div style="display:flex;gap:10px;padding:14px 18px;align-items:center;">
+            <div style="width:46px;height:46px;border-radius:11px;background:#14241B;display:flex;align-items:center;justify-content:center;flex:none;">
+              <svg width="30" height="30" viewBox="0 0 100 100">
+                <rect x="12" y="12" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="53.5" y="12" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="12" y="39.5" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="53.5" y="39.5" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="12" y="67" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="53.5" y="67" width="34.5" height="21" rx="6" fill="#FB6E4E"></rect>
+              </svg>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:#14241B;border-radius:11px;padding:0 16px;height:46px;flex:1;">
+              <svg width="20" height="20" viewBox="0 0 100 100">
+                <rect x="12" y="12" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="53.5" y="12" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="12" y="39.5" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="53.5" y="39.5" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="12" y="67" width="34.5" height="21" rx="6" fill="#5FC78A"></rect>
+                <rect x="53.5" y="67" width="34.5" height="21" rx="6" fill="#FB6E4E"></rect>
+              </svg>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.02em;color:#F6F5F0;">BatchFit</span>
+            </div>
+          </div>
+          <div style="padding:6px 18px 20px;">
+            <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;">The Six</div>
+            <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:6px 0 0;">A container split into six portions; one logged in coral. It <em style="font-style:normal;color:#CBD6CE;">is</em> the product story — one cook, many meals — and reads instantly at app-icon size.</p>
+          </div>
+        </div>
+
+        <!-- 1b Stack -->
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:22px;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;">
+            <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;background:#2E9E5B;color:#fff;padding:4px 9px;border-radius:7px;">1b</span>
+          </div>
+          <div style="background:#F6F5F0;padding:36px;display:flex;justify-content:center;">
+            <svg width="118" height="118" viewBox="0 0 100 100">
+              <rect x="14" y="14" width="72" height="12" rx="6" fill="#2E9E5B"></rect>
+              <rect x="14" y="34" width="72" height="12" rx="6" fill="#FB6E4E"></rect>
+              <rect x="14" y="54" width="72" height="12" rx="6" fill="#2E9E5B"></rect>
+              <rect x="14" y="74" width="72" height="12" rx="6" fill="#2E9E5B"></rect>
+            </svg>
+          </div>
+          <div style="display:flex;gap:10px;padding:14px 18px;align-items:center;">
+            <div style="width:46px;height:46px;border-radius:11px;background:#14241B;display:flex;align-items:center;justify-content:center;flex:none;">
+              <svg width="30" height="30" viewBox="0 0 100 100">
+                <rect x="14" y="14" width="72" height="12" rx="6" fill="#5FC78A"></rect>
+                <rect x="14" y="34" width="72" height="12" rx="6" fill="#FB6E4E"></rect>
+                <rect x="14" y="54" width="72" height="12" rx="6" fill="#5FC78A"></rect>
+                <rect x="14" y="74" width="72" height="12" rx="6" fill="#5FC78A"></rect>
+              </svg>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:#14241B;border-radius:11px;padding:0 16px;height:46px;flex:1;">
+              <svg width="20" height="20" viewBox="0 0 100 100">
+                <rect x="14" y="14" width="72" height="12" rx="6" fill="#5FC78A"></rect>
+                <rect x="14" y="34" width="72" height="12" rx="6" fill="#FB6E4E"></rect>
+                <rect x="14" y="54" width="72" height="12" rx="6" fill="#5FC78A"></rect>
+                <rect x="14" y="74" width="72" height="12" rx="6" fill="#5FC78A"></rect>
+              </svg>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.02em;color:#F6F5F0;">BatchFit</span>
+            </div>
+          </div>
+          <div style="padding:6px 18px 20px;">
+            <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;">The Stack</div>
+            <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:6px 0 0;">Prepped meals stacked in the fridge — the inventory view, the "how many left." Leans into stock and order; calmer, more list-like.</p>
+          </div>
+        </div>
+
+        <!-- 1c Dial -->
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:22px;overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;">
+            <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;background:#2E9E5B;color:#fff;padding:4px 9px;border-radius:7px;">1c</span>
+          </div>
+          <div style="background:#F6F5F0;padding:36px;display:flex;justify-content:center;">
+            <svg width="118" height="118" viewBox="0 0 100 100">
+              <g transform="rotate(-90 50 50)" fill="none" stroke-width="15">
+                <circle cx="50" cy="50" r="38" stroke="#2E9E5B" stroke-dasharray="25.79 14"></circle>
+                <circle cx="50" cy="50" r="38" stroke="#FB6E4E" stroke-dasharray="25.79 212.97"></circle>
+              </g>
+              <text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Schibsted Grotesk, sans-serif" font-weight="700" font-size="30" fill="#16201A">6</text>
+            </svg>
+          </div>
+          <div style="display:flex;gap:10px;padding:14px 18px;align-items:center;">
+            <div style="width:46px;height:46px;border-radius:11px;background:#14241B;display:flex;align-items:center;justify-content:center;flex:none;">
+              <svg width="32" height="32" viewBox="0 0 100 100">
+                <g transform="rotate(-90 50 50)" fill="none" stroke-width="15">
+                  <circle cx="50" cy="50" r="38" stroke="#5FC78A" stroke-dasharray="25.79 14"></circle>
+                  <circle cx="50" cy="50" r="38" stroke="#FB6E4E" stroke-dasharray="25.79 212.97"></circle>
+                </g>
+              </svg>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:#14241B;border-radius:11px;padding:0 16px;height:46px;flex:1;">
+              <svg width="22" height="22" viewBox="0 0 100 100">
+                <g transform="rotate(-90 50 50)" fill="none" stroke-width="15">
+                  <circle cx="50" cy="50" r="38" stroke="#5FC78A" stroke-dasharray="25.79 14"></circle>
+                  <circle cx="50" cy="50" r="38" stroke="#FB6E4E" stroke-dasharray="25.79 212.97"></circle>
+                </g>
+              </svg>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.02em;color:#F6F5F0;">BatchFit</span>
+            </div>
+          </div>
+          <div style="padding:6px 18px 20px;">
+            <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;">The Dial</div>
+            <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:6px 0 0;">A portion ring — six segments, one spent. Bridges batch-cooking and the tracking/data side, with a built-in count. The most "app-native."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLOUR -->
+      <h3 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.12em;color:#7E8C82;margin:72px 0 0;">02 · COLOUR SYSTEM</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:24px;">
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:18px;padding:22px;">
+          <div style="height:88px;border-radius:12px;background:#2E9E5B;"></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:14px;">
+            <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;">Prep Green</span>
+            <span style="font-size:13px;font-weight:600;color:#8FA096;font-variant-numeric:tabular-nums;">#2E9E5B</span>
+          </div>
+          <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:8px 0 0;"><strong style="color:#CBD6CE;font-weight:700;">Lead.</strong> Food, freshness, forward momentum. Fresh and confident — not a sickly diet pastel, not an alarming red.</p>
+        </div>
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:18px;padding:22px;">
+          <div style="height:88px;border-radius:12px;background:#FB6E4E;"></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:14px;">
+            <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;">Coral</span>
+            <span style="font-size:13px;font-weight:600;color:#8FA096;font-variant-numeric:tabular-nums;">#FB6E4E</span>
+          </div>
+          <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:8px 0 0;"><strong style="color:#CBD6CE;font-weight:700;">Accent.</strong> Appetite and energy. Reserved for the one live thing on screen — today's portion, the next action.</p>
+        </div>
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:18px;padding:22px;">
+          <div style="height:88px;border-radius:12px;background:#14241B;border:1px solid #2A4233;"></div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:14px;">
+            <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;">Deep Kale</span>
+            <span style="font-size:13px;font-weight:600;color:#8FA096;font-variant-numeric:tabular-nums;">#14241B</span>
+          </div>
+          <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:8px 0 0;"><strong style="color:#CBD6CE;font-weight:700;">Base.</strong> A green-tinted charcoal for premium, focused surfaces — warmer and more on-brand than pure black.</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px;">
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;">
+          <span style="width:40px;height:40px;border-radius:9px;background:#F6F5F0;flex:none;border:1px solid #2A4233;"></span>
+          <div><div style="font-weight:700;font-size:14px;">Paper</div><div style="font-size:12px;color:#8FA096;font-variant-numeric:tabular-nums;">#F6F5F0</div></div>
+        </div>
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;">
+          <span style="width:40px;height:40px;border-radius:9px;background:#E9F3EC;flex:none;"></span>
+          <div><div style="font-weight:700;font-size:14px;">Mint</div><div style="font-size:12px;color:#8FA096;font-variant-numeric:tabular-nums;">#E9F3EC</div></div>
+        </div>
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;">
+          <span style="width:40px;height:40px;border-radius:9px;background:#FDEEE8;flex:none;"></span>
+          <div><div style="font-weight:700;font-size:14px;">Coral Tint</div><div style="font-size:12px;color:#8FA096;font-variant-numeric:tabular-nums;">#FDEEE8</div></div>
+        </div>
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;">
+          <span style="width:40px;height:40px;border-radius:9px;background:#18211C;flex:none;border:1px solid #2A4233;"></span>
+          <div><div style="font-weight:700;font-size:14px;">Ink</div><div style="font-size:12px;color:#8FA096;font-variant-numeric:tabular-nums;">#18211C</div></div>
+        </div>
+      </div>
+      <p style="font-size:13.5px;line-height:1.55;color:#8FA096;margin:18px 0 0;max-width:760px;">Discipline is the point: green leads, coral appears sparingly so it always means "act here," and everything sits on warm paper or deep kale. Tints (mint, coral tint) handle quiet fills without adding new hues.</p>
+
+      <!-- TYPE -->
+      <h3 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.12em;color:#7E8C82;margin:72px 0 0;">03 · TYPOGRAPHY</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;">
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:18px;padding:28px;">
+          <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;line-height:1;">Aa</div>
+          <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:22px;margin-top:14px;">Schibsted Grotesk</div>
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.1em;color:#FB6E4E;margin-top:4px;">DISPLAY &amp; WORDMARK</div>
+          <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:12px 0 0;">A confident modern grotesque with just enough character to be ownable, without tipping into novelty. Carries headlines and the wordmark — premium and no-nonsense.</p>
+          <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:18px;margin-top:16px;letter-spacing:-0.01em;color:#CBD6CE;">Cook once. Eat all week.</div>
+        </div>
+        <div style="background:#1B2E22;border:1px solid #2A4233;border-radius:18px;padding:28px;">
+          <div style="font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:52px;line-height:1;">Aa</div>
+          <div style="font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:22px;margin-top:14px;">Hanken Grotesk</div>
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.1em;color:#FB6E4E;margin-top:4px;">INTERFACE &amp; NUMBERS</div>
+          <p style="font-size:13.5px;line-height:1.5;color:#9DABA1;margin:12px 0 0;">An exceptionally legible, neutral workhorse with clean tabular figures — so macros and counts stay crisp and scannable at any size. Pairs quietly with the display face.</p>
+          <div style="display:flex;gap:18px;margin-top:16px;font-family:'Hanken Grotesk',sans-serif;font-variant-numeric:tabular-nums;color:#CBD6CE;">
+            <div><span style="font-weight:700;font-size:24px;">612</span><span style="font-size:13px;color:#8FA096;"> kcal</span></div>
+            <div><span style="font-weight:700;font-size:24px;">48g</span><span style="font-size:13px;color:#8FA096;"> protein</span></div>
+            <div><span style="font-weight:700;font-size:24px;">6</span><span style="font-size:13px;color:#8FA096;"> portions</span></div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:13.5px;line-height:1.55;color:#8FA096;margin:18px 0 0;max-width:760px;">The wordmark is set as one word — <strong style="color:#CBD6CE;font-weight:700;">BatchFit</strong> — tight tracking, single colour, so the coloured mark does the talking and the lockup drops cleanly onto any surface.</p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180},&quot;surface&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FBFAF8&quot;,&quot;options&quot;:[&quot;#FBFAF8&quot;,&quot;#F4F1EA&quot;,&quot;#EFEEE7&quot;,&quot;#FFFFFF&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Page&quot;,&quot;label&quot;:&quot;Background&quot;},&quot;cardStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;outlined&quot;,&quot;soft&quot;],&quot;default&quot;:&quot;outlined&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Page&quot;,&quot;label&quot;:&quot;Card style&quot;},&quot;corners&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;editorial&quot;,&quot;rounded&quot;],&quot;default&quot;:&quot;editorial&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Page&quot;,&quot;label&quot;:&quot;Corners&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const surface = this.props.surface || '#FBFAF8';
+    const cardStyle = this.props.cardStyle || 'outlined';
+    const corners = this.props.corners || 'editorial';
+    const card = cardStyle === 'soft'
+      ? { border: '1px solid #ECEBE4', shadow: '0 22px 50px -30px rgba(20,36,27,0.22)' }
+      : { border: '1px solid #E4E2D8', shadow: 'none' };
+    const rad = corners === 'rounded'
+      ? { card: '20px', mock: '24px', btn: '12px' }
+      : { card: '10px', mock: '14px', btn: '9px' };
+    return {
+      bg: surface,
+      cardBorder: card.border,
+      cardShadow: card.shadow,
+      radCard: rad.card,
+      radMock: rad.mock,
+      radBtn: rad.btn,
+    };
+  }
+}
+</script>
+</body>
+</html>

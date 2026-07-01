@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{background:#E7E4DC;color:#18211C;font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum"}
+    ::selection{background:#FB6E4E;color:#fff}
+  </style>
+</helmet>
+
+<div style="padding:64px 72px 90px;font-family:'Hanken Grotesk',sans-serif">
+
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+    <svg width="34" height="34" viewBox="0 0 100 100"><rect x="12" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect><rect x="53.5" y="12" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect><rect x="12" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect><rect x="53.5" y="39.5" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect><rect x="12" y="67" width="34.5" height="21" rx="6" fill="#2E9E5B"></rect><rect x="53.5" y="67" width="34.5" height="21" rx="6" fill="#FB6E4E"></rect></svg>
+    <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:30px;letter-spacing:-0.03em;color:#16201A">BatchFit · Prep <span style="color:#FB6E4E">★</span></span>
+  </div>
+  <p style="font-size:16px;line-height:1.5;color:#5A645C;max-width:720px;margin:0 0 8px">The batch-cooking differentiator (wireframes <b>1k–1t</b>) — Inventory, Batch detail, the four-step Create-batch flow with its live per-portion "magic moment", Confirmation, Recipes, Recipe detail and the first-run empty state. Portions-remaining is the hero; batch items carry coral. Light and dark. Reference any screen by id (e.g. "punch up <b>1o</b>").</p>
+
+  <!-- LIGHT -->
+  <div style="margin-top:40px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:26px">
+      <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.18em;color:#2E9E5B">LIGHT THEME</span>
+      <span style="height:1px;flex:1;background:#CFCCC3"></span>
+      <span style="font-size:12px;font-weight:600;letter-spacing:0.05em;color:#9AA39C">Paper surfaces · Prep Green leads</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+<!-- 1k Inventory (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1k</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Inventory · default</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 8px">
+              <h1 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.03em;color:#16201A;margin:0">Prep</h1>
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA39C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></svg></span>
+            </div>
+            <div style="flex:none;padding:0 22px 8px"><div style="display:flex;background:#EDEBE3;border-radius:12px;padding:4px;gap:4px"><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:700;color:#16201A;background:#fff;border-radius:9px;box-shadow:0 1px 4px rgba(0,0,0,.09)">Inventory</span><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:600;color:#6B756D;border-radius:9px">Recipes</span></div></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;padding:2px 22px 0">
+              <div style="background:#141E18;border-radius:16px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.03em;color:#fff;line-height:1">12</span><span style="font-size:12.5px;font-weight:600;color:#8FA396">meals ready</span></div>
+                <span style="font-size:11.5px;font-weight:700;color:#46C57E;background:#1C2A22;padding:5px 10px;border-radius:8px">~4 days stocked</span>
+              </div>
+              <button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:15px;color:#fff;background:#2E9E5B;padding:14px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 24px -14px rgba(46,158,91,.7)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>New batch</button>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#16201A">Chicken &amp; Rice</div><div style="font-size:11.5px;color:#9AA39C;margin-top:2px">Cooked 2 days ago</div></div><div style="text-align:right"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#2E9E5B;line-height:1">6</div><div style="font-size:10.5px;font-weight:600;color:#9AA39C">of 8 left</div></div></div>
+                <div style="display:flex;gap:5px"><span style="flex:1;height:6px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:6px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:6px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:6px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:6px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:6px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:6px;border-radius:3px;background:#E3E0D8"></span><span style="flex:1;height:6px;border-radius:3px;background:#E3E0D8"></span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:#6B756D">612 kcal · 48g protein</span><span style="font-size:12.5px;font-weight:700;color:#fff;background:#2E9E5B;padding:7px 13px;border-radius:9px">Eat one</span></div>
+              </div>
+              <div style="background:#fff;border:1px solid #F3D9CF;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:7px"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#16201A">Beef Chilli</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.06em;color:#fff;background:#FB6E4E;padding:2px 6px;border-radius:5px">LOW</span></div><div style="font-size:11.5px;color:#9AA39C;margin-top:2px">Cooked 4 days ago</div></div><div style="text-align:right"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#FB6E4E;line-height:1">2</div><div style="font-size:10.5px;font-weight:600;color:#9AA39C">of 6 left</div></div></div>
+                <div style="display:flex;gap:5px"><span style="flex:1;height:6px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:6px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:6px;border-radius:3px;background:#E3E0D8"></span><span style="flex:1;height:6px;border-radius:3px;background:#E3E0D8"></span><span style="flex:1;height:6px;border-radius:3px;background:#E3E0D8"></span><span style="flex:1;height:6px;border-radius:3px;background:#E3E0D8"></span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:#6B756D">540 kcal · 39g protein</span><span style="font-size:12.5px;font-weight:700;color:#FB6E4E;background:#FDEBE4;padding:7px 13px;border-radius:9px">Eat one</span></div>
+              </div>
+            </div>
+            <div style="flex:none;background:#fff;border-top:1px solid #ECEBE4;display:flex;justify-content:space-around;align-items:center;padding:9px 8px 7px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="font-size:9.5px;font-weight:600">Today</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13l3 3v13H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg><span style="font-size:9.5px;font-weight:600">Diary</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:-12px"><span style="width:46px;height:46px;border-radius:16px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 18px -8px rgba(251,110,78,.7)"><svg width="24" height="24" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FFD2C4"></rect></svg></span><span style="font-size:9.5px;font-weight:700;color:#FB6E4E">Prep</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M21 3l-5 5M3 21l5-5M14 10l7-7M3 3l7 7"></path></svg><span style="font-size:9.5px;font-weight:600">Train</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3"></path></svg><span style="font-size:9.5px;font-weight:600">Progress</span></div>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:5px 0 8px;background:#fff"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1l Batch detail (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1l</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Batch detail</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 10px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#16201A;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#16201A">Chicken &amp; Rice</span>
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#9AA39C;font-size:17px;letter-spacing:1px">⋯</span>
+            </div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:2px 22px 0">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:#9AA39C">Cooked 2 days ago</span><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;color:#2E9E5B">6 <span style="color:#9AA39C;font-weight:600;font-size:12px">of 8 left</span></span></div>
+              <div style="display:flex;gap:5px"><span style="flex:1;height:7px;border-radius:4px;background:#2E9E5B"></span><span style="flex:1;height:7px;border-radius:4px;background:#2E9E5B"></span><span style="flex:1;height:7px;border-radius:4px;background:#2E9E5B"></span><span style="flex:1;height:7px;border-radius:4px;background:#2E9E5B"></span><span style="flex:1;height:7px;border-radius:4px;background:#2E9E5B"></span><span style="flex:1;height:7px;border-radius:4px;background:#2E9E5B"></span><span style="flex:1;height:7px;border-radius:4px;background:#E3E0D8"></span><span style="flex:1;height:7px;border-radius:4px;background:#E3E0D8"></span></div>
+              <div style="background:#141E18;border-radius:20px;padding:16px 18px;display:flex;align-items:center;gap:16px;margin-top:2px">
+                <div style="position:relative;width:96px;height:96px;flex:none;border-radius:50%;background:conic-gradient(#46C57E 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:10px;border-radius:50%;background:#141E18;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:23px;letter-spacing:-0.03em;color:#fff;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.12em;color:#8FA396">KCAL / PORTION</span></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#46C57E"></span><span style="font-size:12.5px;font-weight:700;color:#fff">Protein</span></span><span style="font-size:13px;font-weight:700;color:#fff">48g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#C7D2CA">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#C7D2CA">58g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#C7D2CA">Fat</span></span><span style="font-size:13px;font-weight:600;color:#C7D2CA">19g</span></div>
+                </div>
+              </div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12.5px;font-weight:600;color:#6B756D">Whole batch</span><span style="font-size:13px;font-weight:700;color:#16201A">4,896 kcal · 8 meals</span></div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:#16201A;margin-top:2px">INGREDIENTS</div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#16201A">Chicken breast</span><span style="font-size:12.5px;font-weight:600;color:#9AA39C">1.2 kg</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#16201A">Brown rice</span><span style="font-size:12.5px;font-weight:600;color:#9AA39C">600 g</span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff;background:#2E9E5B;padding:16px;border-radius:15px;box-shadow:0 14px 26px -12px rgba(46,158,91,.65)">Eat a portion</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#FBFAF8"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1m Create batch · start (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1m</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · start</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#16201A;font-size:16px">✕</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#16201A">New batch</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 14px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:5px;border-radius:3px;background:#E3E0D8"></span><span style="flex:1;height:5px;border-radius:3px;background:#E3E0D8"></span><span style="flex:1;height:5px;border-radius:3px;background:#E3E0D8"></span><span style="font-size:11px;font-weight:700;color:#9AA39C;margin-left:4px">1/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:2px 22px 0">
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px"><div style="font-size:11px;font-weight:600;color:#9AA39C">Batch name</div><div style="font-size:14.5px;font-weight:600;color:#16201A;margin-top:3px">Chicken &amp; Rice</div></div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:#16201A;margin-top:2px">START FROM</div>
+              <div style="background:#fff;border:1.5px solid #2E9E5B;border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:12px;background:#E9F3EC;flex:none;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#2E9E5B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span><div style="flex:1"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:14.5px;color:#16201A">New from scratch</div><div style="font-size:11.5px;color:#9AA39C;margin-top:1px">Build the ingredient list yourself</div></div><span style="color:#2E9E5B;font-size:18px;font-weight:600">›</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:12px;background:#F1EFE8;flex:none;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B756D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"></path></svg></span><div style="flex:1"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:14.5px;color:#16201A">From a saved recipe</div><div style="font-size:11.5px;color:#9AA39C;margin-top:1px">Pre-fills ingredients &amp; portions</div></div><span style="color:#C4C8C1;font-size:18px;font-weight:600">›</span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff;background:#2E9E5B;padding:16px;border-radius:15px;box-shadow:0 14px 26px -12px rgba(46,158,91,.65)">Next · Add ingredients</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#FBFAF8"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1n Create batch · ingredients (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1n</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · ingredients</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#16201A;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#16201A">Add ingredients</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 14px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:5px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:5px;border-radius:3px;background:#E3E0D8"></span><span style="flex:1;height:5px;border-radius:3px;background:#E3E0D8"></span><span style="font-size:11px;font-weight:700;color:#9AA39C;margin-left:4px">2/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:9px;padding:2px 22px 0">
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 13px;display:flex;align-items:center;gap:9px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA39C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg><span style="font-size:13.5px;color:#9AA39C">Search ingredient…</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:600;color:#16201A">Chicken breast</div><div style="font-size:11px;color:#9AA39C;margin-top:1px">1.2 kg</div></div><span style="font-size:13px;font-weight:700;color:#3C443E">1,980</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:600;color:#16201A">Brown rice</div><div style="font-size:11px;color:#9AA39C;margin-top:1px">600 g</div></div><span style="font-size:13px;font-weight:700;color:#3C443E">2,160</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:600;color:#16201A">Olive oil</div><div style="font-size:11px;color:#9AA39C;margin-top:1px">30 g</div></div><span style="font-size:13px;font-weight:700;color:#3C443E">265</span></div>
+              <div style="border:1.5px dashed #D5D2C9;border-radius:13px;padding:11px;display:flex;align-items:center;justify-content:center;gap:7px;color:#6B756D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E9E5B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span style="font-size:13px;font-weight:600">Add ingredient</span></div>
+            </div>
+            <div style="flex:none;padding:10px 22px 10px">
+              <div style="background:#141E18;border-radius:13px;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:12.5px;font-weight:600;color:#8FA396">Running total</span><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff">4,405 <span style="font-size:11px;color:#8FA396">kcal</span></span></div>
+              <button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff;background:#2E9E5B;padding:16px;border-radius:15px;box-shadow:0 14px 26px -12px rgba(46,158,91,.65)">Next · Portions</button>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#FBFAF8"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1o Create batch · portions (light) ✨ -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">1o</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · portions ✨</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#16201A;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#16201A">Split into…</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 8px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:5px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:5px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:5px;border-radius:3px;background:#E3E0D8"></span><span style="font-size:11px;font-weight:700;color:#9AA39C;margin-left:4px">3/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;align-items:center;padding:6px 22px 0">
+              <div style="font-size:13px;font-weight:600;color:#6B756D;margin-bottom:14px">How many meals does this make?</div>
+              <div style="display:flex;align-items:center;gap:22px;margin-bottom:6px"><span style="width:46px;height:46px;border-radius:14px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;color:#6B756D">–</span><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:64px;letter-spacing:-0.04em;color:#16201A;line-height:1;min-width:70px;text-align:center">8</span><span style="width:46px;height:46px;border-radius:14px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;color:#fff;box-shadow:0 10px 20px -10px rgba(251,110,78,.7)">+</span></div>
+              <div style="font-size:11.5px;font-weight:600;color:#9AA39C;margin-bottom:16px">portions</div>
+              <div style="width:100%;background:#FFF3EF;border:1.5px solid #FBCBBC;border-radius:20px;padding:16px 18px">
+                <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="#FB6E4E"><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6z"></path></svg><span style="font-size:11px;font-weight:700;letter-spacing:0.06em;color:#FB6E4E">PER PORTION · UPDATES LIVE</span></div>
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div style="position:relative;width:88px;height:88px;flex:none;border-radius:50%;background:conic-gradient(#2E9E5B 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:9px;border-radius:50%;background:#FFF3EF;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#16201A;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.1em;color:#B4705A">KCAL</span></div></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#2E9E5B"></span><span style="font-size:12.5px;font-weight:700;color:#16201A">Protein</span></span><span style="font-size:13px;font-weight:700;color:#16201A">48g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#6B756D">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#3C443E">58g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#6B756D">Fat</span></span><span style="font-size:13px;font-weight:600;color:#3C443E">19g</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff;background:#2E9E5B;padding:16px;border-radius:15px;box-shadow:0 14px 26px -12px rgba(46,158,91,.65)">Next · Review</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#FBFAF8"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1p Create batch · review (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1p</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · review</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#16201A;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#16201A">Review</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 14px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:5px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:5px;border-radius:3px;background:#2E9E5B"></span><span style="flex:1;height:5px;border-radius:3px;background:#2E9E5B"></span><span style="font-size:11px;font-weight:700;color:#9AA39C;margin-left:4px">4/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;padding:2px 22px 0">
+              <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em;color:#16201A">Chicken &amp; Rice</div>
+              <div style="background:#141E18;border-radius:20px;padding:16px 18px">
+                <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:0.08em;color:#8FA396;margin-bottom:13px">PER PORTION · ×8</div>
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div style="position:relative;width:88px;height:88px;flex:none;border-radius:50%;background:conic-gradient(#46C57E 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:9px;border-radius:50%;background:#141E18;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#fff;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.1em;color:#8FA396">KCAL</span></div></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#46C57E"></span><span style="font-size:12.5px;font-weight:700;color:#fff">Protein</span></span><span style="font-size:13px;font-weight:700;color:#fff">48g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#C7D2CA">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#C7D2CA">58g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#C7D2CA">Fat</span></span><span style="font-size:13px;font-weight:600;color:#C7D2CA">19g</span></div>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12.5px;font-weight:600;color:#6B756D">Whole batch</span><span style="font-size:13px;font-weight:700;color:#16201A">4,896 kcal</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12.5px;font-weight:600;color:#6B756D">Ingredients</span><span style="font-size:13px;font-weight:700;color:#16201A">3 items</span></div>
+              <div style="background:#E9F3EC;border:1px solid #CDE7D7;border-radius:13px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:700;color:#16201A">Save as recipe</div><div style="font-size:11px;color:#3F7A56;margin-top:1px">Reuse this as a template</div></div><span style="width:42px;height:24px;border-radius:13px;background:#2E9E5B;position:relative;flex:none"><span style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff"></span></span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff;background:#2E9E5B;padding:16px;border-radius:15px;box-shadow:0 14px 26px -12px rgba(46,158,91,.65)">Add to inventory</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#FBFAF8"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1q Confirmation (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1q</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Confirmation</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#2E9E5B;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#fff;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px;gap:4px">
+              <div style="width:96px;height:96px;border-radius:28px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></div>
+              <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:32px;letter-spacing:-0.03em;color:#fff;line-height:1.05">8 meals<br>prepped</div>
+              <div style="font-size:14px;line-height:1.5;color:rgba(255,255,255,.85);max-width:210px;margin-top:8px">Your fridge is stocked for about 4 days. Cook once — eat all week.</div>
+            </div>
+            <div style="flex:none;padding:12px 26px 10px;display:flex;flex-direction:column;gap:10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#16201A;background:#fff;padding:16px;border-radius:15px;box-shadow:0 14px 26px -12px rgba(0,0,0,.3)">Back to inventory</button><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:600;font-size:14px;color:rgba(255,255,255,.9);background:transparent;padding:6px">Eat one now</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:2px 0 9px;background:#2E9E5B"><span style="width:124px;height:5px;border-radius:3px;background:#fff;opacity:.4"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1r Recipes (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1r</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Recipes · sub-view</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 8px"><h1 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.03em;color:#16201A;margin:0">Prep</h1></div>
+            <div style="flex:none;padding:0 22px 10px"><div style="display:flex;background:#EDEBE3;border-radius:12px;padding:4px;gap:4px"><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:600;color:#6B756D;border-radius:9px">Inventory</span><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:700;color:#16201A;background:#fff;border-radius:9px;box-shadow:0 1px 4px rgba(0,0,0,.09)">Recipes</span></div></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;padding:2px 22px 0">
+              <div style="font-size:12px;font-weight:600;color:#9AA39C">Templates you can cook anytime</div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#16201A">Chicken &amp; Rice</div><span style="font-size:11px;font-weight:700;color:#6B756D;background:#F1EFE8;padding:4px 9px;border-radius:8px">makes 8</span></div>
+                <div style="font-size:12px;font-weight:600;color:#6B756D">612 kcal · 48g protein / portion</div>
+                <div style="display:flex;justify-content:flex-end"><span style="font-size:12.5px;font-weight:700;color:#fff;background:#2E9E5B;padding:8px 15px;border-radius:9px">Cook this</span></div>
+              </div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#16201A">Beef Chilli</div><span style="font-size:11px;font-weight:700;color:#6B756D;background:#F1EFE8;padding:4px 9px;border-radius:8px">makes 6</span></div>
+                <div style="font-size:12px;font-weight:600;color:#6B756D">540 kcal · 39g protein / portion</div>
+                <div style="display:flex;justify-content:flex-end"><span style="font-size:12.5px;font-weight:700;color:#fff;background:#2E9E5B;padding:8px 15px;border-radius:9px">Cook this</span></div>
+              </div>
+              <div style="border:1.5px dashed #D5D2C9;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;gap:7px;color:#6B756D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2E9E5B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span style="font-size:13px;font-weight:600">New recipe</span></div>
+            </div>
+            <div style="flex:none;background:#fff;border-top:1px solid #ECEBE4;display:flex;justify-content:space-around;align-items:center;padding:9px 8px 7px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="font-size:9.5px;font-weight:600">Today</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13l3 3v13H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg><span style="font-size:9.5px;font-weight:600">Diary</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:-12px"><span style="width:46px;height:46px;border-radius:16px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 18px -8px rgba(251,110,78,.7)"><svg width="24" height="24" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FFD2C4"></rect></svg></span><span style="font-size:9.5px;font-weight:700;color:#FB6E4E">Prep</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M21 3l-5 5M3 21l5-5M14 10l7-7M3 3l7 7"></path></svg><span style="font-size:9.5px;font-weight:600">Train</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3"></path></svg><span style="font-size:9.5px;font-weight:600">Progress</span></div>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:5px 0 8px;background:#fff"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1s Recipe detail (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1s</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Recipe detail · edit</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 10px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#16201A;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#16201A">Chicken &amp; Rice</span>
+              <span style="width:34px;height:34px;border-radius:11px;background:#fff;border:1px solid #ECEBE4;display:flex;align-items:center;justify-content:center;color:#9AA39C;font-size:17px;letter-spacing:1px">⋯</span>
+            </div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:2px 22px 0">
+              <div style="display:flex;align-items:center;gap:7px"><span style="font-size:9px;font-weight:700;letter-spacing:0.08em;color:#2E9E5B;background:#E9F3EC;padding:3px 8px;border-radius:6px">RECIPE</span><span style="font-size:11.5px;color:#9AA39C">A template — cook it into a batch</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600;color:#6B756D">Default portions</span><span style="font-size:14px;font-weight:700;color:#16201A">8</span></div>
+              <div style="background:#141E18;border-radius:20px;padding:16px 18px;display:flex;align-items:center;gap:16px">
+                <div style="position:relative;width:88px;height:88px;flex:none;border-radius:50%;background:conic-gradient(#46C57E 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:9px;border-radius:50%;background:#141E18;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#fff;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.1em;color:#8FA396">KCAL</span></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#46C57E"></span><span style="font-size:12.5px;font-weight:700;color:#fff">Protein</span></span><span style="font-size:13px;font-weight:700;color:#fff">48g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#C7D2CA">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#C7D2CA">58g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#C7D2CA">Fat</span></span><span style="font-size:13px;font-weight:600;color:#C7D2CA">19g</span></div>
+                </div>
+              </div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:#16201A;margin-top:2px">INGREDIENTS · DEFAULT</div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#16201A">Chicken breast</span><span style="font-size:12.5px;font-weight:600;color:#9AA39C">1.2 kg</span></div>
+              <div style="background:#fff;border:1px solid #ECEBE4;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#16201A">Brown rice</span><span style="font-size:12.5px;font-weight:600;color:#9AA39C">600 g</span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff;background:#2E9E5B;padding:16px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 14px 26px -12px rgba(46,158,91,.65)">Cook this <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#FBFAF8"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 1t Inventory empty (light) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#18211C;color:#fff;padding:3px 9px;border-radius:7px">1t</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Inventory · empty state</span>
+        </div>
+        <div style="flex:none;width:320px;background:#141E18;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(20,36,27,.55),0 0 0 1px rgba(0,0,0,.05)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#FBFAF8;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#18211C;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 8px"><h1 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.03em;color:#16201A;margin:0">Prep</h1></div>
+            <div style="flex:none;padding:0 22px 10px"><div style="display:flex;background:#EDEBE3;border-radius:12px;padding:4px;gap:4px"><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:700;color:#16201A;background:#fff;border-radius:9px;box-shadow:0 1px 4px rgba(0,0,0,.09)">Inventory</span><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:600;color:#6B756D;border-radius:9px">Recipes</span></div></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:6px">
+              <div style="width:104px;height:104px;border-radius:30px;background:#E9F3EC;border:1px solid #CDE7D7;display:flex;align-items:center;justify-content:center;margin-bottom:6px"><svg width="52" height="52" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#2E9E5B"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#2E9E5B"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#2E9E5B"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#2E9E5B"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#2E9E5B"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FB6E4E"></rect></svg></div>
+              <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;color:#16201A">No prepped meals yet</div>
+              <div style="font-size:13.5px;line-height:1.5;color:#6B756D;max-width:220px">Cook once, portion it up, and BatchFit tracks every meal waiting in your fridge.</div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#fff;background:#2E9E5B;padding:16px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 14px 26px -12px rgba(46,158,91,.65)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Prep your first batch</button></div>
+            <div style="flex:none;background:#fff;border-top:1px solid #ECEBE4;display:flex;justify-content:space-around;align-items:center;padding:9px 8px 7px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="font-size:9.5px;font-weight:600">Today</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13l3 3v13H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg><span style="font-size:9.5px;font-weight:600">Diary</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:-12px"><span style="width:46px;height:46px;border-radius:16px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 18px -8px rgba(251,110,78,.7)"><svg width="24" height="24" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FFD2C4"></rect></svg></span><span style="font-size:9.5px;font-weight:700;color:#FB6E4E">Prep</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M21 3l-5 5M3 21l5-5M14 10l7-7M3 3l7 7"></path></svg><span style="font-size:9.5px;font-weight:600">Train</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#9AA39C"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3"></path></svg><span style="font-size:9.5px;font-weight:600">Progress</span></div>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:5px 0 8px;background:#fff"><span style="width:124px;height:5px;border-radius:3px;background:#18211C;opacity:.22"></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DARK -->
+  <div style="margin-top:60px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:26px">
+      <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.18em;color:#FB6E4E">DARK THEME</span>
+      <span style="height:1px;flex:1;background:#CFCCC3"></span>
+      <span style="font-size:12px;font-weight:600;letter-spacing:0.05em;color:#9AA39C">Deep Kale surfaces · mint-green accents</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start">
+
+<!-- 2k Inventory (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2k</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Inventory · default</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 8px">
+              <h1 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.03em;color:#F4F8F4;margin:0">Prep</h1>
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E8174" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></svg></span>
+            </div>
+            <div style="flex:none;padding:0 22px 8px"><div style="display:flex;background:#16241D;border-radius:12px;padding:4px;gap:4px"><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:700;color:#0D1611;background:#46C57E;border-radius:9px">Inventory</span><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:600;color:#8FA396;border-radius:9px">Recipes</span></div></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;padding:2px 22px 0">
+              <div style="background:#16241D;border:1px solid #22332A;border-radius:16px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.03em;color:#F4F8F4;line-height:1">12</span><span style="font-size:12.5px;font-weight:600;color:#8FA396">meals ready</span></div>
+                <span style="font-size:11.5px;font-weight:700;color:#46C57E;background:#16271D;padding:5px 10px;border-radius:8px">~4 days stocked</span>
+              </div>
+              <button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:15px;color:#0D1611;background:#46C57E;padding:14px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 12px 26px -12px rgba(70,197,126,.6)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0D1611" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>New batch</button>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#F4F8F4">Chicken &amp; Rice</div><div style="font-size:11.5px;color:#6E8174;margin-top:2px">Cooked 2 days ago</div></div><div style="text-align:right"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#46C57E;line-height:1">6</div><div style="font-size:10.5px;font-weight:600;color:#6E8174">of 8 left</div></div></div>
+                <div style="display:flex;gap:5px"><span style="flex:1;height:6px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:6px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:6px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:6px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:6px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:6px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:6px;border-radius:3px;background:#233029"></span><span style="flex:1;height:6px;border-radius:3px;background:#233029"></span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:#8FA396">612 kcal · 48g protein</span><span style="font-size:12.5px;font-weight:700;color:#0D1611;background:#46C57E;padding:7px 13px;border-radius:9px">Eat one</span></div>
+              </div>
+              <div style="background:#131E18;border:1px solid #4A2A22;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div><div style="display:flex;align-items:center;gap:7px"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#F4F8F4">Beef Chilli</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.06em;color:#fff;background:#FB6E4E;padding:2px 6px;border-radius:5px">LOW</span></div><div style="font-size:11.5px;color:#6E8174;margin-top:2px">Cooked 4 days ago</div></div><div style="text-align:right"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#FB6E4E;line-height:1">2</div><div style="font-size:10.5px;font-weight:600;color:#6E8174">of 6 left</div></div></div>
+                <div style="display:flex;gap:5px"><span style="flex:1;height:6px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:6px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:6px;border-radius:3px;background:#233029"></span><span style="flex:1;height:6px;border-radius:3px;background:#233029"></span><span style="flex:1;height:6px;border-radius:3px;background:#233029"></span><span style="flex:1;height:6px;border-radius:3px;background:#233029"></span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:#8FA396">540 kcal · 39g protein</span><span style="font-size:12.5px;font-weight:700;color:#FB6E4E;background:#2A1913;padding:7px 13px;border-radius:9px">Eat one</span></div>
+              </div>
+            </div>
+            <div style="flex:none;background:#0A120D;border-top:1px solid #1A2620;display:flex;justify-content:space-around;align-items:center;padding:9px 8px 7px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="font-size:9.5px;font-weight:600">Today</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13l3 3v13H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg><span style="font-size:9.5px;font-weight:600">Diary</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:-12px"><span style="width:46px;height:46px;border-radius:16px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 20px -8px rgba(251,110,78,.8)"><svg width="24" height="24" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FFD2C4"></rect></svg></span><span style="font-size:9.5px;font-weight:700;color:#FB6E4E">Prep</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M21 3l-5 5M3 21l5-5M14 10l7-7M3 3l7 7"></path></svg><span style="font-size:9.5px;font-weight:600">Train</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3"></path></svg><span style="font-size:9.5px;font-weight:600">Progress</span></div>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:5px 0 8px;background:#0A120D"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2l Batch detail (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2l</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Batch detail</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 10px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#EAF0EB;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#F4F8F4">Chicken &amp; Rice</span>
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#6E8174;font-size:17px;letter-spacing:1px">⋯</span>
+            </div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:2px 22px 0">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:#6E8174">Cooked 2 days ago</span><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:15px;color:#46C57E">6 <span style="color:#6E8174;font-weight:600;font-size:12px">of 8 left</span></span></div>
+              <div style="display:flex;gap:5px"><span style="flex:1;height:7px;border-radius:4px;background:#46C57E"></span><span style="flex:1;height:7px;border-radius:4px;background:#46C57E"></span><span style="flex:1;height:7px;border-radius:4px;background:#46C57E"></span><span style="flex:1;height:7px;border-radius:4px;background:#46C57E"></span><span style="flex:1;height:7px;border-radius:4px;background:#46C57E"></span><span style="flex:1;height:7px;border-radius:4px;background:#46C57E"></span><span style="flex:1;height:7px;border-radius:4px;background:#233029"></span><span style="flex:1;height:7px;border-radius:4px;background:#233029"></span></div>
+              <div style="background:#16241D;border:1px solid #22332A;border-radius:20px;padding:16px 18px;display:flex;align-items:center;gap:16px;margin-top:2px">
+                <div style="position:relative;width:96px;height:96px;flex:none;border-radius:50%;background:conic-gradient(#46C57E 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:10px;border-radius:50%;background:#16241D;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:23px;letter-spacing:-0.03em;color:#F4F8F4;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.12em;color:#8FA396">KCAL / PORTION</span></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#46C57E"></span><span style="font-size:12.5px;font-weight:700;color:#F4F8F4">Protein</span></span><span style="font-size:13px;font-weight:700;color:#F4F8F4">48g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#B9C6BD">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#B9C6BD">58g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#B9C6BD">Fat</span></span><span style="font-size:13px;font-weight:600;color:#B9C6BD">19g</span></div>
+                </div>
+              </div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12.5px;font-weight:600;color:#8FA396">Whole batch</span><span style="font-size:13px;font-weight:700;color:#EAF0EB">4,896 kcal · 8 meals</span></div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:#EAF0EB;margin-top:2px">INGREDIENTS</div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#EAF0EB">Chicken breast</span><span style="font-size:12.5px;font-weight:600;color:#6E8174">1.2 kg</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#EAF0EB">Brown rice</span><span style="font-size:12.5px;font-weight:600;color:#6E8174">600 g</span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)">Eat a portion</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#0D1611"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2m Create batch · start (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2m</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · start</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#EAF0EB;font-size:16px">✕</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#F4F8F4">New batch</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 14px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:5px;border-radius:3px;background:#233029"></span><span style="flex:1;height:5px;border-radius:3px;background:#233029"></span><span style="flex:1;height:5px;border-radius:3px;background:#233029"></span><span style="font-size:11px;font-weight:700;color:#6E8174;margin-left:4px">1/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:2px 22px 0">
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px"><div style="font-size:11px;font-weight:600;color:#6E8174">Batch name</div><div style="font-size:14.5px;font-weight:600;color:#EAF0EB;margin-top:3px">Chicken &amp; Rice</div></div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:#EAF0EB;margin-top:2px">START FROM</div>
+              <div style="background:#131E18;border:1.5px solid #46C57E;border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:12px;background:#16271D;flex:none;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#46C57E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></span><div style="flex:1"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:14.5px;color:#F4F8F4">New from scratch</div><div style="font-size:11.5px;color:#6E8174;margin-top:1px">Build the ingredient list yourself</div></div><span style="color:#46C57E;font-size:18px;font-weight:600">›</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:13px"><span style="width:40px;height:40px;border-radius:12px;background:#0D1611;flex:none;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8FA396" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"></path></svg></span><div style="flex:1"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:14.5px;color:#F4F8F4">From a saved recipe</div><div style="font-size:11.5px;color:#6E8174;margin-top:1px">Pre-fills ingredients &amp; portions</div></div><span style="color:#3E5145;font-size:18px;font-weight:600">›</span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)">Next · Add ingredients</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#0D1611"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2n Create batch · ingredients (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2n</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · ingredients</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#EAF0EB;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#F4F8F4">Add ingredients</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 14px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:5px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:5px;border-radius:3px;background:#233029"></span><span style="flex:1;height:5px;border-radius:3px;background:#233029"></span><span style="font-size:11px;font-weight:700;color:#6E8174;margin-left:4px">2/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:9px;padding:2px 22px 0">
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 13px;display:flex;align-items:center;gap:9px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E8174" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg><span style="font-size:13.5px;color:#6E8174">Search ingredient…</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:600;color:#EAF0EB">Chicken breast</div><div style="font-size:11px;color:#6E8174;margin-top:1px">1.2 kg</div></div><span style="font-size:13px;font-weight:700;color:#C2CFC6">1,980</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:600;color:#EAF0EB">Brown rice</div><div style="font-size:11px;color:#6E8174;margin-top:1px">600 g</div></div><span style="font-size:13px;font-weight:700;color:#C2CFC6">2,160</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:600;color:#EAF0EB">Olive oil</div><div style="font-size:11px;color:#6E8174;margin-top:1px">30 g</div></div><span style="font-size:13px;font-weight:700;color:#C2CFC6">265</span></div>
+              <div style="border:1.5px dashed #2E4034;border-radius:13px;padding:11px;display:flex;align-items:center;justify-content:center;gap:7px;color:#8FA396"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#46C57E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span style="font-size:13px;font-weight:600">Add ingredient</span></div>
+            </div>
+            <div style="flex:none;padding:10px 22px 10px">
+              <div style="background:#16241D;border:1px solid #22332A;border-radius:13px;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:12.5px;font-weight:600;color:#8FA396">Running total</span><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#F4F8F4">4,405 <span style="font-size:11px;color:#8FA396">kcal</span></span></div>
+              <button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)">Next · Portions</button>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#0D1611"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2o Create batch · portions (dark) ✨ -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2o</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · portions ✨</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#EAF0EB;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#F4F8F4">Split into…</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 8px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:5px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:5px;border-radius:3px;background:#FB6E4E"></span><span style="flex:1;height:5px;border-radius:3px;background:#233029"></span><span style="font-size:11px;font-weight:700;color:#6E8174;margin-left:4px">3/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;align-items:center;padding:6px 22px 0">
+              <div style="font-size:13px;font-weight:600;color:#8FA396;margin-bottom:14px">How many meals does this make?</div>
+              <div style="display:flex;align-items:center;gap:22px;margin-bottom:6px"><span style="width:46px;height:46px;border-radius:14px;background:#131E18;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;color:#8FA396">–</span><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:64px;letter-spacing:-0.04em;color:#F4F8F4;line-height:1;min-width:70px;text-align:center">8</span><span style="width:46px;height:46px;border-radius:14px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;color:#fff;box-shadow:0 10px 22px -8px rgba(251,110,78,.8)">+</span></div>
+              <div style="font-size:11.5px;font-weight:600;color:#6E8174;margin-bottom:16px">portions</div>
+              <div style="width:100%;background:#2A1913;border:1.5px solid #5A2E22;border-radius:20px;padding:16px 18px">
+                <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="#FB6E4E"><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6z"></path></svg><span style="font-size:11px;font-weight:700;letter-spacing:0.06em;color:#FB6E4E">PER PORTION · UPDATES LIVE</span></div>
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div style="position:relative;width:88px;height:88px;flex:none;border-radius:50%;background:conic-gradient(#46C57E 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:9px;border-radius:50%;background:#2A1913;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#F4F8F4;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.1em;color:#D99175">KCAL</span></div></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#46C57E"></span><span style="font-size:12.5px;font-weight:700;color:#F4F8F4">Protein</span></span><span style="font-size:13px;font-weight:700;color:#F4F8F4">48g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#E4C3B8">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#E4C3B8">58g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#E4C3B8">Fat</span></span><span style="font-size:13px;font-weight:600;color:#E4C3B8">19g</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)">Next · Review</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#0D1611"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2p Create batch · review (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2p</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Create batch · review</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 6px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#EAF0EB;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#F4F8F4">Review</span>
+              <span style="width:34px"></span>
+            </div>
+            <div style="flex:none;padding:0 22px 14px;display:flex;align-items:center;gap:6px"><span style="flex:1;height:5px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:5px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:5px;border-radius:3px;background:#46C57E"></span><span style="flex:1;height:5px;border-radius:3px;background:#46C57E"></span><span style="font-size:11px;font-weight:700;color:#6E8174;margin-left:4px">4/4</span></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;padding:2px 22px 0">
+              <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.02em;color:#F4F8F4">Chicken &amp; Rice</div>
+              <div style="background:#16241D;border:1px solid #22332A;border-radius:20px;padding:16px 18px">
+                <div style="text-align:center;font-size:11px;font-weight:700;letter-spacing:0.08em;color:#8FA396;margin-bottom:13px">PER PORTION · ×8</div>
+                <div style="display:flex;align-items:center;gap:16px">
+                  <div style="position:relative;width:88px;height:88px;flex:none;border-radius:50%;background:conic-gradient(#46C57E 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:9px;border-radius:50%;background:#16241D;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#F4F8F4;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.1em;color:#8FA396">KCAL</span></div></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#46C57E"></span><span style="font-size:12.5px;font-weight:700;color:#F4F8F4">Protein</span></span><span style="font-size:13px;font-weight:700;color:#F4F8F4">48g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#B9C6BD">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#B9C6BD">58g</span></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#B9C6BD">Fat</span></span><span style="font-size:13px;font-weight:600;color:#B9C6BD">19g</span></div>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12.5px;font-weight:600;color:#8FA396">Whole batch</span><span style="font-size:13px;font-weight:700;color:#EAF0EB">4,896 kcal</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:12.5px;font-weight:600;color:#8FA396">Ingredients</span><span style="font-size:13px;font-weight:700;color:#EAF0EB">3 items</span></div>
+              <div style="background:#16271D;border:1px solid #265237;border-radius:13px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13.5px;font-weight:700;color:#F4F8F4">Save as recipe</div><div style="font-size:11px;color:#7FC79C;margin-top:1px">Reuse this as a template</div></div><span style="width:42px;height:24px;border-radius:13px;background:#46C57E;position:relative;flex:none"><span style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#0D1611"></span></span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)">Add to inventory</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#0D1611"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2q Confirmation (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2q</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Confirmation</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#123024;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF7EE;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px;gap:4px">
+              <div style="width:96px;height:96px;border-radius:28px;background:#46C57E;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 18px 40px -14px rgba(70,197,126,.7)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#0D1611" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></div>
+              <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:32px;letter-spacing:-0.03em;color:#F4F8F4;line-height:1.05">8 meals<br>prepped</div>
+              <div style="font-size:14px;line-height:1.5;color:#A9CBB8;max-width:210px;margin-top:8px">Your fridge is stocked for about 4 days. Cook once — eat all week.</div>
+            </div>
+            <div style="flex:none;padding:12px 26px 10px;display:flex;flex-direction:column;gap:10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)">Back to inventory</button><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:600;font-size:14px;color:#A9CBB8;background:transparent;padding:6px">Eat one now</button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:2px 0 9px;background:#123024"><span style="width:124px;height:5px;border-radius:3px;background:#EAF7EE;opacity:.4"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2r Recipes (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2r</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Recipes · sub-view</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 8px"><h1 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.03em;color:#F4F8F4;margin:0">Prep</h1></div>
+            <div style="flex:none;padding:0 22px 10px"><div style="display:flex;background:#16241D;border-radius:12px;padding:4px;gap:4px"><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:600;color:#8FA396;border-radius:9px">Inventory</span><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:700;color:#0D1611;background:#46C57E;border-radius:9px">Recipes</span></div></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:11px;padding:2px 22px 0">
+              <div style="font-size:12px;font-weight:600;color:#6E8174">Templates you can cook anytime</div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#F4F8F4">Chicken &amp; Rice</div><span style="font-size:11px;font-weight:700;color:#8FA396;background:#0D1611;padding:4px 9px;border-radius:8px">makes 8</span></div>
+                <div style="font-size:12px;font-weight:600;color:#8FA396">612 kcal · 48g protein / portion</div>
+                <div style="display:flex;justify-content:flex-end"><span style="font-size:12.5px;font-weight:700;color:#0D1611;background:#46C57E;padding:8px 15px;border-radius:9px">Cook this</span></div>
+              </div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:9px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between"><div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:16px;color:#F4F8F4">Beef Chilli</div><span style="font-size:11px;font-weight:700;color:#8FA396;background:#0D1611;padding:4px 9px;border-radius:8px">makes 6</span></div>
+                <div style="font-size:12px;font-weight:600;color:#8FA396">540 kcal · 39g protein / portion</div>
+                <div style="display:flex;justify-content:flex-end"><span style="font-size:12.5px;font-weight:700;color:#0D1611;background:#46C57E;padding:8px 15px;border-radius:9px">Cook this</span></div>
+              </div>
+              <div style="border:1.5px dashed #2E4034;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;gap:7px;color:#8FA396"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#46C57E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span style="font-size:13px;font-weight:600">New recipe</span></div>
+            </div>
+            <div style="flex:none;background:#0A120D;border-top:1px solid #1A2620;display:flex;justify-content:space-around;align-items:center;padding:9px 8px 7px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="font-size:9.5px;font-weight:600">Today</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13l3 3v13H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg><span style="font-size:9.5px;font-weight:600">Diary</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:-12px"><span style="width:46px;height:46px;border-radius:16px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 20px -8px rgba(251,110,78,.8)"><svg width="24" height="24" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FFD2C4"></rect></svg></span><span style="font-size:9.5px;font-weight:700;color:#FB6E4E">Prep</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M21 3l-5 5M3 21l5-5M14 10l7-7M3 3l7 7"></path></svg><span style="font-size:9.5px;font-weight:600">Train</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3"></path></svg><span style="font-size:9.5px;font-weight:600">Progress</span></div>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:5px 0 8px;background:#0A120D"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2s Recipe detail (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2s</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Recipe detail · edit</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 10px">
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#EAF0EB;font-size:18px;padding-bottom:2px">‹</span>
+              <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:17px;color:#F4F8F4">Chicken &amp; Rice</span>
+              <span style="width:34px;height:34px;border-radius:11px;background:#16241D;border:1px solid #22332A;display:flex;align-items:center;justify-content:center;color:#6E8174;font-size:17px;letter-spacing:1px">⋯</span>
+            </div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:2px 22px 0">
+              <div style="display:flex;align-items:center;gap:7px"><span style="font-size:9px;font-weight:700;letter-spacing:0.08em;color:#46C57E;background:#16271D;padding:3px 8px;border-radius:6px">RECIPE</span><span style="font-size:11.5px;color:#6E8174">A template — cook it into a batch</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600;color:#8FA396">Default portions</span><span style="font-size:14px;font-weight:700;color:#EAF0EB">8</span></div>
+              <div style="background:#16241D;border:1px solid #22332A;border-radius:20px;padding:16px 18px;display:flex;align-items:center;gap:16px">
+                <div style="position:relative;width:88px;height:88px;flex:none;border-radius:50%;background:conic-gradient(#46C57E 0 40%,#FB6E4E 40% 70%,#F5C84B 70% 100%)"><div style="position:absolute;inset:9px;border-radius:50%;background:#16241D;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#F4F8F4;line-height:1">612</span><span style="font-size:8.5px;font-weight:700;letter-spacing:0.1em;color:#8FA396">KCAL</span></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#46C57E"></span><span style="font-size:12.5px;font-weight:700;color:#F4F8F4">Protein</span></span><span style="font-size:13px;font-weight:700;color:#F4F8F4">48g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#FB6E4E"></span><span style="font-size:12.5px;font-weight:600;color:#B9C6BD">Carbs</span></span><span style="font-size:13px;font-weight:600;color:#B9C6BD">58g</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#F5C84B"></span><span style="font-size:12.5px;font-weight:600;color:#B9C6BD">Fat</span></span><span style="font-size:13px;font-weight:600;color:#B9C6BD">19g</span></div>
+                </div>
+              </div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:#EAF0EB;margin-top:2px">INGREDIENTS · DEFAULT</div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#EAF0EB">Chicken breast</span><span style="font-size:12.5px;font-weight:600;color:#6E8174">1.2 kg</span></div>
+              <div style="background:#131E18;border:1px solid #22332A;border-radius:13px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13.5px;font-weight:600;color:#EAF0EB">Brown rice</span><span style="font-size:12.5px;font-weight:600;color:#6E8174">600 g</span></div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)">Cook this <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0D1611" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></div>
+            <div style="flex:none;display:flex;justify-content:center;padding:0 0 9px;background:#0D1611"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+<!-- 2t Inventory empty (dark) -->
+      <div style="flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:9px;padding-left:4px">
+          <span style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:12px;background:#FB6E4E;color:#fff;padding:3px 9px;border-radius:7px">2t</span>
+          <span style="font-size:13px;font-weight:600;color:#3C443E">Inventory · empty state</span>
+        </div>
+        <div style="flex:none;width:320px;background:#050907;border-radius:52px;padding:11px;box-shadow:0 50px 90px -40px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)">
+          <div style="height:742px;border-radius:41px;overflow:hidden;background:#0D1611;display:flex;flex-direction:column;position:relative">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 24px 4px;flex:none;color:#EAF0EB;font-weight:700;font-size:14px"><span>9:41</span><div style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="5" y="4.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="2" width="3" height="9" rx="1"></rect><rect x="14" y="0" width="3" height="11" rx="1"></rect></svg><span style="font-size:11px;font-weight:700">5G</span><span style="width:22px;height:11px;border:1.4px solid currentColor;border-radius:3px;padding:1.4px;display:block"><span style="display:block;height:100%;width:72%;background:currentColor;border-radius:1px"></span></span></div></div>
+            <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 22px 8px"><h1 style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:28px;letter-spacing:-0.03em;color:#F4F8F4;margin:0">Prep</h1></div>
+            <div style="flex:none;padding:0 22px 10px"><div style="display:flex;background:#16241D;border-radius:12px;padding:4px;gap:4px"><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:700;color:#0D1611;background:#46C57E;border-radius:9px">Inventory</span><span style="flex:1;text-align:center;padding:9px 4px;font-size:13px;font-weight:600;color:#8FA396;border-radius:9px">Recipes</span></div></div>
+            <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 34px;gap:6px">
+              <div style="width:104px;height:104px;border-radius:30px;background:#16271D;border:1px solid #265237;display:flex;align-items:center;justify-content:center;margin-bottom:6px"><svg width="52" height="52" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#46C57E"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#46C57E"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#46C57E"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#46C57E"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#46C57E"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FB6E4E"></rect></svg></div>
+              <div style="font-family:'Schibsted Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;color:#F4F8F4">No prepped meals yet</div>
+              <div style="font-size:13.5px;line-height:1.5;color:#8FA396;max-width:220px">Cook once, portion it up, and BatchFit tracks every meal waiting in your fridge.</div>
+            </div>
+            <div style="flex:none;padding:12px 22px 10px"><button style="width:100%;border:none;cursor:pointer;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:16px;color:#0D1611;background:#46C57E;padding:16px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 14px 30px -10px rgba(70,197,126,.55)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0D1611" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Prep your first batch</button></div>
+            <div style="flex:none;background:#0A120D;border-top:1px solid #1A2620;display:flex;justify-content:space-around;align-items:center;padding:9px 8px 7px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="font-size:9.5px;font-weight:600">Today</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13l3 3v13H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg><span style="font-size:9.5px;font-weight:600">Diary</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:-12px"><span style="width:46px;height:46px;border-radius:16px;background:#FB6E4E;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 20px -8px rgba(251,110,78,.8)"><svg width="24" height="24" viewBox="0 0 100 100"><rect x="14" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="14" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="40" width="33" height="20" rx="6" fill="#fff"></rect><rect x="14" y="66" width="33" height="20" rx="6" fill="#fff"></rect><rect x="53" y="66" width="33" height="20" rx="6" fill="#FFD2C4"></rect></svg></span><span style="font-size:9.5px;font-weight:700;color:#FB6E4E">Prep</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M21 3l-5 5M3 21l5-5M14 10l7-7M3 3l7 7"></path></svg><span style="font-size:9.5px;font-weight:600">Train</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6E8174"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-3"></path></svg><span style="font-size:9.5px;font-weight:600">Progress</span></div>
+            </div>
+            <div style="flex:none;display:flex;justify-content:center;padding:5px 0 8px;background:#0A120D"><span style="width:124px;height:5px;border-radius:3px;background:#EAF0EB;opacity:.28"></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

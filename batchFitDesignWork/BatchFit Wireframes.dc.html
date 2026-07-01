@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#efece6;font-family:'Architects Daughter',system-ui,sans-serif;color:#1a1a1a}
+    /* options-stack chrome */
+    .dv-turn{padding:36px 40px 30px;border-bottom:1px solid rgba(0,0,0,.08)}
+    .dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+    .dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+    .dv-tname{font:600 14px/1.3 system-ui,sans-serif;color:#1a1a1a}
+    .dv-tsub{font:400 12px/1.4 system-ui,sans-serif;color:rgba(0,0,0,.5);max-width:760px;margin:0 0 22px}
+    .dv-opts{display:flex;flex-wrap:wrap;gap:30px 26px;align-items:flex-start}
+    .dv-opt{flex:none;display:flex;flex-direction:column;gap:8px;scroll-margin-top:16px}
+    .dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+    .dv-olabel{display:flex;align-items:center;gap:8px;font:400 12px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.6)}
+    .dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+    .dv-next{margin:24px 0 0;font:12px/1.6 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+    .dv-next a{color:#2a78d6;text-decoration:none}
+    .flow-h{flex-basis:100%;font:700 13px/1 system-ui,sans-serif;color:#1a1a1a;letter-spacing:.04em;text-transform:uppercase;margin:8px 0 -6px;display:flex;align-items:center;gap:10px}
+    .flow-h::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.12)}
+    .wf-note{max-width:262px;font:400 11px/1.45 'Architects Daughter';color:#b25a3e}
+    .wf-note b{color:#1a1a1a}
+    /* phone frame */
+    .ph{width:262px;height:556px;background:#fff;border:2.5px solid #1a1a1a;border-radius:30px;padding:7px;box-shadow:0 3px 0 rgba(0,0,0,.1)}
+    .ph-in{height:100%;display:flex;flex-direction:column;border-radius:23px;overflow:hidden;background:#fff}
+    .st{height:18px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:2px 16px 0;font:600 9px ui-monospace,monospace;color:#1a1a1a}
+    .st .dots{width:34px;height:6px;border-radius:3px;background:#1a1a1a;opacity:.5}
+    .scr{flex:1;display:flex;flex-direction:column;gap:9px;padding:11px 13px;overflow:hidden}
+    .scr.ctr{justify-content:center;align-items:center;text-align:center;gap:13px}
+    /* bottom tab bar */
+    .tab{height:44px;flex:none;border-top:2px solid #1a1a1a;display:flex;justify-content:space-around;align-items:center;padding-top:3px}
+    .tab .t{display:flex;flex-direction:column;align-items:center;gap:3px;font:400 8px 'Architects Daughter';color:#9a958c}
+    .tab .t::before{content:'';width:17px;height:17px;border:1.5px solid #b8b4ab;border-radius:5px}
+    .tab .t.on{color:#1a1a1a}
+    .tab .t.on::before{border-color:#1a1a1a;background:#1a1a1a}
+    .tab .t.c::before{border-color:#2E9E5B;background:#eaf4ee;width:21px;height:21px;border-width:2px}
+    .tab .t.c{color:#2E9E5B}
+    .tab .t.c.on::before{background:#2E9E5B}
+    /* primitives */
+    .ttl{font:700 16px/1.05 'Caveat',cursive;color:#1a1a1a}
+    .ttl.lg{font-size:21px}
+    .lbl{font:400 11px/1.3 'Architects Daughter';color:#6b675f}
+    .lbl.d{color:#1a1a1a}
+    .num{font:700 22px/1 'Caveat',cursive;color:#1a1a1a}
+    .num.xl{font-size:30px}
+    .bar{height:8px;border-radius:4px;background:#dcd8d0;width:100%}
+    .bar.s{width:46%}.bar.m{width:72%}.bar.xs{width:30%}
+    .box{background:#efece5;border:1.5px solid #cbc7be;border-radius:9px}
+    .card{background:#fff;border:1.5px solid #1a1a1a;border-radius:11px;padding:9px;display:flex;flex-direction:column;gap:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row.sb{justify-content:space-between}
+    .ic{width:18px;height:18px;border:1.5px solid #b8b4ab;border-radius:5px;flex:none}
+    .hdr{display:flex;align-items:center;justify-content:space-between;flex:none}
+    .btn{border:1.5px solid #1a1a1a;border-radius:9px;padding:8px;text-align:center;font:400 12px 'Architects Daughter';background:#fff;color:#1a1a1a}
+    .btn.p{background:#2E9E5B;border-color:#2E9E5B;color:#fff}
+    .btn.coral{background:#FB6E4E;border-color:#FB6E4E;color:#fff}
+    .chip{border:1.5px solid #cbc7be;border-radius:20px;padding:4px 10px;font:400 10px 'Architects Daughter';background:#fff;color:#1a1a1a}
+    .chip.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+    .tag{font:400 8px 'Architects Daughter';background:#FB6E4E;color:#fff;border-radius:4px;padding:1px 6px;display:inline-block}
+    .seg{display:flex;border:1.5px solid #1a1a1a;border-radius:9px;overflow:hidden;flex:none}
+    .seg span{flex:1;text-align:center;font:400 11px 'Architects Daughter';padding:6px 4px;color:#6b675f}
+    .seg span.on{background:#1a1a1a;color:#fff}
+    .ring{width:78px;height:78px;border-radius:50%;border:8px solid #dcd8d0;border-top-color:#2E9E5B;border-right-color:#2E9E5B;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
+    .mb{display:flex;align-items:center;gap:7px}
+    .mb .ml{width:46px;font:400 10px 'Architects Daughter';color:#6b675f;flex:none}
+    .mb .mt{flex:1;height:7px;border-radius:4px;background:#dcd8d0;position:relative;overflow:hidden}
+    .mb .mt::before{content:'';position:absolute;inset:0;width:60%;background:#2E9E5B;border-radius:4px}
+    .mb.pro .ml{color:#1a1a1a;font-weight:700}
+    .mb.pro .mt::before{width:75%}
+    .mb.f2 .mt::before{width:40%}.mb.f3 .mt::before{width:55%}.mb.f4 .mt::before{width:30%}
+    .stepdots{display:flex;gap:6px;margin-top:4px}
+    .stepdots i{width:6px;height:6px;border-radius:50%;background:#cbc7be}
+    .stepdots i.on{background:#1a1a1a}
+    .logo6{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:26px;flex:none}
+    .logo6 i{height:7px;border-radius:2px;background:#2E9E5B}
+    .logo6 i.c{background:#FB6E4E}
+    .back{font:400 14px 'Architects Daughter';color:#1a1a1a}
+    .spark{height:34px;border-bottom:1.5px solid #cbc7be;display:flex;align-items:flex-end;gap:3px}
+    .spark i{flex:1;background:#bdb9b0;border-radius:2px 2px 0 0}
+    .kpd{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex:none}
+    .kpd b{background:#efece5;border:1.5px solid #cbc7be;border-radius:7px;text-align:center;padding:7px 0;font:400 13px 'Caveat',cursive}
+    .illus{width:96px;height:96px;border-radius:14px;border:2px dashed #cbc7be;display:flex;align-items:center;justify-content:center}
+    .illus .logo6{width:46px}
+    .illus .logo6 i{height:13px}
+  </style>
+</helmet>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">BatchFit MVP — full wireframe set</span></div>
+  <p class="dv-tsub">Low-fi phone wireframes for every screen in the MVP spec. One version each — structure & flow only. Green = primary actions &amp; the Prep differentiator; coral = batch tags &amp; the "magic" per-portion moment. Reference any screen by its id (e.g. "tighten <a class="dv-oid" href="#1k">1k</a>") and I'll iterate.</p>
+  <div class="dv-opts">
+
+    <div class="flow-h">Onboarding</div>
+
+    <!-- 1a Welcome -->
+    <div class="dv-opt" id="1a">
+      <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Welcome</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr ctr">
+          <div class="logo6"><i></i><i></i><i></i><i></i><i></i><i class="c"></i></div>
+          <div class="ttl lg">BatchFit</div>
+          <div class="lbl d">Plan it · Batch it · Burn it</div>
+          <div class="lbl" style="max-width:180px">"Cook once, eat all week,<br>macros sorted."</div>
+          <div class="btn p" style="width:82%;margin-top:8px">Get started</div>
+          <div class="lbl" style="text-decoration:underline">Skip setup</div>
+          <div class="stepdots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>First impression.</b> Leads with the batch-cooking promise + tagline.</div>
+    </div>
+
+    <!-- 1b Your goal -->
+    <div class="dv-opt" id="1b">
+      <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Your goal</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="row sb"><span class="back">‹ Back</span><div class="stepdots"><i></i><i class="on"></i><i></i><i></i><i></i></div></div>
+          <div class="ttl">What's your goal?</div>
+          <div class="card" style="border-color:#2E9E5B"><div class="row sb"><span class="lbl d">Lose weight</span><span class="ic" style="border-radius:50%"></span></div></div>
+          <div class="row" style="gap:6px;margin:-2px 0 2px"><span class="chip">Gentle</span><span class="chip on">Moderate</span><span class="chip">Aggressive</span></div>
+          <div class="card"><div class="row sb"><span class="lbl d">Maintain</span><span class="ic" style="border-radius:50%"></span></div></div>
+          <div class="card"><div class="row sb"><span class="lbl d">Build muscle</span><span class="ic" style="border-radius:50%"></span></div></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Continue</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Rate selector appears only under <b>Lose weight</b>.</div>
+    </div>
+
+    <!-- 1c About you -->
+    <div class="dv-opt" id="1c">
+      <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>About you</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="row sb"><span class="back">‹ Back</span><div class="stepdots"><i></i><i></i><i class="on"></i><i></i><i></i></div></div>
+          <div class="ttl">About you</div>
+          <div class="seg"><span class="on">Metric</span><span>Imperial</span></div>
+          <div class="row" style="gap:6px"><span class="chip on">Male</span><span class="chip">Female</span></div>
+          <div class="box" style="padding:8px"><div class="lbl">Age</div><div class="bar xs"></div></div>
+          <div class="box" style="padding:8px"><div class="lbl">Height</div><div class="bar s"></div></div>
+          <div class="box" style="padding:8px"><div class="lbl">Current weight</div><div class="bar s"></div></div>
+          <div class="lbl d">Activity level</div>
+          <div class="row" style="gap:6px"><span class="chip">Sedentary</span><span class="chip on">Light</span><span class="chip">Active</span></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Continue</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Feeds the <b>TDEE</b> calculation. Gentle validation — guide, don't block.</div>
+    </div>
+
+    <!-- 1d Targets -->
+    <div class="dv-opt" id="1d">
+      <div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Your targets</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="row sb"><span class="back">‹ Back</span><div class="stepdots"><i></i><i></i><i></i><i class="on"></i><i></i></div></div>
+          <div class="ttl">Your daily target</div>
+          <div class="row ctr" style="justify-content:center;margin:2px 0"><div class="ring"><span class="num xl">1,840</span><span class="lbl">kcal</span></div></div>
+          <div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div>
+          <div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div>
+          <div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div>
+          <div class="mb f4"><span class="ml">Fibre</span><div class="mt"></div></div>
+          <div class="lbl">Based on your goal. Tap any value to override.</div>
+          <div style="flex:1"></div>
+          <div class="btn p">Looks good</div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>Edge:</b> if "About you" skipped → sensible defaults + "edit later in Settings".</div>
+    </div>
+
+    <!-- 1e Ready -->
+    <div class="dv-opt" id="1e">
+      <div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Ready</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr ctr">
+          <div class="ttl lg">You're all set</div>
+          <div class="lbl" style="max-width:190px">Three ways to use BatchFit every day:</div>
+          <div class="row" style="gap:14px;margin-top:4px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px"><span class="ic" style="width:34px;height:34px"></span><span class="lbl">Log food</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px"><span class="ic" style="width:34px;height:34px;border-color:#2E9E5B;background:#eaf4ee"></span><span class="lbl d">Prep a batch</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px"><span class="ic" style="width:34px;height:34px"></span><span class="lbl">Workout</span></div>
+          </div>
+          <div class="btn p" style="width:82%;margin-top:12px">Start</div>
+          <div class="stepdots"><i></i><i></i><i></i><i></i><i class="on"></i></div>
+        </div>
+      </div></div>
+      <div class="wf-note">Optional micro-screen → drops into <a class="dv-oid" href="#1a">Today</a>.</div>
+    </div>
+
+    <div class="flow-h">Today — daily home</div>
+
+    <!-- 1f Today dashboard -->
+    <div class="dv-opt" id="1f">
+      <div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Today dashboard</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr" style="gap:8px">
+          <div class="hdr"><div class="ttl">Today</div><div class="row" style="gap:6px"><span class="back">‹</span><span class="lbl d">Wed 12 Jun</span><span class="back">›</span></div></div>
+          <div class="card" style="flex-direction:row;align-items:center;gap:10px">
+            <div class="ring"><span class="num">1,240</span><span class="lbl">left</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div>
+              <div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div>
+              <div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div>
+              <div class="mb f4"><span class="ml">Fibre</span><div class="mt"></div></div>
+            </div>
+          </div>
+          <div class="row" style="gap:6px">
+            <div class="btn" style="flex:1;padding:6px">Log food</div>
+            <div class="btn coral" style="flex:1;padding:6px">Eat prepped</div>
+          </div>
+          <div class="row" style="gap:6px">
+            <div class="btn" style="flex:1;padding:6px">Start workout</div>
+            <div class="btn" style="flex:1;padding:6px">Log weight</div>
+          </div>
+          <div class="box" style="padding:7px 9px;display:flex;justify-content:space-between;align-items:center">
+            <span class="lbl d">Breakfast · Lunch · Dinner</span><span class="lbl">600 kcal</span>
+          </div>
+          <div class="card" style="flex-direction:row;align-items:center;gap:8px;border-color:#2E9E5B">
+            <span class="logo6" style="width:20px"><i></i><i></i><i></i><i></i><i></i><i class="c"></i></span>
+            <div style="flex:1"><div class="lbl d">6 prepped meals ready</div><div class="lbl">~2 days stocked</div></div>
+            <span class="chip" style="border-color:#2E9E5B;color:#2E9E5B">Eat one</span>
+          </div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl">Weight trend</span><span class="lbl d">82.4 kg</span></div><div class="spark" style="height:22px;margin-top:4px"><i style="height:60%"></i><i style="height:55%"></i><i style="height:65%"></i><i style="height:50%"></i><i style="height:45%"></i><i style="height:48%"></i></div></div>
+        </div>
+        <div class="tab"><span class="t on">Today</span><span class="t">Diary</span><span class="t c">Prep</span><span class="t">Train</span><span class="t">Progress</span></div>
+      </div></div>
+      <div class="wf-note"><b>Calories = hero, Protein = prioritised macro.</b> Leave a slot here for a Phase-2 "burned / eat-back" figure.</div>
+    </div>
+
+    <div class="flow-h">Diary — food log</div>
+
+    <!-- 1g Day log -->
+    <div class="dv-opt" id="1g">
+      <div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Day log</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr" style="gap:8px">
+          <div class="hdr"><div class="row" style="gap:6px"><span class="back">‹</span><span class="ttl">Wed 12 Jun</span><span class="back">›</span></div><span class="lbl">Today</span></div>
+          <div class="box" style="padding:6px 9px"><div class="row" style="gap:6px"><span class="num" style="font-size:16px">1,360</span><span class="lbl">/ 1,840 kcal</span></div><div class="row" style="gap:4px;margin-top:4px"><div class="mt" style="flex:1;height:5px;border-radius:3px;background:#dcd8d0;position:relative;overflow:hidden"><div style="position:absolute;inset:0;width:74%;background:#2E9E5B"></div></div></div></div>
+          <div class="row sb"><span class="lbl d">Breakfast</span><span class="lbl">420 kcal</span></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl d">Oats &amp; berries</span><span class="lbl">320</span></div></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><div class="row" style="gap:5px"><span class="lbl d">Chicken &amp; rice</span><span class="tag">BATCH</span></div><span class="lbl">410</span></div></div>
+          <div class="lbl" style="text-decoration:underline">+ Add food</div>
+          <div class="row sb"><span class="lbl d">Lunch</span><span class="lbl">540 kcal</span></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl d">Greek salad</span><span class="lbl">540</span></div></div>
+          <div class="lbl" style="text-decoration:underline">+ Add food</div>
+          <div class="row sb"><span class="lbl d">Dinner</span><span class="lbl">0 kcal</span></div>
+          <div class="box" style="padding:8px 9px;border-style:dashed"><span class="lbl">Nothing here yet — + Add food</span></div>
+        </div>
+        <div class="tab"><span class="t">Today</span><span class="t on">Diary</span><span class="t c">Prep</span><span class="t">Train</span><span class="t">Progress</span></div>
+      </div></div>
+      <div class="wf-note"><b>Totals bar pinned</b> while scrolling. Batch items carry a coral tag · swipe row to delete.</div>
+    </div>
+
+    <!-- 1h Add-food search -->
+    <div class="dv-opt" id="1h">
+      <div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Add food — search</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">✕</span><div class="ttl">Add food</div><span class="lbl">Lunch</span></div>
+          <div class="row" style="gap:6px"><div class="box" style="flex:1;padding:8px 9px"><span class="lbl">Search foods…</span></div><span class="ic" style="width:32px;height:32px;border-style:dashed"></span></div>
+          <div class="row" style="gap:5px"><span class="chip on">Recents</span><span class="chip">Favourites</span><span class="chip">My foods</span><span class="chip">Recipes</span></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Banana</span><span class="lbl">105</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><div class="row" style="gap:5px"><span class="lbl d">Chicken &amp; rice</span><span class="tag">BATCH</span></div><span class="lbl">410</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Greek yoghurt</span><span class="lbl">120</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Almonds 30g</span><span class="lbl">180</span></div></div>
+          <div style="flex:1"></div>
+          <div class="lbl" style="text-align:center">No match? <span style="text-decoration:underline">Create a custom food</span></div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>Phase-2 hook:</b> dashed square = barcode-scan slot (layout only, not built).</div>
+    </div>
+
+    <!-- 1i Food detail / quantity -->
+    <div class="dv-opt" id="1i">
+      <div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Food detail / quantity</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">Greek yoghurt</div><span></span></div>
+          <div class="row" style="gap:6px"><div class="box" style="flex:1;padding:8px;text-align:center"><span class="num" style="font-size:16px">170</span></div><div class="seg" style="flex:1"><span class="on">g</span><span>serving</span><span>portion</span></div></div>
+          <div class="card" style="flex-direction:row;align-items:center;gap:10px">
+            <div class="ring" style="width:62px;height:62px;border-width:7px"><span class="num" style="font-size:15px">120</span><span class="lbl">kcal</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div>
+              <div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div>
+              <div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div>
+            </div>
+          </div>
+          <div class="lbl">Live updates as you change the amount</div>
+          <div class="box" style="padding:8px 9px"><div class="row sb"><span class="lbl">Meal</span><span class="lbl d">Lunch ▾</span></div></div>
+          <div class="box" style="padding:8px 9px"><div class="row sb"><span class="lbl">Date</span><span class="lbl d">Today ▾</span></div></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Add to diary</div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>Edge:</b> missing macro data shown as "—", never a fake 0.</div>
+    </div>
+
+    <!-- 1j Custom food -->
+    <div class="dv-opt" id="1j">
+      <div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Create custom food</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">New food</div><span></span></div>
+          <div class="box" style="padding:8px 9px"><div class="lbl">Name</div><div class="bar m"></div></div>
+          <div class="box" style="padding:8px 9px"><div class="lbl">Serving size &amp; unit</div><div class="bar s"></div></div>
+          <div class="lbl d">Per serving</div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl">Calories</span><div class="bar xs"></div></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Protein</span><div class="bar xs"></div></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl">Fat</span><div class="bar xs"></div></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl">Carbs</span><div class="bar xs"></div></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl">Fibre</span><div class="bar xs"></div></div></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Save to my foods</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Reached when search returns nothing. Saves into <b>My foods</b> for reuse.</div>
+    </div>
+
+    <div class="flow-h">Prep ⭐ — batch cooking, recipes &amp; inventory</div>
+
+    <!-- 1k Inventory -->
+    <div class="dv-opt" id="1k">
+      <div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Inventory (default)</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr" style="gap:8px">
+          <div class="hdr"><div class="ttl">Prep</div></div>
+          <div class="seg"><span class="on">Inventory</span><span>Recipes</span></div>
+          <div class="row sb"><span class="lbl">12 meals · ~4 days stocked</span></div>
+          <div class="btn p">+ New batch</div>
+          <div class="card" style="border-color:#2E9E5B">
+            <div class="row sb"><span class="lbl d">Chicken &amp; Rice</span><span class="num" style="font-size:17px;color:#2E9E5B">6 left</span></div>
+            <div class="row sb"><span class="lbl">612 kcal · 48g protein</span><span class="lbl">of 8</span></div>
+            <div class="row sb"><span class="lbl">Cooked 2 days ago</span><span class="chip" style="border-color:#2E9E5B;color:#2E9E5B">Eat one</span></div>
+          </div>
+          <div class="card" style="border-color:#FB6E4E">
+            <div class="row sb"><span class="lbl d">Beef Chilli</span><span class="num" style="font-size:17px;color:#FB6E4E">2 left</span></div>
+            <div class="row sb"><span class="lbl">540 kcal · 39g protein</span><span class="tag">LOW</span></div>
+            <div class="row sb"><span class="lbl">Cooked 4 days ago</span><span class="chip" style="border-color:#FB6E4E;color:#FB6E4E">Eat one</span></div>
+          </div>
+        </div>
+        <div class="tab"><span class="t">Today</span><span class="t">Diary</span><span class="t c on">Prep</span><span class="t">Train</span><span class="t">Progress</span></div>
+      </div></div>
+      <div class="wf-note"><b>Portions-remaining = hero.</b> Low-stock flagged coral. At 0 a batch leaves to history.</div>
+    </div>
+
+    <!-- 1l Batch detail -->
+    <div class="dv-opt" id="1l">
+      <div class="dv-olabel"><a class="dv-oid" href="#1l">1l</a>Batch detail</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">Chicken &amp; Rice</div><span class="back">⋯</span></div>
+          <div class="row sb"><span class="lbl">Cooked 2 days ago</span><span class="num" style="font-size:16px;color:#2E9E5B">6 of 8 left</span></div>
+          <div class="card">
+            <div class="lbl d" style="text-align:center">Per portion</div>
+            <div class="row" style="gap:10px;align-items:center">
+              <div class="ring"><span class="num">612</span><span class="lbl">kcal</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div>
+                <div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div>
+                <div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div>
+                <div class="mb f4"><span class="ml">Fibre</span><div class="mt"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl">Whole batch</span><span class="lbl d">4,896 kcal · 8 meals</span></div></div>
+          <div class="lbl d">Ingredients</div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl d">Chicken breast</span><span class="lbl">1.2 kg</span></div></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl d">Brown rice</span><span class="lbl">600 g</span></div></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Eat a portion</div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>Edge:</b> 0 left → action disables, becomes "Cook this again" (pre-fills a new batch).</div>
+    </div>
+
+    <!-- 1m Create batch — start -->
+    <div class="dv-opt" id="1m">
+      <div class="dv-olabel"><a class="dv-oid" href="#1m">1m</a>Create batch · start</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">✕</span><div class="ttl">New batch</div><span class="lbl">1/4</span></div>
+          <div class="box" style="padding:8px 9px"><div class="lbl">Batch name</div><div class="bar m"></div></div>
+          <div class="lbl d">Start from…</div>
+          <div class="card" style="border-color:#2E9E5B"><div class="row sb"><span class="lbl d">New from scratch</span><span class="back">›</span></div><span class="lbl">Build the ingredient list yourself</span></div>
+          <div class="card"><div class="row sb"><span class="lbl d">From a saved recipe</span><span class="back">›</span></div><span class="lbl">Pre-fills ingredients &amp; default portions</span></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Next · Add ingredients</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Step 1 of the core flow. Resumable step-to-step.</div>
+    </div>
+
+    <!-- 1n Create batch — ingredients -->
+    <div class="dv-opt" id="1n">
+      <div class="dv-olabel"><a class="dv-oid" href="#1n">1n</a>Create batch · ingredients</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">Add ingredients</div><span class="lbl">2/4</span></div>
+          <div class="box" style="padding:8px 9px"><span class="lbl">Search ingredient…</span></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Chicken breast · 1.2 kg</span><span class="lbl">1,980</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Brown rice · 600 g</span><span class="lbl">2,160</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Olive oil · 30 g</span><span class="lbl">265</span></div></div>
+          <div class="lbl" style="text-decoration:underline">+ Add ingredient</div>
+          <div style="flex:1"></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl d">Running total</span><span class="lbl d">4,405 kcal</span></div></div>
+          <div class="btn p">Next · Portions</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Each ingredient shows its running macro contribution. Not in DB → inline custom-food path.</div>
+    </div>
+
+    <!-- 1o Create batch — portions (magic) -->
+    <div class="dv-opt" id="1o">
+      <div class="dv-olabel"><a class="dv-oid" href="#1o">1o</a>Create batch · portions ✨</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr ctr" style="gap:11px">
+          <div class="hdr" style="width:100%"><span class="back">‹</span><div class="ttl">Split into…</div><span class="lbl">3/4</span></div>
+          <div class="lbl">How many meals?</div>
+          <div class="row" style="gap:14px;align-items:center"><span class="btn" style="width:34px">–</span><span class="num xl" style="font-size:38px">8</span><span class="btn" style="width:34px">+</span></div>
+          <div class="card" style="width:100%;border-color:#FB6E4E;background:#fff6f3">
+            <div class="lbl d" style="text-align:center">Per portion · updates live</div>
+            <div class="row" style="gap:10px;align-items:center">
+              <div class="ring" style="border-top-color:#FB6E4E;border-right-color:#FB6E4E"><span class="num">612</span><span class="lbl">kcal</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div>
+                <div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div>
+                <div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1"></div>
+          <div class="btn p" style="width:100%">Next · Review</div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>The magic moment.</b> Per-portion macros recompute live as the count changes — visually celebrated.</div>
+    </div>
+
+    <!-- 1p Create batch — review -->
+    <div class="dv-opt" id="1p">
+      <div class="dv-olabel"><a class="dv-oid" href="#1p">1p</a>Create batch · review</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">Review</div><span class="lbl">4/4</span></div>
+          <div class="card">
+            <div class="lbl d" style="text-align:center">Per portion (×8)</div>
+            <div class="row" style="gap:10px;align-items:center">
+              <div class="ring"><span class="num">612</span><span class="lbl">kcal</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div>
+                <div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div>
+                <div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl">Whole batch</span><span class="lbl d">4,896 kcal</span></div></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl">Ingredients</span><span class="lbl d">3 items</span></div></div>
+          <div class="box" style="padding:7px 9px;border-style:dashed"><div class="row sb"><span class="lbl d">Save as recipe</span><span class="ic" style="width:30px;height:16px;border-radius:9px"></span></div></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Add to inventory</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Optional <b>Save as recipe</b> makes it a reusable template.</div>
+    </div>
+
+    <!-- 1q Confirmation -->
+    <div class="dv-opt" id="1q">
+      <div class="dv-olabel"><a class="dv-oid" href="#1q">1q</a>Confirmation</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr ctr">
+          <div class="illus" style="border-style:solid;border-color:#2E9E5B;background:#eaf4ee"><span class="num xl" style="color:#2E9E5B">✓</span></div>
+          <div class="ttl lg">8 meals prepped</div>
+          <div class="lbl" style="max-width:180px">Your fridge is stocked for ~4 days. Nice work.</div>
+          <div class="btn p" style="width:82%;margin-top:8px">Back to inventory</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Brief success state · best place for brand warmth. New batch lands on top of <a class="dv-oid" href="#1k">1k</a>.</div>
+    </div>
+
+    <!-- 1r Recipes list -->
+    <div class="dv-opt" id="1r">
+      <div class="dv-olabel"><a class="dv-oid" href="#1r">1r</a>Recipes (sub-view)</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><div class="ttl">Prep</div></div>
+          <div class="seg"><span>Inventory</span><span class="on">Recipes</span></div>
+          <div class="btn p">+ New recipe</div>
+          <div class="card"><div class="row sb"><span class="lbl d">Chicken &amp; Rice</span><span class="lbl">makes 8</span></div><span class="lbl">612 kcal · 48g protein / portion</span><div class="row" style="justify-content:flex-end"><span class="chip" style="border-color:#2E9E5B;color:#2E9E5B">Cook this</span></div></div>
+          <div class="card"><div class="row sb"><span class="lbl d">Beef Chilli</span><span class="lbl">makes 6</span></div><span class="lbl">540 kcal · 39g protein / portion</span><div class="row" style="justify-content:flex-end"><span class="chip" style="border-color:#2E9E5B;color:#2E9E5B">Cook this</span></div></div>
+        </div>
+        <div class="tab"><span class="t">Today</span><span class="t">Diary</span><span class="t c on">Prep</span><span class="t">Train</span><span class="t">Progress</span></div>
+      </div></div>
+      <div class="wf-note"><b>Recipe = template</b> (what you can make) vs <b>Batch = a cook in Inventory</b> (what you have). Kept visually distinct.</div>
+    </div>
+
+    <!-- 1s Recipe detail -->
+    <div class="dv-opt" id="1s">
+      <div class="dv-olabel"><a class="dv-oid" href="#1s">1s</a>Recipe detail / edit</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">Chicken &amp; Rice</div><span class="back">⋯</span></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl">Default portions</span><span class="lbl d">8</span></div></div>
+          <div class="card" style="flex-direction:row;gap:10px;align-items:center"><div class="ring" style="width:58px;height:58px;border-width:7px"><span class="num" style="font-size:14px">612</span><span class="lbl">kcal</span></div><div style="flex:1;display:flex;flex-direction:column;gap:5px"><div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div><div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div></div></div>
+          <div class="lbl d">Ingredients (default amounts)</div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl d">Chicken breast</span><span class="lbl">1.2 kg</span></div></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl d">Brown rice</span><span class="lbl">600 g</span></div></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Cook this →</div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>"Cook this"</b> launches the Create-Batch flow pre-filled, where actual amounts can be tweaked.</div>
+    </div>
+
+    <!-- 1t Inventory empty state -->
+    <div class="dv-opt" id="1t">
+      <div class="dv-olabel"><a class="dv-oid" href="#1t">1t</a>Inventory · empty state</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr ctr">
+          <div class="hdr" style="width:100%"><div class="ttl">Prep</div></div>
+          <div class="seg" style="width:100%"><span class="on">Inventory</span><span>Recipes</span></div>
+          <div style="flex:1"></div>
+          <div class="illus"><span class="logo6"><i></i><i></i><i></i><i></i><i></i><i class="c"></i></span></div>
+          <div class="ttl">No prepped meals yet</div>
+          <div class="lbl" style="max-width:185px">Cook once, portion it up, and BatchFit tracks every meal in your fridge.</div>
+          <div class="btn p" style="width:84%;margin-top:6px">Prep your first batch</div>
+          <div style="flex:1"></div>
+        </div>
+        <div class="tab"><span class="t">Today</span><span class="t">Diary</span><span class="t c on">Prep</span><span class="t">Train</span><span class="t">Progress</span></div>
+      </div></div>
+      <div class="wf-note"><b>The most important empty state in the app</b> — warm, instructive, explains the batch concept in one line.</div>
+    </div>
+
+    <div class="flow-h">Train — workout logging (Burn it)</div>
+
+    <!-- 1u Train home / history -->
+    <div class="dv-opt" id="1u">
+      <div class="dv-olabel"><a class="dv-oid" href="#1u">1u</a>Train home / history</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><div class="ttl">Train</div></div>
+          <div class="btn p">Start workout</div>
+          <div class="card" style="border-color:#FB6E4E"><div class="row sb"><span class="lbl d">Push day — in progress</span><span class="tag">RESUME</span></div><span class="lbl">Started 14 min ago · 2 exercises</span></div>
+          <div class="lbl d">History</div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Pull day</span><span class="lbl">Mon · 52 min</span></div><span class="lbl">5 exercises · 18 sets</span></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Legs</span><span class="lbl">Sat · 47 min</span></div><span class="lbl">4 exercises · 15 sets</span></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Push day</span><span class="lbl">Thu · 44 min</span></div><span class="lbl">5 exercises · 16 sets</span></div>
+        </div>
+        <div class="tab"><span class="t">Today</span><span class="t">Diary</span><span class="t c">Prep</span><span class="t on">Train</span><span class="t">Progress</span></div>
+      </div></div>
+      <div class="wf-note"><b>Co-equal core with the food log.</b> Unfinished session resumable via the coral banner.</div>
+    </div>
+
+    <!-- 1v Active session -->
+    <div class="dv-opt" id="1v">
+      <div class="dv-olabel"><a class="dv-oid" href="#1v">1v</a>Active workout session</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr" style="gap:8px">
+          <div class="hdr"><div class="ttl">Push day</div><span class="chip on">Finish</span></div>
+          <div class="row sb"><span class="lbl">⏱ 14:22</span><span class="lbl">Today</span></div>
+          <div class="card">
+            <div class="row sb"><span class="lbl d">Bench press</span><span class="back">⋯</span></div>
+            <div class="row" style="gap:6px"><span class="lbl" style="flex:1">Set</span><span class="lbl" style="flex:1">kg</span><span class="lbl" style="flex:1">reps</span></div>
+            <div class="row" style="gap:6px"><span class="lbl d" style="flex:1">1</span><span class="box" style="flex:1;padding:3px 6px"><span class="lbl d">60</span></span><span class="box" style="flex:1;padding:3px 6px"><span class="lbl d">10</span></span></div>
+            <div class="row" style="gap:6px"><span class="lbl d" style="flex:1">2</span><span class="box" style="flex:1;padding:3px 6px"><span class="lbl d">60</span></span><span class="box" style="flex:1;padding:3px 6px"><span class="lbl d">9</span></span></div>
+            <div class="row sb"><span class="lbl" style="text-decoration:underline">+ Add set</span><span class="lbl" style="text-decoration:underline">Repeat last time</span></div>
+          </div>
+          <div class="lbl" style="text-decoration:underline">+ Add exercise</div>
+          <div style="flex:1"></div>
+          <div class="kpd"><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b><b>9</b><b>.</b><b>0</b><b>⌫</b></div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>+ Add set pre-fills from the previous set.</b> Fast numeric keypad stays out of the way. Supports weight×reps / bodyweight / time / distance modes.</div>
+    </div>
+
+    <!-- 1w Exercise picker -->
+    <div class="dv-opt" id="1w">
+      <div class="dv-olabel"><a class="dv-oid" href="#1w">1w</a>Exercise picker / library</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">✕</span><div class="ttl">Add exercise</div><span></span></div>
+          <div class="box" style="padding:8px 9px"><span class="lbl">Search exercises…</span></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Bench press</span><span class="lbl">Chest · Barbell</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Squat</span><span class="lbl">Legs · Barbell</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Pull-up</span><span class="lbl">Back · Bodyweight</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl d">Plank</span><span class="lbl">Core · Time</span></div></div>
+          <div style="flex:1"></div>
+          <div class="btn">+ Create exercise</div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>Seeded with common exercises</b> so the library is never empty on first use.</div>
+    </div>
+
+    <!-- 1x Create exercise -->
+    <div class="dv-opt" id="1x">
+      <div class="dv-olabel"><a class="dv-oid" href="#1x">1x</a>Create / edit exercise</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">New exercise</div><span></span></div>
+          <div class="box" style="padding:8px 9px"><div class="lbl">Name</div><div class="bar m"></div></div>
+          <div class="box" style="padding:8px 9px"><div class="row sb"><span class="lbl">Muscle group</span><span class="lbl d">Chest ▾</span></div></div>
+          <div class="box" style="padding:8px 9px"><div class="row sb"><span class="lbl">Equipment</span><span class="lbl d">Barbell ▾</span></div></div>
+          <div class="lbl d">Default tracking mode</div>
+          <div class="row" style="gap:5px;flex-wrap:wrap"><span class="chip on">Weight × reps</span><span class="chip">Bodyweight</span><span class="chip">Time</span><span class="chip">Distance</span></div>
+          <div style="flex:1"></div>
+          <div class="btn p">Save exercise</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Tracking mode determines the set-table layout in <a class="dv-oid" href="#1v">1v</a>.</div>
+    </div>
+
+    <div class="flow-h">Progress &amp; Settings</div>
+
+    <!-- 1y Progress trend -->
+    <div class="dv-opt" id="1y">
+      <div class="dv-olabel"><a class="dv-oid" href="#1y">1y</a>Progress · trend</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><div class="ttl">Progress</div><span class="ic"></span></div>
+          <div class="row sb"><span class="num" style="font-size:18px">82.4 kg</span><span class="lbl">▼ 1.6 kg / 30d</span></div>
+          <div class="box" style="padding:9px;height:120px;position:relative">
+            <div style="position:absolute;left:9px;right:9px;top:30px;height:1.5px;background:#2E9E5B;transform:rotate(-7deg)"></div>
+            <div class="row" style="gap:9px;align-items:flex-end;height:100%"><i class="dot"></i></div>
+            <div style="position:absolute;inset:9px;display:flex;align-items:flex-end;gap:6px"><span style="width:5px;height:5px;border-radius:50%;background:#bdb9b0;margin-bottom:40%"></span><span style="width:5px;height:5px;border-radius:50%;background:#bdb9b0;margin-bottom:55%"></span><span style="width:5px;height:5px;border-radius:50%;background:#bdb9b0;margin-bottom:35%"></span><span style="width:5px;height:5px;border-radius:50%;background:#bdb9b0;margin-bottom:60%"></span><span style="width:5px;height:5px;border-radius:50%;background:#bdb9b0;margin-bottom:48%"></span><span style="width:5px;height:5px;border-radius:50%;background:#bdb9b0;margin-bottom:66%"></span></div>
+          </div>
+          <div class="row" style="gap:5px"><span class="chip">1M</span><span class="chip on">3M</span><span class="chip">6M</span><span class="chip">All</span></div>
+          <div class="btn">Log weight</div>
+          <div class="lbl d">This week</div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl">Avg calories</span><span class="lbl d">1,790</span></div></div>
+          <div class="box" style="padding:6px 9px"><div class="row sb"><span class="lbl">Workouts · meals stocked</span><span class="lbl d">3 · 12</span></div></div>
+        </div>
+        <div class="tab"><span class="t">Today</span><span class="t">Diary</span><span class="t c">Prep</span><span class="t">Train</span><span class="t on">Progress</span></div>
+      </div></div>
+      <div class="wf-note"><b>Raw daily points are light; the smoothed trend line is the emphasised signal.</b> Gear icon → Settings.</div>
+    </div>
+
+    <!-- 1z Add weight -->
+    <div class="dv-opt" id="1z">
+      <div class="dv-olabel"><a class="dv-oid" href="#1z">1z</a>Add weight (modal)</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div style="flex:1"></div>
+          <div class="card" style="border-radius:16px 16px 0 0;gap:9px">
+            <div class="row sb"><span class="ttl">Log weight</span><span class="back">✕</span></div>
+            <div class="box" style="padding:8px 9px"><div class="row sb"><span class="lbl">Date</span><span class="lbl d">Today ▾</span></div></div>
+            <div class="row" style="gap:6px"><div class="box" style="flex:1;padding:8px;text-align:center"><span class="num" style="font-size:16px">82.4</span></div><div class="seg" style="flex:none;width:84px"><span class="on">kg</span><span>lb</span></div></div>
+            <div class="box" style="padding:8px 9px"><div class="lbl">Note (optional)</div><div class="bar s"></div></div>
+            <div class="btn p">Save</div>
+          </div>
+        </div>
+      </div></div>
+      <div class="wf-note">Bottom-sheet modal · entries editable/deletable.</div>
+    </div>
+
+    <!-- 1aa Settings home -->
+    <div class="dv-opt" id="1aa">
+      <div class="dv-olabel"><a class="dv-oid" href="#1aa">1aa</a>Settings home</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">Settings</div><span></span></div>
+          <div class="box" style="padding:9px"><div class="row sb"><span class="lbl d">Goals &amp; targets</span><span class="back">›</span></div></div>
+          <div class="box" style="padding:9px"><div class="row sb"><span class="lbl d">Profile</span><span class="back">›</span></div></div>
+          <div class="box" style="padding:9px"><div class="row sb"><span class="lbl d">Preferences · units</span><span class="back">›</span></div></div>
+          <div class="box" style="padding:9px"><div class="row sb"><span class="lbl d">Data — export / clear</span><span class="back">›</span></div></div>
+          <div class="box" style="padding:9px;border-style:dashed"><div class="row sb"><span class="lbl">Account &amp; cloud sync</span><span class="lbl">Phase 3</span></div></div>
+          <div class="box" style="padding:9px"><div class="row sb"><span class="lbl d">About</span><span class="back">›</span></div></div>
+        </div>
+      </div></div>
+      <div class="wf-note"><b>Phase-3 hook:</b> dashed row reserves space for account/sync.</div>
+    </div>
+
+    <!-- 1ab TDEE calculator -->
+    <div class="dv-opt" id="1ab">
+      <div class="dv-olabel"><a class="dv-oid" href="#1ab">1ab</a>TDEE target calculator</div>
+      <div class="ph"><div class="ph-in">
+        <div class="st"><span>9:41</span><span class="dots"></span></div>
+        <div class="scr">
+          <div class="hdr"><span class="back">‹</span><div class="ttl">Calculate targets</div><span></span></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl">Goal</span><span class="lbl d">Lose · moderate ▾</span></div></div>
+          <div class="box" style="padding:7px 9px"><div class="row sb"><span class="lbl">Activity</span><span class="lbl d">Light ▾</span></div></div>
+          <div class="card">
+            <div class="row" style="gap:10px;align-items:center"><div class="ring"><span class="num xl">1,840</span><span class="lbl">kcal</span></div><div style="flex:1;display:flex;flex-direction:column;gap:5px"><div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div><div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div><div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div></div></div>
+          </div>
+          <div class="lbl">Recommended from your profile. Tap to override.</div>
+          <div style="flex:1"></div>
+          <div class="btn p">Use these targets</div>
+        </div>
+      </div></div>
+      <div class="wf-note">Same component used in onboarding <a class="dv-oid" href="#1d">1d</a> and from Settings. Updates rings app-wide.</div>
+    </div>
+
+    <div class="flow-h">Shared patterns — design once, reuse everywhere</div>
+
+    <!-- 1ac Macro ring set -->
+    <div class="dv-opt" id="1ac">
+      <div class="dv-olabel"><a class="dv-oid" href="#1ac">1ac</a>Macro Ring / Bar set</div>
+      <div class="card" style="width:200px;border-color:#1a1a1a">
+        <div class="lbl d" style="text-align:center">Remaining vs target</div>
+        <div class="row" style="gap:10px;align-items:center">
+          <div class="ring"><span class="num">1,240</span><span class="lbl">kcal</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <div class="mb pro"><span class="ml">Protein</span><div class="mt"></div></div>
+            <div class="mb f2"><span class="ml">Fat</span><div class="mt"></div></div>
+            <div class="mb f3"><span class="ml">Carbs</span><div class="mt"></div></div>
+            <div class="mb f4"><span class="ml">Fibre</span><div class="mt"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="wf-note">Calories = hero ring · <b>Protein bolded</b> · two modes: remaining-vs-target &amp; total-only.</div>
+    </div>
+
+    <!-- 1ad Date selector -->
+    <div class="dv-opt" id="1ad">
+      <div class="dv-olabel"><a class="dv-oid" href="#1ad">1ad</a>Date selector</div>
+      <div class="card" style="width:200px">
+        <div class="row sb"><span class="back">‹</span><span class="lbl d">Wed 12 Jun</span><span class="back">›</span></div>
+        <div class="row" style="gap:4px;justify-content:space-between">
+          <span class="chip" style="padding:4px 6px">M</span><span class="chip" style="padding:4px 6px">T</span><span class="chip on" style="padding:4px 7px">W</span><span class="chip" style="padding:4px 7px">T</span><span class="chip" style="padding:4px 7px">F</span>
+        </div>
+      </div>
+      <div class="wf-note">Reused on Today, Diary, Train. Default = today; "viewing a past day" must read clearly.</div>
+    </div>
+
+    <!-- 1ae Quantity control -->
+    <div class="dv-opt" id="1ae">
+      <div class="dv-olabel"><a class="dv-oid" href="#1ae">1ae</a>Quantity / portion control</div>
+      <div class="card" style="width:200px">
+        <div class="row" style="gap:6px"><span class="btn" style="width:34px">–</span><div class="box" style="flex:1;padding:7px;text-align:center"><span class="num" style="font-size:16px">170</span></div><span class="btn" style="width:34px">+</span></div>
+        <div class="seg"><span class="on">g</span><span>serving</span><span>portion</span></div>
+      </div>
+      <div class="wf-note">Reused anywhere a food amount is set — diary, batch ingredients, recipes.</div>
+    </div>
+
+    <!-- 1af Numeric keypad -->
+    <div class="dv-opt" id="1af">
+      <div class="dv-olabel"><a class="dv-oid" href="#1af">1af</a>Numeric keypad</div>
+      <div class="card" style="width:200px">
+        <div class="kpd"><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b><b>9</b><b>.</b><b>0</b><b>⌫</b></div>
+      </div>
+      <div class="wf-note">Large, thumb-friendly · used for weights, reps &amp; macro values.</div>
+    </div>
+
+    <!-- 1ag Empty state -->
+    <div class="dv-opt" id="1ag">
+      <div class="dv-olabel"><a class="dv-oid" href="#1ag">1ag</a>Empty-state pattern</div>
+      <div class="card ctr" style="width:200px;align-items:center;text-align:center;gap:9px;padding:16px 12px">
+        <div class="illus" style="width:64px;height:64px"><span class="logo6" style="width:30px"><i></i><i></i><i></i><i></i><i></i><i class="c"></i></span></div>
+        <div class="ttl">Nothing here yet</div>
+        <div class="lbl">One line of friendly context.</div>
+        <div class="btn p" style="width:100%">Primary action</div>
+      </div>
+      <div class="wf-note">Illustration + one line + one primary action. Every list screen needs one.</div>
+    </div>
+
+    <!--MORE-->
+  </div>
+  <p class="dv-next">Full MVP set — 33 screens/states across Onboarding, Today, Diary, Prep, Train, Progress, Settings &amp; shared patterns. Review and reference any id to iterate, e.g. "rework the Prep inventory <a class="dv-oid" href="#1k">1k</a>" · "show the 0-portions edge of <a class="dv-oid" href="#1l">1l</a>" · "make the magic moment <a class="dv-oid" href="#1o">1o</a> bigger" · "add the loading/skeleton state for <a class="dv-oid" href="#1g">1g</a>". When the structure's locked, I'll take it to full hi-fi design.</p>
+</section>
+</x-dc>
+</body>
+</html>

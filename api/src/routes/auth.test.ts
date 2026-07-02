@@ -50,3 +50,44 @@ describe('POST /auth/register', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('POST /auth/login', () => {
+  const credentials = { email: 'member@example.com', password: 'password123' };
+
+  beforeEach(async () => {
+    await request(app).post('/auth/register').send(credentials);
+  });
+
+  it('returns a token for valid credentials', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ email: 'Member@Example.com', password: 'password123' }); // case-insensitive email
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toEqual(expect.any(String));
+    expect(res.body.user.email).toBe('member@example.com');
+    expect(res.body.user.passwordHash).toBeUndefined();
+  });
+
+  it('rejects a wrong password with 401', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ email: credentials.email, password: 'wrong-password' });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects an unknown email with 401', async () => {
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ email: 'nobody@example.com', password: 'password123' });
+
+    expect(res.status).toBe(401);
+  });
+
+  it('rejects a missing password with 400', async () => {
+    const res = await request(app).post('/auth/login').send({ email: credentials.email });
+
+    expect(res.status).toBe(400);
+  });
+});

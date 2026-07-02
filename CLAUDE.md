@@ -89,9 +89,20 @@ The touched project typechecks (`tsc --noEmit`), any added tests pass, `roadmap.
 and the PR is open against `main`. Because status lives in `roadmap.md`, a fresh session can read
 it and resume exactly where the last one stopped.
 
-## Repository status: pre-build
+## Architecture & repository status
 
-There is **no application code, build system, package manager, or test suite in this repo yet.** It currently contains only planning and design artifacts. Do not assume any tooling exists — if asked to "build", "test", or "run", there is nothing to run until the app is scaffolded. When scaffolding begins, the intended stack is a **React Native / Expo** app (phone-first, portrait-only, iOS + Android) that is **fully offline / local-first** for the MVP (no network, accounts, or sync — those are Phase 3).
+This repo is a **monorepo** being built against `roadmap.md` (the source of truth for status —
+see its **Current status** section for exactly what exists):
+- `app/` — the client: a **React Native / Expo** app, phone-first, portrait-only, iOS + Android.
+- `api/` — the server: **Express + TypeScript + Prisma**, with a Vitest + Supertest test harness.
+
+**BatchFit is built as a client–server app with user accounts from day one.** The app depends on
+the API and requires login before use; register/login and API-backed onboarding come first
+(Phase 1). This is a **deliberate departure** from the older framing in this file and in
+`mvp-spec.md`, which described a **fully offline, single-user, local-first** MVP with accounts
+deferred to Phase 3. Where those docs still say "offline / no network / accounts later," **trust
+`roadmap.md`.** Only **cloud sync** (multi-device, media) remains a later-phase item — accounts
+and the API are not.
 
 ## What the product is
 
@@ -124,7 +135,7 @@ Reusable components the spec expects to be built once and shared: Macro Ring/Bar
 
 ## Phase-2/3 hooks to leave room for (design, don't build in MVP)
 
-Barcode scanning (slot in food search), calorie-burn estimation feeding back into the daily budget (slot on Today), adaptive targets, and account/cloud-sync (row in Settings). Leave visual/architectural room; do not implement.
+Barcode scanning (slot in food search), calorie-burn estimation feeding back into the daily budget (slot on Today), adaptive targets, and **cloud sync** (multi-device / media — the Settings row). Leave visual/architectural room; do not implement. (Note: **accounts themselves are Phase 1**, not a deferred hook — only cross-device *sync* is later.)
 
 ## Voice for any UI copy
 

@@ -1,7 +1,8 @@
 # BatchFit — MVP Screen Specification
 
 > **Purpose of this document:** A precise, screen-by-screen specification of the Phase 1 (MVP) app, written to brief a designer producing wireframes and high-fidelity designs. Every screen lists its purpose, how the user arrives, each section/component it contains, the data shown, the interactions available, and the states the designer must account for (empty / loading / error / populated).
-> **Scope:** Phase 1 MVP only — fully usable, offline, single user. Barcode scanning, cloud sync, accounts, and adaptive targets are **out of scope** here (Phases 2–3) and are flagged where a hook should be left in the design.
+> **Scope:** Phase 1 MVP only. Barcode scanning, **cloud sync** (multi-device / media), and adaptive targets are **out of scope** here (Phases 2–3) and are flagged where a hook should be left in the design.
+> **⚠️ Architecture update (supersedes older wording below):** BatchFit is being built as a **client–server app with user accounts from day one** (see `roadmap.md`). The app talks to an API and **requires login before use**; register/login and API-backed onboarding come first. This **replaces** this doc's original "fully offline, single-user, local-first, accounts-in-Phase-3" framing. Where the text below still says "offline / no network / accounts later," treat it as historical — **`roadmap.md` is the source of truth.** Only cross-device *sync* remains a later phase; accounts and the API are Phase 1. The screen designs below otherwise still stand, with **auth screens (Welcome → Register / Login) preceding onboarding.**
 > **Platform:** This is a **native mobile app for iOS and Android** (built with React Native / Expo), designed **phone-first and portrait-only**. Every wireframe should assume a one-handed, thumb-driven experience on a phone screen — **not** tablet or desktop. Use standard mobile conventions throughout: a bottom tab bar, full-screen pushes, bottom-sheet modals, and native-style numeric keypad / date pickers.
 > **Product pillars — _Plan it · Batch it · Burn it_:** the app has **two equally important logging cores — nutrition (macros) and exercise** — framed by the tagline. *Plan it* = set your targets and plan what you'll eat and cook. *Batch it* = batch-cook and log your food/macros (calories, protein, fat, carbs, fibre). *Burn it* = log your workouts and burn it off. **Macro logging and workout logging are both key — neither is an afterthought.** (Only the *batch-cooking* mechanic is the unique differentiator; the food and exercise logs are both core, polished pillars. A fuller forward meal-_planner_ is a later phase — in the MVP, *Plan it* is expressed through targets and the prep/cook workflow.)
 > **Companion doc:** `business.md` (brand, tone, audience, visual direction). Read that first for look-and-feel; this doc defines structure and behaviour.
@@ -46,7 +47,7 @@ The designer should design these shared components a single time; they appear ac
 
 **Purpose:** Get a brand-new user from install to a personalised, ready-to-use app in under a minute, and capture the minimum needed to set calorie/macro targets. This is the user's first brand impression — it must feel fast, warm, and competent.
 
-**Entry point:** Automatically on first launch; never shown again once completed (re-runnable from Settings).
+**Entry point:** After a new user **registers or logs in** (auth is required — see Architecture update at the top), onboarding runs automatically the first time and is never shown again once completed (re-runnable from Settings). An unauthenticated launch shows **Welcome → Register / Login** first; onboarding follows a successful register.
 
 **Screens / steps:**
 
@@ -290,7 +291,7 @@ This tab has **two views (a segmented control or sub-tabs at the top):** **Inven
 1. **Goals & targets** — edit goal (lose/maintain/build), re-run the **TDEE target calculator**, or manually set calorie + macro targets (Calories / Protein / Fat / Carbs / Fibre). Changing targets updates all the rings app-wide.
 2. **Profile** — sex, age, height, current/goal weight.
 3. **Preferences** — units (metric/imperial), and (placeholder) meal-group labels.
-4. **Data** — basic local-data management (export/clear). *Phase-3 hook:* this is where "Account & cloud sync" will later live — leave room for it.
+4. **Account & data** — the user is signed in (accounts are Phase 1), so this includes a **sign-out** action and basic data management (export/clear). *Phase-2/3 hook:* **cloud sync** (multi-device / media) will later live here — leave room for it.
 5. **About** — app version, brand info.
 
 ### 7.1 TDEE Target Calculator (reused screen)
@@ -303,15 +304,16 @@ This tab has **two views (a segmented control or sub-tabs at the top):** **Inven
 - **"Eat a prepped meal" is the hero logging action** and appears in multiple places (Today quick actions, inventory snapshot, Diary add-food → "My recipes/batches", Batch detail). Keep its visual identity consistent everywhere so users learn it as *the* fast path.
 - **Calories is always the hero metric; Protein is the prioritised macro.** Maintain this hierarchy in every Macro Ring/Bar instance.
 - **Today vs. history:** moving the date back is for *reviewing*; new logging defaults to today. Make "you're viewing a past day" visually obvious to avoid accidental back-dated logging.
-- **Phase-2 hooks to leave room for (design, don't build):** barcode-scan button in food search; a slot for adaptive-target messaging on Today; account/sync row in Settings.
-- **Offline-first:** there is no network dependency in MVP — avoid any UI that implies "syncing"/"uploading." Everything is instant and local.
+- **Phase-2 hooks to leave room for (design, don't build):** barcode-scan button in food search; a slot for adaptive-target messaging on Today; a **cloud-sync** row in Settings (accounts themselves are Phase 1, not a hook).
+- **API-backed, accounts from day one:** the app talks to a server and requires login (see Architecture update at top). Design for brief network states (loading/spinners on data screens, a graceful error/retry when a request fails) — this supersedes the original "instant, local, no network" note. Cross-device *sync* is still later, so don't imply background syncing between devices.
 - **Tone in UI copy:** follow `business.md` — plain, warm, encouraging, lightly witty; never shaming. Empty states and the prep-success moment are the best places to express brand personality.
 
 ---
 
 ## 9. Screen Inventory (quick checklist for wireframing)
 
-**Onboarding:** Welcome · Goal · About you · Targets · Ready
+**Auth (accounts from day one):** Welcome · Register · Login
+**Onboarding:** Goal · About you · Targets · Ready
 **Today:** Dashboard
 **Diary:** Day log · Add-food search · Food detail/quantity · Create custom food
 **Prep:** Inventory · Batch detail · Create/Edit batch (start → ingredients → portions → review → confirm) · Recipes list · Recipe detail/edit

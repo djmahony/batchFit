@@ -27,9 +27,12 @@ _Last updated: 2026-07-01._
   `gh` authed, `main` pushed).
 - [x] **P0-2** — API test harness (Vitest + Supertest, `npm test` in `api/`, `/health` test
   green). App split into `src/app.ts` (exported) + `src/index.ts` (listen) for testability.
+- [x] **P0-3** — Reconciled `CLAUDE.md` and `mvp-spec.md` with the client–server +
+  accounts-from-day-one approach (offline/local-first framing superseded; cloud *sync* only
+  remains later; auth screens precede onboarding).
 
-**Next up (in order):** **P0-3** (reconcile docs) → **F1-1** (User & profile data model) →
-**F1-2** (Auth infrastructure). Confirm which to start when resuming.
+**Next up (in order):** **F1-1** (User & profile data model) → **F1-2** (Auth infrastructure) →
+**F1-3** (`POST /auth/register`). Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -75,8 +78,10 @@ Small groundwork that unblocks the workflow. Needed once.
   script (`vitest run`); `src/health.test.ts` exercises `/health`. App is split into
   `src/app.ts` (exported Express app) and `src/index.ts` (starts the listener) so tests can
   import the app without binding a port.
-- [ ] **P0-3 — Reconcile the docs.** Update `CLAUDE.md` and `mvp-spec.md` to reflect the
-  client-server + accounts-from-day-one approach (see note above).
+- [x] **P0-3 — Reconcile the docs.** ✅ Done. Updated `CLAUDE.md` and `mvp-spec.md` to reflect
+  the client-server + accounts-from-day-one approach (see note above): offline/local-first and
+  accounts-in-Phase-3 framing superseded, only cross-device **sync** stays later, and auth
+  screens (Welcome → Register / Login) now precede onboarding.
 
 **Verification:** `origin` is set and `main` is pushed; `npm test` runs green in `api/`.
 

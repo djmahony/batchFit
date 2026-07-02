@@ -25,9 +25,11 @@ _Last updated: 2026-07-01._
 **Completed roadmap tasks:**
 - [x] **P0-1** — GitHub remote + PR workflow (`origin` = `github.com:djmahony/batchFit.git`,
   `gh` authed, `main` pushed).
+- [x] **P0-2** — API test harness (Vitest + Supertest, `npm test` in `api/`, `/health` test
+  green). App split into `src/app.ts` (exported) + `src/index.ts` (listen) for testability.
 
-**Next up (in order):** **P0-2** (API test harness) → **P0-3** (reconcile docs) → **F1-1**
-(User & profile data model). Confirm which to start when resuming.
+**Next up (in order):** **P0-3** (reconcile docs) → **F1-1** (User & profile data model) →
+**F1-2** (Auth infrastructure). Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -69,8 +71,10 @@ Small groundwork that unblocks the workflow. Needed once.
 - [x] **P0-1 — GitHub remote + PR workflow.** ✅ Done. `origin` =
   `github.com:djmahony/batchFit.git`, `gh` authenticated (account `djmahony`, `repo` scope),
   `main` pushed.
-- [ ] **P0-2 — API test harness.** Add a test runner to `api/` (Vitest + Supertest) and a
-  `test` script, so endpoint tasks can ship with a test. One trivial `/health` test to prove wiring.
+- [x] **P0-2 — API test harness.** ✅ Done. Vitest + Supertest added to `api/` with a `test`
+  script (`vitest run`); `src/health.test.ts` exercises `/health`. App is split into
+  `src/app.ts` (exported Express app) and `src/index.ts` (starts the listener) so tests can
+  import the app without binding a port.
 - [ ] **P0-3 — Reconcile the docs.** Update `CLAUDE.md` and `mvp-spec.md` to reflect the
   client-server + accounts-from-day-one approach (see note above).
 

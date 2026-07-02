@@ -39,9 +39,11 @@ _Last updated: 2026-07-01._
 - [x] **F1-3** — `POST /auth/register`. Validates email/password, hashes, creates the user,
   returns token + serialized user (no hash). Also set up the endpoint-test DB harness
   (isolated `test.db`, schema pushed in `globalSetup`, tables cleared per test).
+- [x] **F1-4** — `POST /auth/login`. Verifies credentials (case-insensitive email), returns
+  token + serialized user; unknown email and wrong password both 401 (no user enumeration).
 
-**Next up (in order):** **F1-4** (`POST /auth/login`) → **F1-5** (`GET /me`) →
-**F1-6** (TDEE calculator). Confirm which to start when resuming.
+**Next up (in order):** **F1-5** (`GET /me`) → **F1-6** (TDEE calculator) →
+**F1-7** (Save onboarding). Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -117,7 +119,9 @@ Auth is **JWT**: register/login return an access token; protected routes require
   `{ token, user }` (user serialized without `passwordHash`); duplicate email → 409. Tests
   cover success + duplicate/invalid-email/short-password. Established the endpoint-test DB
   harness (`vitest.config.ts` points Prisma at `test.db`; `globalSetup` recreates the schema).
-- [ ] **F1-4 — `POST /auth/login`.** Validate credentials, return token + user. (+test)
+- [x] **F1-4 — `POST /auth/login`.** ✅ Done. Looks up the user by normalised email, verifies
+  the password, returns `{ token, user }` (serialized). Unknown email and wrong password both
+  return the same `401` (no user enumeration); missing fields → 400. Tests cover all four.
 - [ ] **F1-5 — `GET /me`.** Protected; returns the current user, profile, targets, and
   `onboardingComplete`. (+test)
 - [ ] **F1-6 — TDEE calculator.** Pure helper (BMR + activity → maintenance; goal → target

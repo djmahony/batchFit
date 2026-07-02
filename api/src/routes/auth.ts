@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { signToken } from '../auth/jwt.js';
-import { hashPassword } from '../auth/password.js';
+import { hashPassword, verifyPassword } from '../auth/password.js';
 import { prisma } from '../prisma.js';
 import { serializeUser } from '../serializers.js';
 
@@ -35,4 +35,25 @@ authRouter.post('/register', async (req, res) => {
   });
 
   res.status(201).json({ token: signToken(user.id), user: serializeUser(user) });
+});
+
+// POST /auth/login — verify credentials, return an auth token + the user.
+authRouter.post('/login', async (req, res) => {
+  const { email, password } = req.body ?? {};
+
+  if (typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+  });
+
+  // Same response whether the email is unknown or the password is wrong, so
+  // the endpoint doesn't reveal which emails have accounts.
+  if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
+
+  res.json({ token: signToken(user.id), user: serializeUser(user) });
 });

@@ -14,7 +14,7 @@ Tick tasks off as they merge. `[ ]` = todo, `[x]` = merged.
 
 ## Current status
 
-_Last updated: 2026-07-01._
+_Last updated: 2026-07-02._
 
 **Baseline already on `main` (pre-roadmap scaffolding):** a monorepo with two folders —
 - `app/` — Expo SDK 57 + Expo Router. Five placeholder tabs (Today, Diary, Prep, Train,
@@ -41,9 +41,11 @@ _Last updated: 2026-07-01._
   (isolated `test.db`, schema pushed in `globalSetup`, tables cleared per test).
 - [x] **F1-4** — `POST /auth/login`. Verifies credentials (case-insensitive email), returns
   token + serialized user; unknown email and wrong password both 401 (no user enumeration).
+- [x] **F1-5** — `GET /me`. Protected route returning the serialized current user; 404 if the
+  user no longer exists, 401 without a valid token.
 
-**Next up (in order):** **F1-5** (`GET /me`) → **F1-6** (TDEE calculator) →
-**F1-7** (Save onboarding). Confirm which to start when resuming.
+**Next up (in order):** **F1-6** (TDEE calculator) → **F1-7** (Save onboarding).
+Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -122,8 +124,10 @@ Auth is **JWT**: register/login return an access token; protected routes require
 - [x] **F1-4 — `POST /auth/login`.** ✅ Done. Looks up the user by normalised email, verifies
   the password, returns `{ token, user }` (serialized). Unknown email and wrong password both
   return the same `401` (no user enumeration); missing fields → 400. Tests cover all four.
-- [ ] **F1-5 — `GET /me`.** Protected; returns the current user, profile, targets, and
-  `onboardingComplete`. (+test)
+- [x] **F1-5 — `GET /me`.** ✅ Done. Protected route (`requireAuth`) returning
+  `{ user }` — the serialized current user (profile, targets, `onboardingComplete`),
+  looked up by `req.userId`; 404 if the user no longer exists, 401 without a valid token.
+  Tests cover success + missing/invalid token.
 - [ ] **F1-6 — TDEE calculator.** Pure helper (BMR + activity → maintenance; goal → target
   calories; macro split incl. protein priority + fibre) plus `POST /tools/tdee` that returns
   suggested targets from profile inputs. (+unit test on the math)

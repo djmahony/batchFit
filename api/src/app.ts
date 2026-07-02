@@ -4,6 +4,7 @@ import express from 'express';
 import { authRouter } from './routes/auth.js';
 import { batchesRouter } from './routes/batches.js';
 import { foodsRouter } from './routes/foods.js';
+import { meRouter } from './routes/me.js';
 
 export const app = express();
 
@@ -15,5 +16,6 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/auth', authRouter);
+app.use('/me', meRouter);
 app.use('/foods', foodsRouter);
 app.use('/batches', batchesRouter);

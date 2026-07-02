@@ -1,7 +1,9 @@
-// BatchFit API schema — Phase-3 backend seed.
-// Scope: the batch-cooking differentiator (Recipe = template, Batch = one cook
-// with snapshotted amounts + portion inventory). Diary, workouts, weight and
-// user targets are intentionally NOT modelled yet — add them when sync work needs them.
+// BatchFit API schema.
+// Accounts are Phase 1 (client–server, login required — see roadmap.md). This models
+// the User (auth + profile + the five daily targets). The batch-cooking differentiator
+// (Recipe = template, Batch = one cook with snapshotted amounts + portion inventory) is
+// modelled below. Diary, workouts and weight entries arrive in later phases; ownership
+// (scoping foods/recipes/batches to a user) is added in F3-1 / F5-1.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,6 +12,44 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+/// An account plus the profile and daily targets that onboarding produces.
+/// Profile/target fields are nullable until onboarding completes (`onboardingComplete`).
+/// Weight and height are stored canonically in metric (kg / cm) regardless of the
+/// user's chosen display `units`. SQLite has no enums, so choice fields are strings
+/// validated at the app layer:
+///   sex           — "male" | "female"
+///   activityLevel — "sedentary" | "light" | "moderate" | "active" | "very_active"
+///   goal          — "lose" | "maintain" | "build"
+///   units         — "metric" | "imperial"
+model User {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+
+  // Profile (set during onboarding).
+  sex             String?
+  birthDate       DateTime?
+  heightCm        Float?
+  activityLevel   String?
+  goal            String?
+  goalRateKgPerWk Float?
+  currentWeightKg Float?
+  goalWeightKg    Float?
+  units           String  @default("metric")
+
+  // The five daily targets.
+  targetKcal    Float?
+  targetProtein Float?
+  targetFat     Float?
+  targetCarbs   Float?
+  targetFibre   Float?
+
+  onboardingComplete Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// A reference food with macros per 100g. The five tracked nutrients throughout

@@ -33,9 +33,12 @@ _Last updated: 2026-07-01._
 - [x] **F1-1** — User & profile data model. `User` Prisma model (email unique, passwordHash,
   profile + the five targets, `onboardingComplete`) + `add_user` migration. Profile/target
   fields live on `User` (1:1), nullable until onboarding; weight/height stored in metric.
+- [x] **F1-2** — Auth infrastructure. `src/auth/`: bcryptjs password hash/verify, JWT
+  sign/verify helpers (`JWT_SECRET`, 7-day tokens), and `requireAuth` middleware that sets
+  `req.userId`. Unit tests on the password + JWT round-trips.
 
-**Next up (in order):** **F1-2** (Auth infrastructure: hashing, JWT, `requireAuth`) →
-**F1-3** (`POST /auth/register`) → **F1-4** (`POST /auth/login`). Confirm which to start when resuming.
+**Next up (in order):** **F1-3** (`POST /auth/register`) → **F1-4** (`POST /auth/login`) →
+**F1-5** (`GET /me`). Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -102,8 +105,10 @@ Auth is **JWT**: register/login return an access token; protected routes require
   activityLevel, goal, goalRateKgPerWk, current/goal weight, units) and the five targets
   (kcal/protein/fat/carbs/fibre), plus `onboardingComplete`. Profile/target fields sit on
   `User` (1:1), nullable until onboarding; weight/height stored canonically in metric.
-- [ ] **F1-2 — Auth infrastructure.** Password hashing (argon2/bcrypt), JWT sign/verify
-  helpers, and an `requireAuth` middleware that populates `req.userId`.
+- [x] **F1-2 — Auth infrastructure.** ✅ Done. `src/auth/`: `password.ts` (bcryptjs
+  hash/verify), `jwt.ts` (sign/verify, `JWT_SECRET` with dev fallback, 7-day TTL), and
+  `requireAuth.ts` (Bearer-token middleware populating `req.userId`, 401 otherwise). Unit
+  tests cover the password + JWT round-trips.
 - [ ] **F1-3 — `POST /auth/register`.** Validate, hash, create user, return token + user. (+test)
 - [ ] **F1-4 — `POST /auth/login`.** Validate credentials, return token + user. (+test)
 - [ ] **F1-5 — `GET /me`.** Protected; returns the current user, profile, targets, and

@@ -30,9 +30,12 @@ _Last updated: 2026-07-01._
 - [x] **P0-3** — Reconciled `CLAUDE.md` and `mvp-spec.md` with the client–server +
   accounts-from-day-one approach (offline/local-first framing superseded; cloud *sync* only
   remains later; auth screens precede onboarding).
+- [x] **F1-1** — User & profile data model. `User` Prisma model (email unique, passwordHash,
+  profile + the five targets, `onboardingComplete`) + `add_user` migration. Profile/target
+  fields live on `User` (1:1), nullable until onboarding; weight/height stored in metric.
 
-**Next up (in order):** **F1-1** (User & profile data model) → **F1-2** (Auth infrastructure) →
-**F1-3** (`POST /auth/register`). Confirm which to start when resuming.
+**Next up (in order):** **F1-2** (Auth infrastructure: hashing, JWT, `requireAuth`) →
+**F1-3** (`POST /auth/register`) → **F1-4** (`POST /auth/login`). Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -94,10 +97,11 @@ Small groundwork that unblocks the workflow. Needed once.
 Register, log in, and store the profile + calorie/macro targets onboarding produces.
 Auth is **JWT**: register/login return an access token; protected routes require it.
 
-- [ ] **F1-1 — User & profile data model.** Prisma models + migration: `User`
-  (email unique, passwordHash, timestamps) and profile/target fields (sex, birth date,
-  height, activity level, goal, goal rate, current/goal weight, units, the five targets:
-  calorie/protein/fat/carb/fibre, `onboardingComplete` flag).
+- [x] **F1-1 — User & profile data model.** ✅ Done. `User` Prisma model + `add_user`
+  migration: email (unique), passwordHash, timestamps, profile (sex, birthDate, heightCm,
+  activityLevel, goal, goalRateKgPerWk, current/goal weight, units) and the five targets
+  (kcal/protein/fat/carbs/fibre), plus `onboardingComplete`. Profile/target fields sit on
+  `User` (1:1), nullable until onboarding; weight/height stored canonically in metric.
 - [ ] **F1-2 — Auth infrastructure.** Password hashing (argon2/bcrypt), JWT sign/verify
   helpers, and an `requireAuth` middleware that populates `req.userId`.
 - [ ] **F1-3 — `POST /auth/register`.** Validate, hash, create user, return token + user. (+test)

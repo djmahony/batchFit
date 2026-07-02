@@ -36,9 +36,12 @@ _Last updated: 2026-07-01._
 - [x] **F1-2** — Auth infrastructure. `src/auth/`: bcryptjs password hash/verify, JWT
   sign/verify helpers (`JWT_SECRET`, 7-day tokens), and `requireAuth` middleware that sets
   `req.userId`. Unit tests on the password + JWT round-trips.
+- [x] **F1-3** — `POST /auth/register`. Validates email/password, hashes, creates the user,
+  returns token + serialized user (no hash). Also set up the endpoint-test DB harness
+  (isolated `test.db`, schema pushed in `globalSetup`, tables cleared per test).
 
-**Next up (in order):** **F1-3** (`POST /auth/register`) → **F1-4** (`POST /auth/login`) →
-**F1-5** (`GET /me`). Confirm which to start when resuming.
+**Next up (in order):** **F1-4** (`POST /auth/login`) → **F1-5** (`GET /me`) →
+**F1-6** (TDEE calculator). Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -109,7 +112,11 @@ Auth is **JWT**: register/login return an access token; protected routes require
   hash/verify), `jwt.ts` (sign/verify, `JWT_SECRET` with dev fallback, 7-day TTL), and
   `requireAuth.ts` (Bearer-token middleware populating `req.userId`, 401 otherwise). Unit
   tests cover the password + JWT round-trips.
-- [ ] **F1-3 — `POST /auth/register`.** Validate, hash, create user, return token + user. (+test)
+- [x] **F1-3 — `POST /auth/register`.** ✅ Done. Validates email (format) + password
+  (min 8 chars), normalises email to lowercase, hashes, creates the user, returns
+  `{ token, user }` (user serialized without `passwordHash`); duplicate email → 409. Tests
+  cover success + duplicate/invalid-email/short-password. Established the endpoint-test DB
+  harness (`vitest.config.ts` points Prisma at `test.db`; `globalSetup` recreates the schema).
 - [ ] **F1-4 — `POST /auth/login`.** Validate credentials, return token + user. (+test)
 - [ ] **F1-5 — `GET /me`.** Protected; returns the current user, profile, targets, and
   `onboardingComplete`. (+test)

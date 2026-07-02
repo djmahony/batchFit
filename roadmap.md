@@ -43,9 +43,12 @@ _Last updated: 2026-07-02._
   token + serialized user; unknown email and wrong password both 401 (no user enumeration).
 - [x] **F1-5** — `GET /me`. Protected route returning the serialized current user; 404 if the
   user no longer exists, 401 without a valid token.
+- [x] **F1-6** — TDEE calculator. Pure `src/tdee.ts` (Mifflin–St Jeor BMR → maintenance → goal
+  target → macro split, protein prioritised, floored at BMR) + auth-protected `POST /tools/tdee`
+  returning suggested targets from profile inputs. Math unit-tested; endpoint tested.
 
-**Next up (in order):** **F1-6** (TDEE calculator) → **F1-7** (Save onboarding).
-Confirm which to start when resuming.
+**Next up (in order):** **F1-7** (Save onboarding — `PUT /me/profile` persists goal + profile
++ targets and sets `onboardingComplete`). Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -128,9 +131,13 @@ Auth is **JWT**: register/login return an access token; protected routes require
   `{ user }` — the serialized current user (profile, targets, `onboardingComplete`),
   looked up by `req.userId`; 404 if the user no longer exists, 401 without a valid token.
   Tests cover success + missing/invalid token.
-- [ ] **F1-6 — TDEE calculator.** Pure helper (BMR + activity → maintenance; goal → target
-  calories; macro split incl. protein priority + fibre) plus `POST /tools/tdee` that returns
-  suggested targets from profile inputs. (+unit test on the math)
+- [x] **F1-6 — TDEE calculator.** ✅ Done. Pure `src/tdee.ts`: Mifflin–St Jeor BMR × activity
+  multiplier → maintenance; goal + `goalRateKgPerWk` (7700 kcal/kg) → target calories, floored
+  at BMR; macro split with protein prioritised (2 g/kg), fat at 25% of kcal, carbs as the
+  remainder, fibre at 14 g/1000 kcal. `POST /tools/tdee` (auth-protected) validates the profile
+  inputs, derives age from `birthDate`, and returns `{ bmr, maintenanceKcal, targets }`. Unit
+  tests pin the math (incl. the BMR floor + female constant); endpoint tests cover the wiring,
+  401, and validation.
 - [ ] **F1-7 — Save onboarding.** `PUT /me/profile` persists goal + profile + targets and
   sets `onboardingComplete`. (+test)
 

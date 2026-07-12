@@ -50,12 +50,17 @@ const KCAL_PER_G = { protein: 4, fat: 9, carbs: 4 };
 
 const round10 = (n: number) => Math.round(n / 10) * 10;
 
-/** Whole years elapsed from `birthDate` to `now` (defaults to today). */
+/**
+ * Whole years elapsed from `birthDate` to `now` (defaults to today).
+ * A `'YYYY-MM-DD'` string parses to UTC midnight, so we read both dates in UTC
+ * — reading a UTC date with local getters shifts the calendar day (and, for
+ * Jan-1 birthdays, the year) on any server west of UTC.
+ */
 export function ageFromBirthDate(birthDate: Date, now = new Date()): number {
-  let age = now.getFullYear() - birthDate.getFullYear();
+  let age = now.getUTCFullYear() - birthDate.getUTCFullYear();
   const beforeBirthday =
-    now.getMonth() < birthDate.getMonth() ||
-    (now.getMonth() === birthDate.getMonth() && now.getDate() < birthDate.getDate());
+    now.getUTCMonth() < birthDate.getUTCMonth() ||
+    (now.getUTCMonth() === birthDate.getUTCMonth() && now.getUTCDate() < birthDate.getUTCDate());
   if (beforeBirthday) age -= 1;
   return age;
 }
@@ -68,6 +73,7 @@ function basalMetabolicRate(input: TdeeInput): number {
 
 export function calculateTdee(input: TdeeInput): TdeeResult {
   const bmr = basalMetabolicRate(input);
+  const roundedBmr = Math.round(bmr);
   const maintenance = bmr * ACTIVITY_MULTIPLIERS[input.activityLevel];
 
   const dailyDelta = ((input.goalRateKgPerWk ?? 0) * KCAL_PER_KG) / 7;
@@ -75,8 +81,10 @@ export function calculateTdee(input: TdeeInput): TdeeResult {
   if (input.goal === 'lose') targetKcal = maintenance - dailyDelta;
   else if (input.goal === 'build') targetKcal = maintenance + dailyDelta;
 
-  // Never suggest eating below BMR, however aggressive the deficit.
-  targetKcal = round10(Math.max(targetKcal, bmr));
+  // Never suggest eating below BMR, however aggressive the deficit. Floor
+  // against the reported (rounded) BMR *after* rounding to 10 so the target can
+  // never land a few kcal below the BMR we return.
+  targetKcal = Math.max(round10(targetKcal), roundedBmr);
 
   const protein = input.weightKg * PROTEIN_G_PER_KG;
   const fat = (targetKcal * FAT_SHARE_OF_KCAL) / KCAL_PER_G.fat;
@@ -85,7 +93,7 @@ export function calculateTdee(input: TdeeInput): TdeeResult {
   const fibre = (targetKcal / 1000) * FIBRE_G_PER_1000_KCAL;
 
   return {
-    bmr: Math.round(bmr),
+    bmr: roundedBmr,
     maintenanceKcal: Math.round(maintenance),
     targets: {
       kcal: targetKcal,

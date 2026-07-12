@@ -14,7 +14,7 @@ Tick tasks off as they merge. `[ ]` = todo, `[x]` = merged.
 
 ## Current status
 
-_Last updated: 2026-07-02._
+_Last updated: 2026-07-12._
 
 **Baseline already on `main` (pre-roadmap scaffolding):** a monorepo with two folders —
 - `app/` — Expo SDK 57 + Expo Router. Five placeholder tabs (Today, Diary, Prep, Train,
@@ -46,9 +46,17 @@ _Last updated: 2026-07-02._
 - [x] **F1-6** — TDEE calculator. Pure `src/tdee.ts` (Mifflin–St Jeor BMR → maintenance → goal
   target → macro split, protein prioritised, floored at BMR) + auth-protected `POST /tools/tdee`
   returning suggested targets from profile inputs. Math unit-tested; endpoint tested.
+- [x] **F2-1 → F2-6** — Auth UI slice (frontend). Typed API client (`src/lib/api.ts`), session
+  store (`expo-secure-store` token + `AuthProvider`/`useAuth`, restore-on-launch), auth-gated
+  navigation (`Stack.Protected`: logged-in → `(tabs)`, logged-out → `(auth)`), and the Welcome,
+  Register, and Login screens wired to the live API. Shared `Button`/`TextField` components.
+  Register/login validate client-side, surface API errors inline, and let the guard swap to the
+  app on success. **Note:** a freshly-registered user currently lands straight in `(tabs)` —
+  onboarding (F2-7→9) isn't built yet, so `onboardingComplete` isn't gated on.
 
-**Next up (in order):** **F1-7** (Save onboarding — `PUT /me/profile` persists goal + profile
-+ targets and sets `onboardingComplete`). Confirm which to start when resuming.
+**Next up (in order):** **F1-7** (Save onboarding — `PUT /me/profile`) → **F2-7** (Onboarding:
+Goal) → **F2-8** (Onboarding: About you) → **F2-9** (Onboarding: Targets). When onboarding lands,
+re-gate navigation on `onboardingComplete`. Confirm which to start when resuming.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -149,15 +157,23 @@ Protected routes 401 without a token.
 
 The screens that let a user sign up, log in, and complete onboarding against F1.
 
-- [ ] **F2-1 — API client.** Typed fetch wrapper (base URL from config/env, JSON, error
-  handling, attaches bearer token).
-- [ ] **F2-2 — Auth session store.** Token in `expo-secure-store`; `AuthProvider` context
-  exposing `user`, `signIn`, `register`, `signOut`, and load-on-launch.
-- [ ] **F2-3 — Auth-gated navigation.** Route groups: unauthenticated → auth stack;
-  authenticated but `!onboardingComplete` → onboarding; else → the `(tabs)`. Splash while loading.
-- [ ] **F2-4 — Welcome screen.** Logo, tagline, "Get started" → register, "I have an account" → login.
-- [ ] **F2-5 — Register screen.** Email/password form + validation → `register` → store token → onboarding.
-- [ ] **F2-6 — Login screen.** Form → `signIn` → route by `onboardingComplete`.
+- [x] **F2-1 — API client.** ✅ Done. `src/lib/api.ts`: typed `fetch` wrapper (base URL from
+  `EXPO_PUBLIC_API_URL` with simulator fallbacks, JSON, bearer-token injection, `ApiError`
+  carrying status + server message). Exposes `register`/`login`/`me` + `User`/`AuthResponse`.
+- [x] **F2-2 — Auth session store.** ✅ Done. Token in `expo-secure-store` (localStorage on web);
+  `AuthProvider`/`useAuth` exposing `user`, `isLoading`, `signIn`, `register`, `signOut`;
+  restore-on-launch (token → `GET /me`, clearing invalid tokens).
+- [x] **F2-3 — Auth-gated navigation.** ✅ Done. Root layout wraps `AuthProvider` and routes with
+  `Stack.Protected`: `!!user` → `(tabs)`, `!user` → `(auth)`; splash held while the session
+  restores. **Note:** `onboardingComplete` is not gated yet (no onboarding screens) — new users
+  land in `(tabs)`; re-gate when F2-7→9 land.
+- [x] **F2-4 — Welcome screen.** ✅ Done. Wordmark, "Plan it. Batch it. Burn it." tagline,
+  "Get started" → register, "I have an account" → login. Adds shared `Button`.
+- [x] **F2-5 — Register screen.** ✅ Done. Email/password form, client-side validation mirroring
+  the API, inline `ApiError` messages, loading state → `register` → guard swaps to the app.
+  Adds shared `TextField`.
+- [x] **F2-6 — Login screen.** ✅ Done. Form → `signIn`; surfaces the API's 401 inline, loading
+  state → guard swaps to the app on success.
 - [ ] **F2-7 — Onboarding: Goal.** Lose / Maintain / Build cards (+ rate for weight loss); held in flow state.
 - [ ] **F2-8 — Onboarding: About you.** Sex, age, height, current weight, activity; metric/imperial toggle.
 - [ ] **F2-9 — Onboarding: Targets.** Calls `/tools/tdee`, shows calorie hero + macro set,

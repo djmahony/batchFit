@@ -34,6 +34,15 @@ describe('POST /auth/register', () => {
     expect(res.status).toBe(409);
   });
 
+  it('resolves a concurrent duplicate signup to 201 + 409, never 500', async () => {
+    const signup = () =>
+      request(app).post('/auth/register').send({ email: 'race@example.com', password: 'password123' });
+
+    const statuses = (await Promise.all([signup(), signup()])).map((r) => r.status).sort();
+
+    expect(statuses).toEqual([201, 409]);
+  });
+
   it('rejects an invalid email with 400', async () => {
     const res = await request(app)
       .post('/auth/register')

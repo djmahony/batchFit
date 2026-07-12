@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Router } from 'express';
 
 import { signToken } from '../auth/jwt.js';
@@ -30,9 +31,19 @@ authRouter.post('/register', async (req, res) => {
     return res.status(409).json({ error: 'An account with that email already exists' });
   }
 
-  const user = await prisma.user.create({
-    data: { email: normalizedEmail, passwordHash: await hashPassword(password) },
-  });
+  const passwordHash = await hashPassword(password);
+  let user;
+  try {
+    user = await prisma.user.create({ data: { email: normalizedEmail, passwordHash } });
+  } catch (err) {
+    // Two concurrent registrations for the same email both clear the check
+    // above; the second create trips the unique constraint. Treat that as the
+    // same 409 rather than an unhandled 500.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      return res.status(409).json({ error: 'An account with that email already exists' });
+    }
+    throw err;
+  }
 
   res.status(201).json({ token: signToken(user.id), user: serializeUser(user) });
 });

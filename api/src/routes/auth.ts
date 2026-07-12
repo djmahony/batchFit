@@ -10,6 +10,12 @@ export const authRouter = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
 
+// A real 12-round bcrypt hash we compare against when the email is unknown, so
+// login spends the same time whether or not an account exists. Without this the
+// no-user path skips bcrypt and returns markedly faster, leaking which emails
+// are registered via response timing.
+const DUMMY_PASSWORD_HASH = '$2b$12$7WmV0QqSqTIekdLuaFUEpePfeGlj6dwPaj3D1VNxl3BnWYpHdH1w2';
+
 // POST /auth/register — create an account, return an auth token + the user.
 authRouter.post('/register', async (req, res) => {
   const { email, password } = req.body ?? {};
@@ -49,9 +55,12 @@ authRouter.post('/login', async (req, res) => {
     where: { email: email.trim().toLowerCase() },
   });
 
-  // Same response whether the email is unknown or the password is wrong, so
-  // the endpoint doesn't reveal which emails have accounts.
-  if (!user || !(await verifyPassword(password, user.passwordHash))) {
+  // Always run one bcrypt comparison — against a dummy hash when the email is
+  // unknown — so the response takes the same time and status (401) whether the
+  // email is unregistered or the password is wrong. This avoids leaking which
+  // emails have accounts via either the body or the response timing.
+  const passwordOk = await verifyPassword(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
+  if (!user || !passwordOk) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
 

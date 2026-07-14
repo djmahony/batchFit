@@ -75,7 +75,7 @@ export default function LoginScreen() {
               returnKeyType="go"
             />
             {error ? (
-              <ThemedText type="small" style={styles.error}>
+              <ThemedText type="small" themeColor="danger">
                 {error}
               </ThemedText>
             ) : null}
@@ -106,9 +106,6 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: Spacing.three,
-  },
-  error: {
-    color: '#E5484D',
   },
   footer: {
     alignItems: 'center',

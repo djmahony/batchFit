@@ -123,7 +123,31 @@ Five tracked nutrients everywhere: **Calories, Protein, Fat, Carbs, Fibre.** Hie
 Read these before designing data models, screens, or copy — they are the spec:
 - `business.md` — brand, tone of voice, audience, positioning, visual direction, roadmap phases. Read for *look-and-feel and voice*. (`batchFitDesignWork/uploads/business.md` is an identical copy.)
 - `batchFitDesignWork/uploads/mvp-spec.md` — the authoritative **screen-by-screen MVP specification**: navigation, every screen's sections/states, and cross-screen rules. Read for *structure and behaviour*.
-- `batchFitDesignWork/*.dc.html` — exported visual design mockups (Onboarding, Today, Diary, Prep, Train, Brand, Wireframes). These are generated design-tool exports, not app source — treat as reference, not code to edit.
+- `batchFitDesignWork/*.dc.html` — exported visual design mockups (Onboarding, Today, Diary, Prep, Brand, Wireframes). These are generated design-tool exports, not app source — treat as reference, not code to edit.
+
+## Match the designs — mandatory before building or styling any screen
+
+**Any time you build a new screen, component, or change styling, you MUST first open the
+relevant mockup in `batchFitDesignWork/` and make the implementation match it.** Do not style
+from the theme tokens alone or invent a look — the mockups are the visual spec. This is part of
+the definition of done for any frontend task: the screen should visually match its mockup
+(layout, colour, type scale, spacing, component shapes, empty/loading/error states), not just
+"use the app's colours."
+
+Workflow for a UI task:
+1. **Read the matching mockup(s)** before writing UI. They're HTML/CSS exports, so open them and
+   pull the real values (colours, font sizes/weights, radii, spacing, gradients, imagery). Screen
+   → file mapping:
+   - Auth (Welcome / Register / Login) & onboarding → `BatchFit Onboarding.dc.html`
+   - Today → `BatchFit Today.dc.html` · Diary → `BatchFit Diary.dc.html` · Prep →
+     `BatchFit Prep.dc.html`
+   - Shared visual language (palette, typography, buttons, logo usage) → `BatchFit Brand.dc.html`
+     and `BatchFit Logo.svg`
+   - Overall layout/flow when a dedicated screen file doesn't exist → `BatchFit Wireframes.dc.html`
+2. **Reconcile the design with the shared tokens** in `app/src/constants/theme.ts`: if the mockup
+   introduces values not yet in the theme, add them to the theme and use them — don't hard-code
+   one-off colours in a screen.
+3. **If the mockup and the code conflict, or a screen has no mockup, ask** rather than guessing.
 
 ## App structure the spec defines (for when code is written)
 

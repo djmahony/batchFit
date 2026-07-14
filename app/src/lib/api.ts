@@ -57,8 +57,15 @@ type RequestOptions = {
   token?: string;
 };
 
+// Fail loudly instead of spinning forever when the server is unreachable (e.g.
+// a physical device pointed at the wrong host). `fetch` has no built-in timeout.
+const REQUEST_TIMEOUT_MS = 12000;
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token } = options;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   let res: Response;
   try {
@@ -69,9 +76,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
     });
   } catch {
+    // Network failure or the timeout aborting the request.
     throw new ApiError(0, 'Could not reach the server. Check your connection and try again.');
+  } finally {
+    clearTimeout(timeout);
   }
 
   const data = res.status === 204 ? null : await res.json().catch(() => null);

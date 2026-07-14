@@ -1,12 +1,12 @@
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { Fonts, Radii, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type Props = TextInputProps & { label: string };
 
-/** Labelled text input themed to match the app (used by the auth forms). */
+/** Labelled text input themed to the brand (used by the auth forms). */
 export function TextField({ label, style, ...rest }: Props) {
   const theme = useTheme();
   return (
@@ -16,7 +16,11 @@ export function TextField({ label, style, ...rest }: Props) {
         placeholderTextColor={theme.textSecondary}
         style={[
           styles.input,
-          { backgroundColor: theme.backgroundElement, color: theme.text },
+          {
+            backgroundColor: theme.backgroundElement,
+            borderColor: theme.border,
+            color: theme.text,
+          },
           style,
         ]}
         {...rest}
@@ -31,8 +35,10 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 52,
-    borderRadius: 12,
+    borderRadius: Radii.input,
+    borderWidth: 1,
     paddingHorizontal: Spacing.three,
+    fontFamily: Fonts.body,
     fontSize: 16,
   },
 });

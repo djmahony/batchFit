@@ -11,10 +11,21 @@ foodsRouter.use(requireAuth);
 const visibleTo = (userId: string) => ({ OR: [{ ownerId: null }, { ownerId: userId }] });
 
 // GET /foods — reference foods + the caller's custom foods.
+// GET /foods?query= — search the same set by name or brand (SQLite LIKE is
+// case-insensitive for ASCII, which covers our food names).
 foodsRouter.get('/', async (req, res) => {
+  const query = typeof req.query.query === 'string' ? req.query.query.trim() : '';
   const foods = await prisma.food.findMany({
-    where: visibleTo(req.userId!),
+    where: {
+      AND: [
+        visibleTo(req.userId!),
+        query === ''
+          ? {}
+          : { OR: [{ name: { contains: query } }, { brand: { contains: query } }] },
+      ],
+    },
     orderBy: { name: 'asc' },
+    take: 50,
   });
   res.json({ foods });
 });

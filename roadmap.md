@@ -77,10 +77,10 @@ _Last updated: 2026-07-15._
 
 - [x] **F3-1** — `/foods` scoped to users + custom foods (`Food.ownerId`, auth-required
   routes, macro validation; see Phase 2 below).
+- [x] **F3-2** — Food search (`GET /foods?query=`) + reference-food seed library.
 
-**Next up (in order):** Phase 2 — **F3-2** (food search) → **F3-3** (diary model) → **F3-4**
-(log CRUD) → **F3-5** (daily totals). Also consider seeding reference foods before F3-2
-(search over an empty table isn't testable).
+**Next up (in order):** Phase 2 — **F3-3** (diary model) → **F3-4** (log CRUD) → **F3-5**
+(daily totals).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -224,7 +224,10 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   auth: GET returns reference + the caller's own foods; POST creates a food owned by the caller
   and validates all five macros as non-negative numbers. Responses wrapped as `{ foods }` /
   `{ food }`. Tests cover visibility scoping, creation, validation, and 401s.
-- [ ] **F3-2 — Food search endpoint.** `GET /foods?query=` across reference + the user's foods.
+- [x] **F3-2 — Food search endpoint.** ✅ Done. `GET /foods?query=` filters the visible set
+  (reference + own) by name or brand, case-insensitive (SQLite LIKE), capped at 50 results;
+  blank query returns everything. Seed expanded to ~58 reference foods (idempotent — skips if
+  reference foods exist). Tests cover matching, scoping, blank query, and no-match.
 - [ ] **F3-3 — Diary model.** `LogEntry` (user, date, meal group, food, quantity/unit,
   snapshotted macros) + migration.
 - [ ] **F3-4 — Log CRUD.** `POST /diary` (add), `GET /diary?date=`, `PATCH`/`DELETE /diary/:id`. (+tests)

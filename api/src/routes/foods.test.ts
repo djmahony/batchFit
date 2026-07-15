@@ -52,6 +52,73 @@ describe('GET /foods', () => {
   });
 });
 
+describe('GET /foods?query=', () => {
+  it('searches name and brand across reference + own foods, case-insensitively', async () => {
+    const token = await registerAndGetToken('searcher@example.com');
+    const otherToken = await registerAndGetToken('other@example.com');
+
+    await prisma.food.createMany({
+      data: [
+        { ...oats, name: 'Chicken breast' },
+        { ...oats, name: 'Chicken thigh (skinless)' },
+        { ...oats, name: 'Cooked white rice' },
+      ],
+    });
+    await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...oats, name: 'Leftover roast chicken' });
+    await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ ...oats, name: 'Chicken curry (not mine)' });
+    await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...oats, name: 'Granola', brand: 'ChickenBrand Co' });
+
+    const res = await request(app)
+      .get('/foods')
+      .query({ query: 'chicken' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const names = res.body.foods.map((f: { name: string }) => f.name).sort();
+    expect(names).toEqual([
+      'Chicken breast',
+      'Chicken thigh (skinless)',
+      'Granola',
+      'Leftover roast chicken',
+    ]);
+  });
+
+  it('returns everything visible for a blank query', async () => {
+    const token = await registerAndGetToken('searcher@example.com');
+    await prisma.food.create({ data: { ...oats } });
+
+    const res = await request(app)
+      .get('/foods')
+      .query({ query: '  ' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toHaveLength(1);
+  });
+
+  it('returns an empty list when nothing matches', async () => {
+    const token = await registerAndGetToken('searcher@example.com');
+    await prisma.food.create({ data: { ...oats } });
+
+    const res = await request(app)
+      .get('/foods')
+      .query({ query: 'xyzzy' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([]);
+  });
+});
+
 describe('POST /foods', () => {
   it('creates a custom food owned by the caller', async () => {
     const token = await registerAndGetToken('owner@example.com');

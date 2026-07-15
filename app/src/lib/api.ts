@@ -185,6 +185,9 @@ export const api = {
   searchFoods: (token: string, query = '') =>
     request<{ foods: Food[] }>(`/foods?query=${encodeURIComponent(query)}`, { token }),
   recentFoods: (token: string) => request<{ foods: Food[] }>('/foods/recent', { token }),
+  food: (token: string, id: string) => request<{ food: Food }>(`/foods/${id}`, { token }),
+  addDiaryEntry: (token: string, input: { date: string; meal: Meal; foodId: string; quantity: number }) =>
+    request<{ entry: LogEntry }>('/diary', { method: 'POST', body: input, token }),
   diary: (token: string, date: string) =>
     request<{ entries: LogEntry[] }>(`/diary?date=${date}`, { token }),
   diarySummary: (token: string, date: string) =>

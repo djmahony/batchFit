@@ -48,6 +48,15 @@ foodsRouter.get('/recent', async (req, res) => {
   res.json({ foods: ids.map((id) => byId.get(id)).filter(Boolean) });
 });
 
+// GET /foods/:id — a single visible food (reference or the caller's own).
+foodsRouter.get('/:id', async (req, res) => {
+  const food = await prisma.food.findFirst({
+    where: { id: req.params.id, ...visibleTo(req.userId!) },
+  });
+  if (!food) return res.status(404).json({ error: 'food not found' });
+  res.json({ food });
+});
+
 const MACROS = ['kcal', 'protein', 'fat', 'carbs', 'fibre'] as const;
 
 // POST /foods — create a custom food owned by the caller (macros are per 100g).

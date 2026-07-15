@@ -158,6 +158,35 @@ describe('GET /foods/recent', () => {
   });
 });
 
+describe('GET /foods/:id', () => {
+  it('returns a reference food or an own food', async () => {
+    const token = await registerAndGetToken('viewer@example.com');
+    const reference = await prisma.food.create({ data: { ...oats } });
+
+    const res = await request(app)
+      .get(`/foods/${reference.id}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.food.name).toBe('Oats');
+  });
+
+  it("404s for another user's custom food", async () => {
+    const token = await registerAndGetToken('viewer@example.com');
+    const otherToken = await registerAndGetToken('other@example.com');
+    const created = await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ ...oats, name: 'Not yours' });
+
+    const res = await request(app)
+      .get(`/foods/${created.body.food.id}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('POST /foods', () => {
   it('creates a custom food owned by the caller', async () => {
     const token = await registerAndGetToken('owner@example.com');

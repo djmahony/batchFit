@@ -28,7 +28,7 @@ function RootNavigator() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={!!user && user.onboardingComplete}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="add-food" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(logging)" options={{ presentation: 'modal' }} />
       </Stack.Protected>
       <Stack.Protected guard={!!user && !user.onboardingComplete}>
         <Stack.Screen name="(onboarding)" />

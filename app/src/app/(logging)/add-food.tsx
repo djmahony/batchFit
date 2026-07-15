@@ -74,8 +74,7 @@ export default function AddFoodScreen() {
   }, [load, trimmed]);
 
   const openFood = (food: Food) => {
-    // Cast until the /food/[id] screen lands in F4-5 and typed routes learn it.
-    router.push({ pathname: '/food/[id]', params: { id: food.id, meal, date } } as Href);
+    router.push({ pathname: '/food/[id]', params: { id: food.id, meal, date } });
   };
 
   const emptyCopy =
@@ -184,7 +183,7 @@ export default function AddFoodScreen() {
                 accessibilityRole="button"
                 onPress={() =>
                   // Cast until the /create-food screen lands in F4-6.
-                  router.push({ pathname: '/create-food', params: { meal, date } } as Href)
+                  router.push({ pathname: '/create-food', params: { meal, date } } as unknown as Href)
                 }
                 style={({ pressed }) => [styles.createLink, pressed && styles.pressed]}>
                 <ThemedText type="small" themeColor="textSecondary">

@@ -87,9 +87,10 @@ _Last updated: 2026-07-15._
 - [x] **F4-2** — Date selector pill + day-key helpers (`src/lib/dates.ts`).
 - [x] **F4-3** — Diary screen (budget hero + bar, meal groups, entry cards, four states).
 - [x] **F4-4** — Add-food search modal (Recents via new `GET /foods/recent`, My foods, search).
+- [x] **F4-5** — Food detail/quantity (`(logging)` modal group, live ring, add to diary).
 
-**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-5** (food detail/quantity) →
-**F4-6** (create custom food) → **F4-7** (edit/delete entry).
+**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-6** (create custom food) →
+**F4-7** (edit/delete entry).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -276,7 +277,13 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   food detail (F4-5), "No match? Create a custom food" footer → F4-6. Diary add rows now open it.
   - **Decision to revisit:** Favourites chip deferred — no favourite flag in the data model
     (needs its own task); spec's "My recipes/batches" source arrives with Prep (F6).
-- [ ] **F4-5 — Food detail / quantity.** Quantity control + live macros → add to meal/day.
+- [x] **F4-5 — Food detail / quantity.** ✅ Done. `/food/[id]` inside a new `(logging)` modal
+  route group (search → detail → create push within one sheet). Styled to mockup 1i/2i: grams
+  stepper (±10g, editable), live MacroRing card on the hero surface with protein-emphasised
+  legend, "Updates live…" caption, expandable Meal + Date rows, "Add to diary" → `POST /diary`
+  → the sheet dismisses and Diary refetches on focus. API adds `GET /foods/:id` (+tests).
+  - **Decision to revisit:** quantity is grams-only (foods are per-100g); serving/portion units
+    from the mockup's toggle arrive with recipes/batches (F5/F6).
 - [ ] **F4-6 — Create custom food.** Form (name, serving, per-serving macros) → saves & logs.
 - [ ] **F4-7 — Edit / delete entry.** Tap to edit quantity; swipe to delete.
 

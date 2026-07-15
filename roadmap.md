@@ -83,9 +83,11 @@ _Last updated: 2026-07-15._
 - [x] **F3-5** — Daily totals (`GET /diary/summary?date=`: consumed vs. targets vs. remaining).
   **Feature F3 complete** — the Food & Diary API is exercisable end-to-end.
 
-**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-1** (Macro Ring/Bar set) →
-**F4-2** (date selector) → **F4-3** (Diary screen) → **F4-4** (add-food search) → **F4-5**
-(food detail/quantity) → **F4-6** (create custom food) → **F4-7** (edit/delete entry).
+- [x] **F4-1** — Macro Ring/Bar set (`src/components/macros.tsx`, react-native-svg).
+
+**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-2** (date selector) → **F4-3**
+(Diary screen) → **F4-4** (add-food search) → **F4-5** (food detail/quantity) → **F4-6**
+(create custom food) → **F4-7** (edit/delete entry).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -251,8 +253,11 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
 
 ### Feature F4 — Food & Diary UI (frontend)
 
-- [ ] **F4-1 — Shared: Macro Ring/Bar set.** Build the reusable macro component (calories hero,
-  protein prioritised, remaining-vs-target + total modes). Reused everywhere after this.
+- [x] **F4-1 — Shared: Macro Ring/Bar set.** ✅ Done. `src/components/macros.tsx`
+  (react-native-svg): `MacroRing` (SVG donut, segments clockwise from 12; total mode fills the
+  ring, remaining-vs-target mode leaves track; centre takes children), `macroSegments` (splits
+  P/C/F by 4/4/9 kcal), `MacroBar` (thin budget bar), `MacroLegendRow` (dot+label+value, protein
+  emphasised). New theme tokens `macroProtein`/`macroCarbs`/`barTrack` from the Diary mockup.
 - [ ] **F4-2 — Shared: Date selector.** Day strip / `< date >` header, defaults to today.
 - [ ] **F4-3 — Diary screen.** Meal groups (B/L/D/Snacks), per-meal subtotals, pinned daily totals bar.
 - [ ] **F4-4 — Add-food search flow.** Search + Recents/Favourites/My foods tabs → results.

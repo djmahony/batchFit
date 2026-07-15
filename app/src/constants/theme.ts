@@ -39,8 +39,14 @@ export const Colors = {
     tintSoft: '#E9F3EC',
     onTintSoft: '#235C3B',
     accentSoft: '#FDEEE8',
+    // The macro trio (BatchFit Diary.dc.html food-detail ring): protein leads
+    // in bright green, carbs take coral, fat takes gold — same in both themes.
+    macroProtein: '#46C57E',
+    macroCarbs: '#FB6E4E',
     macroFat: '#F5C84B',
     textMuted: '#9AA39C',
+    // Thin progress track under the kcal budget card (Diary day log).
+    barTrack: '#E3E0D8',
   },
   dark: {
     // Deep Kale surfaces, Paper text, brighter mint-green accent.
@@ -67,8 +73,11 @@ export const Colors = {
     tintSoft: '#16271D',
     onTintSoft: '#A8D8BC',
     accentSoft: 'rgba(251,110,78,0.16)',
+    macroProtein: '#46C57E',
+    macroCarbs: '#FB6E4E',
     macroFat: '#F5C84B',
     textMuted: '#6E8174',
+    barTrack: '#0D1611',
   },
 } as const;
 

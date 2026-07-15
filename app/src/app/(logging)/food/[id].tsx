@@ -30,11 +30,12 @@ const STEP_GRAMS = 10;
 export default function FoodDetailScreen() {
   const theme = useTheme();
   const { token } = useAuth();
-  const params = useLocalSearchParams<{ id: string; meal?: Meal; date?: string }>();
+  const params = useLocalSearchParams<{ id: string; meal?: Meal; date?: string; quantity?: string }>();
 
   const [food, setFood] = useState<Food | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [grams, setGrams] = useState('100');
+  // A quantity param (from "create custom food") pre-fills one serving.
+  const [grams, setGrams] = useState(params.quantity ?? '100');
   const [meal, setMeal] = useState<Meal>(params.meal ?? 'snacks');
   const [date, setDate] = useState(params.date ?? todayKey());
   const [mealPickerOpen, setMealPickerOpen] = useState(false);

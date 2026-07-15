@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, useLocalSearchParams, type Href } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -181,10 +181,7 @@ export default function AddFoodScreen() {
             ListFooterComponent={
               <Pressable
                 accessibilityRole="button"
-                onPress={() =>
-                  // Cast until the /create-food screen lands in F4-6.
-                  router.push({ pathname: '/create-food', params: { meal, date } } as unknown as Href)
-                }
+                onPress={() => router.push({ pathname: '/create-food', params: { meal, date } })}
                 style={({ pressed }) => [styles.createLink, pressed && styles.pressed]}>
                 <ThemedText type="small" themeColor="textSecondary">
                   No match?{' '}

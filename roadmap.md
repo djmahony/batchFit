@@ -88,9 +88,10 @@ _Last updated: 2026-07-15._
 - [x] **F4-3** — Diary screen (budget hero + bar, meal groups, entry cards, four states).
 - [x] **F4-4** — Add-food search modal (Recents via new `GET /foods/recent`, My foods, search).
 - [x] **F4-5** — Food detail/quantity (`(logging)` modal group, live ring, add to diary).
+- [x] **F4-6** — Create custom food (per-serving form → per-100g save → straight into logging).
 
-**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-6** (create custom food) →
-**F4-7** (edit/delete entry).
+**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-7** (edit/delete entry) — then
+Phase 3 (Prep, F5/F6).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -284,7 +285,10 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   → the sheet dismisses and Diary refetches on focus. API adds `GET /foods/:id` (+tests).
   - **Decision to revisit:** quantity is grams-only (foods are per-100g); serving/portion units
     from the mockup's toggle arrive with recipes/batches (F5/F6).
-- [ ] **F4-6 — Create custom food.** Form (name, serving, per-serving macros) → saves & logs.
+- [x] **F4-6 — Create custom food.** ✅ Done. `/create-food` (mockup 1j/2j): name, serving
+  size (grams), PER SERVING calories/protein/carbs/fat + optional fibre (blank = 0). Converts
+  per-serving → per-100g for `POST /foods`, then replaces into `/food/[id]` pre-filled with one
+  serving so saving flows straight into logging. Client-side validation with kind copy.
 - [ ] **F4-7 — Edit / delete entry.** Tap to edit quantity; swipe to delete.
 
 **Verification:** on device — add, edit, delete foods across meals; totals and the rings update live.

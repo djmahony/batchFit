@@ -186,6 +186,8 @@ export const api = {
     request<{ foods: Food[] }>(`/foods?query=${encodeURIComponent(query)}`, { token }),
   recentFoods: (token: string) => request<{ foods: Food[] }>('/foods/recent', { token }),
   food: (token: string, id: string) => request<{ food: Food }>(`/foods/${id}`, { token }),
+  createFood: (token: string, input: Macros & { name: string; brand?: string }) =>
+    request<{ food: Food }>('/foods', { method: 'POST', body: input, token }),
   addDiaryEntry: (token: string, input: { date: string; meal: Meal; foodId: string; quantity: number }) =>
     request<{ entry: LogEntry }>('/diary', { method: 'POST', body: input, token }),
   diary: (token: string, date: string) =>

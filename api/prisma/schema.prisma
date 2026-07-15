@@ -51,6 +51,7 @@ model User {
 
   foods      Food[]
   logEntries LogEntry[]
+  batches    Batch[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -145,9 +146,13 @@ model RecipeIngredient {
 /// One actual cook. Amounts are snapshotted here (real cooking varies cook-to-cook),
 /// so editing the source recipe never rewrites a batch. `portionsRemaining` is the
 /// live inventory count and is decremented when a portion is eaten.
+/// `ownerId` is nullable only so pre-ownership rows survive the migration; every
+/// batch created through the API has an owner, and unowned rows are invisible.
 model Batch {
   id                String  @id @default(cuid())
   name              String
+  owner             User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId           String?
   recipe            Recipe? @relation(fields: [recipeId], references: [id])
   recipeId          String?
   portionsTotal     Int
@@ -160,6 +165,7 @@ model Batch {
   updatedAt DateTime @updatedAt
 
   @@index([recipeId])
+  @@index([ownerId])
 }
 
 model BatchIngredient {

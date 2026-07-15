@@ -92,9 +92,10 @@ _Last updated: 2026-07-15._
 - [x] **F4-7** — Edit/delete entry (tap → `/entry/[id]`, snapshot-rescaled preview, delete).
   **Feature F4 complete** — Phase 2 (food logging) is done end-to-end.
 
-**Next up (in order):** Phase 3 (Prep ⭐): **F5-1** (scope batches to users) → **F5-2**
-(recipes) → **F5-3** (cook → batch) → **F5-4** (eat → diary) → **F5-5** (inventory/history),
-then Feature F6 (Prep UI).
+- [x] **F5-1** — Batches scoped to users (ownership + validation + per-portion macros, tested).
+
+**Next up (in order):** Phase 3 (Prep ⭐): **F5-2** (recipes) → **F5-3** (cook → batch) →
+**F5-4** (eat → diary) → **F5-5** (inventory/history), then Feature F6 (Prep UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -310,7 +311,12 @@ The `/foods` and `/batches` scaffolding already exists — these tasks extend it
 
 ### Feature F5 — Prep API (backend)
 
-- [ ] **F5-1 — Scope batches to users** and return total + per-portion macros (extend existing routes). (+tests)
+- [x] **F5-1 — Scope batches to users.** ✅ Done. `Batch.ownerId` + `add_batch_owner`
+  migration (nullable only so pre-ownership rows survive; API always sets it, unowned rows are
+  invisible). All `/batches` routes require auth and filter by owner; POST validates portions/
+  ingredients and requires every ingredient food to be visible to the caller; responses wrapped
+  `{ batches }`/`{ batch }` with total + per-portion macros. Seed no longer creates an example
+  batch. Full endpoint tests (macros maths, validation, scoping, eat decrement/409).
 - [ ] **F5-2 — Recipes.** `Recipe`/`RecipeIngredient` routes: list/create/get/update; per-portion
   macros from default amounts.
 - [ ] **F5-3 — Cook a recipe → batch.** `POST /recipes/:id/cook` pre-fills a batch (editable amounts) into inventory.

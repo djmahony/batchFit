@@ -1,7 +1,6 @@
-// Seeds a library of shared reference foods (ownerId null — visible to every user)
-// and one example batch ("Chicken & Rice", split 6 ways) so the API returns
-// meaningful data on first run. Skips food seeding if reference foods already
-// exist, so it's safe to re-run. Run with: npm run db:seed
+// Seeds a library of shared reference foods (ownerId null — visible to every
+// user) so the API returns meaningful data on first run. Skips seeding if
+// reference foods already exist, so it's safe to re-run. Run with: npm run db:seed
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -90,26 +89,9 @@ async function main() {
     })),
   });
 
-  const chicken = await prisma.food.findFirst({ where: { name: 'Chicken breast' } });
-  const rice = await prisma.food.findFirst({ where: { name: 'Cooked white rice' } });
-  const cornflour = await prisma.food.findFirst({ where: { name: 'Cornflour' } });
-
-  await prisma.batch.create({
-    data: {
-      name: 'Chicken & Rice',
-      portionsTotal: 6,
-      portionsRemaining: 6,
-      ingredients: {
-        create: [
-          { foodId: chicken!.id, grams: 1200 },
-          { foodId: rice!.id, grams: 800 },
-          { foodId: cornflour!.id, grams: 250 },
-        ],
-      },
-    },
-  });
-
-  console.log(`Seeded ${REFERENCE_FOODS.length} reference foods and one example batch.`);
+  // Batches are user-owned (F5-1), so no example batch is seeded any more —
+  // cook one through the app instead.
+  console.log(`Seeded ${REFERENCE_FOODS.length} reference foods.`);
 }
 
 main()

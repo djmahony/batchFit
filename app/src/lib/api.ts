@@ -86,6 +86,14 @@ export type Macros = { kcal: number; protein: number; fat: number; carbs: number
 export type Meal = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
 export const MEALS: Meal[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
 
+/** A food with macros per 100g; `ownerId` null = shared reference food. */
+export type Food = Macros & {
+  id: string;
+  name: string;
+  brand: string | null;
+  ownerId: string | null;
+};
+
 /** One diary line. Macros are snapshotted for the logged quantity at log time. */
 export type LogEntry = Macros & {
   id: string;
@@ -174,6 +182,9 @@ export const api = {
     request<TdeeResult>('/tools/tdee', { method: 'POST', body: input, token }),
   saveProfile: (token: string, profile: ProfileInput) =>
     request<{ user: User }>('/me/profile', { method: 'PUT', body: profile, token }),
+  searchFoods: (token: string, query = '') =>
+    request<{ foods: Food[] }>(`/foods?query=${encodeURIComponent(query)}`, { token }),
+  recentFoods: (token: string) => request<{ foods: Food[] }>('/foods/recent', { token }),
   diary: (token: string, date: string) =>
     request<{ entries: LogEntry[] }>(`/diary?date=${date}`, { token }),
   diarySummary: (token: string, date: string) =>

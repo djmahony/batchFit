@@ -30,6 +30,24 @@ foodsRouter.get('/', async (req, res) => {
   res.json({ foods });
 });
 
+// GET /foods/recent — the caller's most recently logged foods, newest first,
+// one row per food (feeds the add-food "Recents" tab).
+foodsRouter.get('/recent', async (req, res) => {
+  const recents = await prisma.logEntry.findMany({
+    where: { userId: req.userId, foodId: { not: null } },
+    orderBy: { createdAt: 'desc' },
+    distinct: ['foodId'],
+    take: 20,
+    select: { foodId: true },
+  });
+  const ids = recents.map((r) => r.foodId!);
+  const foods = await prisma.food.findMany({
+    where: { id: { in: ids }, ...visibleTo(req.userId!) },
+  });
+  const byId = new Map(foods.map((f) => [f.id, f]));
+  res.json({ foods: ids.map((id) => byId.get(id)).filter(Boolean) });
+});
+
 const MACROS = ['kcal', 'protein', 'fat', 'carbs', 'fibre'] as const;
 
 // POST /foods — create a custom food owned by the caller (macros are per 100g).

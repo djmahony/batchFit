@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -144,6 +144,7 @@ export default function DiaryScreen() {
               <MealSection
                 key={meal}
                 meal={meal}
+                date={date}
                 entries={data.entries.filter((entry) => entry.meal === meal)}
               />
             ))}
@@ -154,7 +155,7 @@ export default function DiaryScreen() {
   );
 }
 
-function MealSection({ meal, entries }: { meal: Meal; entries: LogEntry[] }) {
+function MealSection({ meal, date, entries }: { meal: Meal; date: string; entries: LogEntry[] }) {
   const theme = useTheme();
   const subtotal = entries.reduce((sum, entry) => sum + entry.kcal, 0);
 
@@ -171,10 +172,10 @@ function MealSection({ meal, entries }: { meal: Meal; entries: LogEntry[] }) {
         <EntryRow key={entry.id} entry={entry} />
       ))}
 
-      {/* Wired to the Add Food flow in F4-4. */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Add food to ${MEAL_LABELS[meal]}`}
+        onPress={() => router.push({ pathname: '/add-food', params: { meal, date } })}
         style={({ pressed }) => [
           styles.addRow,
           { borderColor: theme.border },

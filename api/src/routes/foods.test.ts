@@ -5,6 +5,7 @@ import { app } from '../app.js';
 import { prisma } from '../prisma.js';
 
 beforeEach(async () => {
+  await prisma.logEntry.deleteMany();
   await prisma.food.deleteMany();
   await prisma.user.deleteMany();
 });
@@ -116,6 +117,44 @@ describe('GET /foods?query=', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.foods).toEqual([]);
+  });
+});
+
+describe('GET /foods/recent', () => {
+  it('returns recently logged foods, newest first, one row per food', async () => {
+    const token = await registerAndGetToken('recent@example.com');
+    const chicken = await prisma.food.create({ data: { ...oats, name: 'Chicken breast' } });
+    const rice = await prisma.food.create({ data: { ...oats, name: 'Cooked white rice' } });
+
+    const log = (foodId: string, date: string) =>
+      request(app)
+        .post('/diary')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date, meal: 'lunch', foodId, quantity: 100 });
+
+    await log(chicken.id, '2026-07-13');
+    await log(rice.id, '2026-07-14');
+    await log(chicken.id, '2026-07-15'); // chicken again — should dedupe & lead
+
+    const res = await request(app).get('/foods/recent').set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods.map((f: { name: string }) => f.name)).toEqual([
+      'Chicken breast',
+      'Cooked white rice',
+    ]);
+  });
+
+  it('is empty for a user with no logs', async () => {
+    const token = await registerAndGetToken('fresh@example.com');
+    const res = await request(app).get('/foods/recent').set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([]);
+  });
+
+  it('rejects a request with no token with 401', async () => {
+    const res = await request(app).get('/foods/recent');
+    expect(res.status).toBe(401);
   });
 });
 

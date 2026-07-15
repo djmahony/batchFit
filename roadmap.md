@@ -86,9 +86,10 @@ _Last updated: 2026-07-15._
 - [x] **F4-1** — Macro Ring/Bar set (`src/components/macros.tsx`, react-native-svg).
 - [x] **F4-2** — Date selector pill + day-key helpers (`src/lib/dates.ts`).
 - [x] **F4-3** — Diary screen (budget hero + bar, meal groups, entry cards, four states).
+- [x] **F4-4** — Add-food search modal (Recents via new `GET /foods/recent`, My foods, search).
 
-**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-4** (add-food search) → **F4-5**
-(food detail/quantity) → **F4-6** (create custom food) → **F4-7** (edit/delete entry).
+**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-5** (food detail/quantity) →
+**F4-6** (create custom food) → **F4-7** (edit/delete entry).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -268,7 +269,13 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   MacroBar), four meal groups with per-meal kcal subtotals, entry cards (name, grams · protein,
   kcal), dashed per-meal "Add food" rows (wired in F4-4). Pull-to-refresh + refetch-on-focus;
   loading / error+retry / empty-meal states. API client gains diary/diarySummary + types.
-- [ ] **F4-4 — Add-food search flow.** Search + Recents/Favourites/My foods tabs → results.
+- [x] **F4-4 — Add-food search flow.** ✅ Done. Modal `/add-food?meal&date` (mockup 1h/2h):
+  ✕ + "Add to <Meal>" header, debounced search over all visible foods, Recents / My foods chips
+  when the field is empty (Recents backed by new `GET /foods/recent` — most recently logged,
+  deduped, endpoint-tested), barcode Phase-2 slot, result rows with kcal + green add bubble →
+  food detail (F4-5), "No match? Create a custom food" footer → F4-6. Diary add rows now open it.
+  - **Decision to revisit:** Favourites chip deferred — no favourite flag in the data model
+    (needs its own task); spec's "My recipes/batches" source arrives with Prep (F6).
 - [ ] **F4-5 — Food detail / quantity.** Quantity control + live macros → add to meal/day.
 - [ ] **F4-6 — Create custom food.** Form (name, serving, per-serving macros) → saves & logs.
 - [ ] **F4-7 — Edit / delete entry.** Tap to edit quantity; swipe to delete.

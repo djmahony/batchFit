@@ -14,7 +14,7 @@ Tick tasks off as they merge. `[ ]` = todo, `[x]` = merged.
 
 ## Current status
 
-_Last updated: 2026-07-12._
+_Last updated: 2026-07-15._
 
 **Baseline already on `main` (pre-roadmap scaffolding):** a monorepo with two folders —
 - `app/` — Expo SDK 57 + Expo Router. Five placeholder tabs (Today, Diary, Prep, Train,
@@ -51,8 +51,14 @@ _Last updated: 2026-07-12._
   navigation (`Stack.Protected`: logged-in → `(tabs)`, logged-out → `(auth)`), and the Welcome,
   Register, and Login screens wired to the live API. Shared `Button`/`TextField` components.
   Register/login validate client-side, surface API errors inline, and let the guard swap to the
-  app on success. **Note:** a freshly-registered user currently lands straight in `(tabs)` —
-  onboarding (F2-7→9) isn't built yet, so `onboardingComplete` isn't gated on.
+  app on success. Screens are **styled to the design mockups** (`batchFitDesignWork/`): Prep Green
+  palette on Paper/Deep Kale, Schibsted + Hanken fonts, logo mark on Welcome. The API client
+  times out after 12s so an unreachable server shows an error instead of hanging. **Verified on
+  device** (register → app; sign out → Welcome; relaunch stays logged in).
+  - **Note:** a freshly-registered user currently lands straight in `(tabs)` — onboarding
+    (F2-7→9) isn't built yet, so `onboardingComplete` isn't gated on.
+  - **Temporary scaffolding to remove later:** a "Sign out" link on the **Progress** tab (real
+    logout belongs in Settings), and `app/.env.local` points the app at the dev API's LAN IP.
 
 **Next up (in order):** **F1-7** (Save onboarding — `PUT /me/profile`) → **F2-7** (Onboarding:
 Goal) → **F2-8** (Onboarding: About you) → **F2-9** (Onboarding: Targets). When onboarding lands,

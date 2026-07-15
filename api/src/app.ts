@@ -7,6 +7,7 @@ import { batchesRouter } from './routes/batches.js';
 import { diaryRouter } from './routes/diary.js';
 import { foodsRouter } from './routes/foods.js';
 import { meRouter } from './routes/me.js';
+import { recipesRouter } from './routes/recipes.js';
 import { toolsRouter } from './routes/tools.js';
 
 export const app = express();
@@ -24,5 +25,6 @@ app.use('/tools', toolsRouter);
 app.use('/foods', foodsRouter);
 app.use('/diary', diaryRouter);
 app.use('/batches', batchesRouter);
+app.use('/recipes', recipesRouter);
 
 app.use(errorHandler);

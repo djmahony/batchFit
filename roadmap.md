@@ -93,9 +93,10 @@ _Last updated: 2026-07-15._
   **Feature F4 complete** — Phase 2 (food logging) is done end-to-end.
 
 - [x] **F5-1** — Batches scoped to users (ownership + validation + per-portion macros, tested).
+- [x] **F5-2** — Recipes (owned templates; list/get/create/update; per-portion macros).
 
-**Next up (in order):** Phase 3 (Prep ⭐): **F5-2** (recipes) → **F5-3** (cook → batch) →
-**F5-4** (eat → diary) → **F5-5** (inventory/history), then Feature F6 (Prep UI).
+**Next up (in order):** Phase 3 (Prep ⭐): **F5-3** (cook → batch) → **F5-4** (eat → diary) →
+**F5-5** (inventory/history), then Feature F6 (Prep UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -317,8 +318,11 @@ The `/foods` and `/batches` scaffolding already exists — these tasks extend it
   ingredients and requires every ingredient food to be visible to the caller; responses wrapped
   `{ batches }`/`{ batch }` with total + per-portion macros. Seed no longer creates an example
   batch. Full endpoint tests (macros maths, validation, scoping, eat decrement/409).
-- [ ] **F5-2 — Recipes.** `Recipe`/`RecipeIngredient` routes: list/create/get/update; per-portion
-  macros from default amounts.
+- [x] **F5-2 — Recipes.** ✅ Done. `Recipe.ownerId` (+ migration) and auth-scoped `/recipes`:
+  list (A→Z) / get / create / **PUT update** (replaces name, portions and the full ingredient
+  list transactionally — cooked batches are untouched, they snapshot). Same validation as
+  batches (positive grams, visible foods). Total + per-portion macros from default amounts.
+  Endpoint-tested (macros, validation, scoping, update).
 - [ ] **F5-3 — Cook a recipe → batch.** `POST /recipes/:id/cook` pre-fills a batch (editable amounts) into inventory.
 - [ ] **F5-4 — Eat a portion → diary.** `POST /batches/:id/eat` logs a portion to the diary
   **and** decrements remaining (integrates F3). (+test for the decrement + log)

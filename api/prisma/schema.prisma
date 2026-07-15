@@ -52,6 +52,7 @@ model User {
   foods      Food[]
   logEntries LogEntry[]
   batches    Batch[]
+  recipes    Recipe[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -120,9 +121,12 @@ model Food {
 
 /// A reusable template: an ingredient list + a default portion count.
 /// Cooking a recipe produces a Batch (which snapshots the actual amounts used).
+/// `ownerId` nullable only for migration compatibility — see Batch.
 model Recipe {
   id              String @id @default(cuid())
   name            String
+  owner           User?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId         String?
   defaultPortions Int    @default(1)
 
   ingredients RecipeIngredient[]
@@ -130,6 +134,8 @@ model Recipe {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
 }
 
 model RecipeIngredient {

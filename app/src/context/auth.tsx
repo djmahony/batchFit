@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { api, type User } from '@/lib/api';
+import { api, ApiError, type User } from '@/lib/api';
 import { deleteToken, getToken, setToken } from '@/lib/token-storage';
 
 type AuthContextValue = {
@@ -29,8 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const res = await api.me(token);
           setUser(res.user);
         }
-      } catch {
-        await deleteToken();
+      } catch (err) {
+        // Only drop the token when the API rejected it (401 expired/invalid, or
+        // 404 account gone). A network failure (status 0) or server error just
+        // means we couldn't check — keep the session for the next launch.
+        if (err instanceof ApiError && (err.status === 401 || err.status === 404)) {
+          await deleteToken();
+        }
       } finally {
         setIsLoading(false);
       }

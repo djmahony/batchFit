@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 
+import { errorHandler } from './errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { batchesRouter } from './routes/batches.js';
 import { foodsRouter } from './routes/foods.js';
@@ -21,3 +22,5 @@ app.use('/me', meRouter);
 app.use('/tools', toolsRouter);
 app.use('/foods', foodsRouter);
 app.use('/batches', batchesRouter);
+
+app.use(errorHandler);

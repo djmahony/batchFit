@@ -23,6 +23,24 @@ export const Colors = {
     onTint: '#FFFFFF',
     accent: '#FB6E4E',
     danger: '#D64541',
+    // Card + control surfaces (BatchFit Onboarding.dc.html).
+    surface: '#FFFFFF',
+    surfaceBorder: '#ECEBE4',
+    track: '#F1EFE8',
+    segmentSelected: '#FFFFFF',
+    onSegmentSelected: '#16201A',
+    ink: '#18211C',
+    onInk: '#FFFFFF',
+    // The dark "hero" stat card sits on Deep Kale in both themes.
+    heroSurface: '#141E18',
+    onHero: '#FFFFFF',
+    onHeroMuted: '#9DB3A4',
+    // Soft green info banner.
+    tintSoft: '#E9F3EC',
+    onTintSoft: '#235C3B',
+    accentSoft: '#FDEEE8',
+    macroFat: '#F5C84B',
+    textMuted: '#9AA39C',
   },
   dark: {
     // Deep Kale surfaces, Paper text, brighter mint-green accent.
@@ -36,6 +54,21 @@ export const Colors = {
     onTint: '#0D1611',
     accent: '#FB6E4E',
     danger: '#F2837F',
+    surface: '#131E18',
+    surfaceBorder: '#22332A',
+    track: '#16241D',
+    segmentSelected: '#46C57E',
+    onSegmentSelected: '#0D1611',
+    ink: '#EAF0EB',
+    onInk: '#0D1611',
+    heroSurface: '#16241D',
+    onHero: '#F4F8F4',
+    onHeroMuted: '#8FA396',
+    tintSoft: '#16271D',
+    onTintSoft: '#A8D8BC',
+    accentSoft: 'rgba(251,110,78,0.16)',
+    macroFat: '#F5C84B',
+    textMuted: '#6E8174',
   },
 } as const;
 

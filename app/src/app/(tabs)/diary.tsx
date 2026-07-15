@@ -196,7 +196,15 @@ function EntryRow({ entry }: { entry: LogEntry }) {
       : `${round(entry.quantity)}g`;
 
   return (
-    <View style={[styles.entryCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Edit ${entry.name}`}
+      onPress={() => router.push({ pathname: '/entry/[id]', params: { id: entry.id } })}
+      style={({ pressed }) => [
+        styles.entryCard,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
       <View style={styles.entryText}>
         <ThemedText style={styles.entryName} numberOfLines={1}>
           {entry.name}
@@ -208,7 +216,7 @@ function EntryRow({ entry }: { entry: LogEntry }) {
       <ThemedText style={[styles.entryKcal, { color: theme.textSecondary }]}>
         {formatKcal(entry.kcal)}
       </ThemedText>
-    </View>
+    </Pressable>
   );
 }
 

@@ -190,6 +190,15 @@ export const api = {
     request<{ food: Food }>('/foods', { method: 'POST', body: input, token }),
   addDiaryEntry: (token: string, input: { date: string; meal: Meal; foodId: string; quantity: number }) =>
     request<{ entry: LogEntry }>('/diary', { method: 'POST', body: input, token }),
+  diaryEntry: (token: string, id: string) =>
+    request<{ entry: LogEntry }>(`/diary/${id}`, { token }),
+  updateDiaryEntry: (
+    token: string,
+    id: string,
+    patch: { quantity?: number; meal?: Meal; date?: string },
+  ) => request<{ entry: LogEntry }>(`/diary/${id}`, { method: 'PATCH', body: patch, token }),
+  deleteDiaryEntry: (token: string, id: string) =>
+    request<null>(`/diary/${id}`, { method: 'DELETE', token }),
   diary: (token: string, date: string) =>
     request<{ entries: LogEntry[] }>(`/diary?date=${date}`, { token }),
   diarySummary: (token: string, date: string) =>

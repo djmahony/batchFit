@@ -115,6 +115,16 @@ diaryRouter.get('/', async (req, res) => {
   res.json({ entries });
 });
 
+// GET /diary/:id — one entry (the edit screen re-fetches rather than trusting
+// stale navigation params).
+diaryRouter.get('/:id', async (req, res) => {
+  const entry = await prisma.logEntry.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!entry) return res.status(404).json({ error: 'entry not found' });
+  res.json({ entry });
+});
+
 // PATCH /diary/:id — edit an entry. Changing quantity rescales the snapshotted
 // macros proportionally (from the snapshot, not the live food — no rewrites).
 // meal and date can also move.

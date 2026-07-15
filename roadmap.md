@@ -89,9 +89,12 @@ _Last updated: 2026-07-15._
 - [x] **F4-4** — Add-food search modal (Recents via new `GET /foods/recent`, My foods, search).
 - [x] **F4-5** — Food detail/quantity (`(logging)` modal group, live ring, add to diary).
 - [x] **F4-6** — Create custom food (per-serving form → per-100g save → straight into logging).
+- [x] **F4-7** — Edit/delete entry (tap → `/entry/[id]`, snapshot-rescaled preview, delete).
+  **Feature F4 complete** — Phase 2 (food logging) is done end-to-end.
 
-**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-7** (edit/delete entry) — then
-Phase 3 (Prep, F5/F6).
+**Next up (in order):** Phase 3 (Prep ⭐): **F5-1** (scope batches to users) → **F5-2**
+(recipes) → **F5-3** (cook → batch) → **F5-4** (eat → diary) → **F5-5** (inventory/history),
+then Feature F6 (Prep UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -289,7 +292,12 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   size (grams), PER SERVING calories/protein/carbs/fat + optional fibre (blank = 0). Converts
   per-serving → per-100g for `POST /foods`, then replaces into `/food/[id]` pre-filled with one
   serving so saving flows straight into logging. Client-side validation with kind copy.
-- [ ] **F4-7 — Edit / delete entry.** Tap to edit quantity; swipe to delete.
+- [x] **F4-7 — Edit / delete entry.** ✅ Done. Diary entries are tappable → `/entry/[id]`
+  (same sheet visual language as food detail): grams stepper + live ring **rescaled from the
+  entry's own snapshot** (mirrors the API's PATCH maths — the live food is never re-read), meal
+  mover, "Delete entry" destructive row, "Save changes". Batch-portion entries (F5-4) show a
+  fixed portion note instead of a grams stepper. API adds `GET /diary/:id` (+test).
+  - **Decision to revisit:** swipe-to-delete fast path not built (tap → delete covers MVP).
 
 **Verification:** on device — add, edit, delete foods across meals; totals and the rings update live.
 

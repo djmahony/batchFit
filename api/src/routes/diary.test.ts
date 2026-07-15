@@ -221,6 +221,29 @@ describe('GET /diary/summary', () => {
   });
 });
 
+describe('GET /diary/:id', () => {
+  it("returns the caller's entry and 404s for someone else's", async () => {
+    const token = await registerAndGetToken();
+    const otherToken = await registerAndGetToken('other@example.com');
+    const chicken = await seedChicken();
+    const created = await request(app)
+      .post('/diary')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-07-15', meal: 'lunch', foodId: chicken.id, quantity: 150 });
+
+    const own = await request(app)
+      .get(`/diary/${created.body.entry.id}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(own.status).toBe(200);
+    expect(own.body.entry.quantity).toBe(150);
+
+    const foreign = await request(app)
+      .get(`/diary/${created.body.entry.id}`)
+      .set('Authorization', `Bearer ${otherToken}`);
+    expect(foreign.status).toBe(404);
+  });
+});
+
 describe('PATCH /diary/:id', () => {
   it('rescales snapshotted macros when quantity changes', async () => {
     const token = await registerAndGetToken();

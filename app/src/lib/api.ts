@@ -80,6 +80,32 @@ export type ProfileInput = {
   targetFibre: number;
 };
 
+/** The five tracked nutrients, everywhere. */
+export type Macros = { kcal: number; protein: number; fat: number; carbs: number; fibre: number };
+
+export type Meal = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+export const MEALS: Meal[] = ['breakfast', 'lunch', 'dinner', 'snacks'];
+
+/** One diary line. Macros are snapshotted for the logged quantity at log time. */
+export type LogEntry = Macros & {
+  id: string;
+  date: string;
+  meal: Meal;
+  name: string;
+  foodId: string | null;
+  quantity: number;
+  unit: string;
+  createdAt: string;
+};
+
+/** `GET /diary/summary` — consumed vs. targets; targets are null pre-onboarding. */
+export type DiarySummary = {
+  date: string;
+  consumed: Macros;
+  targets: { [K in keyof Macros]: number | null };
+  remaining: { [K in keyof Macros]: number | null };
+};
+
 /** Thrown for any non-2xx response (or an unreachable server, with `status: 0`). */
 export class ApiError extends Error {
   constructor(
@@ -137,7 +163,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return data as T;
 }
 
-/** Typed calls against the BatchFit auth + onboarding API (F1). */
+/** Typed calls against the BatchFit API (auth + onboarding F1, diary F3). */
 export const api = {
   register: (email: string, password: string) =>
     request<AuthResponse>('/auth/register', { method: 'POST', body: { email, password } }),
@@ -148,4 +174,8 @@ export const api = {
     request<TdeeResult>('/tools/tdee', { method: 'POST', body: input, token }),
   saveProfile: (token: string, profile: ProfileInput) =>
     request<{ user: User }>('/me/profile', { method: 'PUT', body: profile, token }),
+  diary: (token: string, date: string) =>
+    request<{ entries: LogEntry[] }>(`/diary?date=${date}`, { token }),
+  diarySummary: (token: string, date: string) =>
+    request<{ summary: DiarySummary }>(`/diary/summary?date=${date}`, { token }),
 };

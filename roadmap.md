@@ -85,10 +85,10 @@ _Last updated: 2026-07-15._
 
 - [x] **F4-1** — Macro Ring/Bar set (`src/components/macros.tsx`, react-native-svg).
 - [x] **F4-2** — Date selector pill + day-key helpers (`src/lib/dates.ts`).
+- [x] **F4-3** — Diary screen (budget hero + bar, meal groups, entry cards, four states).
 
-**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-3** (Diary screen) → **F4-4**
-(add-food search) → **F4-5** (food detail/quantity) → **F4-6** (create custom food) → **F4-7**
-(edit/delete entry).
+**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-4** (add-food search) → **F4-5**
+(food detail/quantity) → **F4-6** (create custom food) → **F4-7** (edit/delete entry).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -263,7 +263,11 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   `‹ Wed 12 Jun ›` pill from the day-log mockup (Today/Yesterday/Tomorrow for nearby days) —
   plus local-time day-key helpers in `src/lib/dates.ts` (`todayKey`, `shiftDayKey`,
   `formatDayKey`; local time so "today" stays honest around midnight).
-- [ ] **F4-3 — Diary screen.** Meal groups (B/L/D/Snacks), per-meal subtotals, pinned daily totals bar.
+- [x] **F4-3 — Diary screen.** ✅ Done. Styled to mockup 1g/2g: header + date selector, kcal
+  budget hero card (logged / target, "left"—or "over" in coral, never shaming copy—plus thin
+  MacroBar), four meal groups with per-meal kcal subtotals, entry cards (name, grams · protein,
+  kcal), dashed per-meal "Add food" rows (wired in F4-4). Pull-to-refresh + refetch-on-focus;
+  loading / error+retry / empty-meal states. API client gains diary/diarySummary + types.
 - [ ] **F4-4 — Add-food search flow.** Search + Recents/Favourites/My foods tabs → results.
 - [ ] **F4-5 — Food detail / quantity.** Quantity control + live macros → add to meal/day.
 - [ ] **F4-6 — Create custom food.** Form (name, serving, per-serving macros) → saves & logs.

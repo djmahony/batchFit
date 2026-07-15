@@ -123,6 +123,104 @@ describe('GET /diary', () => {
   });
 });
 
+describe('GET /diary/summary', () => {
+  const profile = {
+    sex: 'male',
+    birthDate: '1990-06-15',
+    heightCm: 180,
+    activityLevel: 'moderate',
+    goal: 'lose',
+    goalRateKgPerWk: 0.5,
+    currentWeightKg: 90,
+    units: 'metric',
+    targetKcal: 2200,
+    targetProtein: 180,
+    targetFat: 61,
+    targetCarbs: 232,
+    targetFibre: 31,
+  };
+
+  it('returns consumed vs. targets with remaining for the five nutrients', async () => {
+    const token = await registerAndGetToken();
+    await request(app).put('/me/profile').set('Authorization', `Bearer ${token}`).send(profile);
+    const chicken = await seedChicken();
+
+    // 200g at breakfast + 100g at dinner = 300g chicken.
+    for (const [meal, quantity] of [
+      ['breakfast', 200],
+      ['dinner', 100],
+    ] as const) {
+      await request(app)
+        .post('/diary')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: '2026-07-15', meal, foodId: chicken.id, quantity });
+    }
+
+    const res = await request(app)
+      .get('/diary/summary')
+      .query({ date: '2026-07-15' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const { consumed, targets, remaining } = res.body.summary;
+    expect(consumed.kcal).toBeCloseTo(495);
+    expect(consumed.protein).toBeCloseTo(93);
+    expect(targets.kcal).toBe(2200);
+    expect(remaining.kcal).toBeCloseTo(1705);
+    expect(remaining.protein).toBeCloseTo(87);
+    expect(remaining.fibre).toBeCloseTo(31);
+  });
+
+  it('updates after an entry is edited or deleted', async () => {
+    const token = await registerAndGetToken();
+    await request(app).put('/me/profile').set('Authorization', `Bearer ${token}`).send(profile);
+    const chicken = await seedChicken();
+    const created = await request(app)
+      .post('/diary')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-07-15', meal: 'lunch', foodId: chicken.id, quantity: 200 });
+
+    await request(app)
+      .patch(`/diary/${created.body.entry.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ quantity: 100 });
+    let res = await request(app)
+      .get('/diary/summary')
+      .query({ date: '2026-07-15' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.body.summary.consumed.kcal).toBeCloseTo(165);
+
+    await request(app)
+      .delete(`/diary/${created.body.entry.id}`)
+      .set('Authorization', `Bearer ${token}`);
+    res = await request(app)
+      .get('/diary/summary')
+      .query({ date: '2026-07-15' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.body.summary.consumed.kcal).toBe(0);
+  });
+
+  it('returns null targets/remaining before onboarding sets them', async () => {
+    const token = await registerAndGetToken();
+
+    const res = await request(app)
+      .get('/diary/summary')
+      .query({ date: '2026-07-15' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.summary.consumed.kcal).toBe(0);
+    expect(res.body.summary.targets.kcal).toBeNull();
+    expect(res.body.summary.remaining.kcal).toBeNull();
+  });
+
+  it('rejects a missing date with 400', async () => {
+    const token = await registerAndGetToken();
+    const res = await request(app).get('/diary/summary').set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(400);
+  });
+});
+
 describe('PATCH /diary/:id', () => {
   it('rescales snapshotted macros when quantity changes', async () => {
     const token = await registerAndGetToken();

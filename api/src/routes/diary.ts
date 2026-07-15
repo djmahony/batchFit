@@ -58,6 +58,49 @@ diaryRouter.post('/', async (req, res) => {
   res.status(201).json({ entry });
 });
 
+// GET /diary/summary?date=YYYY-MM-DD — the day's consumed totals vs. the user's
+// five targets. `remaining` can go negative; the client decides how to phrase that
+// (never "exceeded your limit" — brand rule).
+diaryRouter.get('/summary', async (req, res) => {
+  const date = req.query.date;
+  if (typeof date !== 'string' || !DAY_KEY.test(date)) {
+    return res.status(400).json({ error: 'date must be "YYYY-MM-DD"' });
+  }
+
+  const [sums, user] = await Promise.all([
+    prisma.logEntry.aggregate({
+      where: { userId: req.userId, date },
+      _sum: { kcal: true, protein: true, fat: true, carbs: true, fibre: true },
+    }),
+    prisma.user.findUnique({ where: { id: req.userId } }),
+  ]);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const consumed = {
+    kcal: sums._sum.kcal ?? 0,
+    protein: sums._sum.protein ?? 0,
+    fat: sums._sum.fat ?? 0,
+    carbs: sums._sum.carbs ?? 0,
+    fibre: sums._sum.fibre ?? 0,
+  };
+  const targets = {
+    kcal: user.targetKcal,
+    protein: user.targetProtein,
+    fat: user.targetFat,
+    carbs: user.targetCarbs,
+    fibre: user.targetFibre,
+  };
+  const remaining = {
+    kcal: targets.kcal === null ? null : targets.kcal - consumed.kcal,
+    protein: targets.protein === null ? null : targets.protein - consumed.protein,
+    fat: targets.fat === null ? null : targets.fat - consumed.fat,
+    carbs: targets.carbs === null ? null : targets.carbs - consumed.carbs,
+    fibre: targets.fibre === null ? null : targets.fibre - consumed.fibre,
+  };
+
+  res.json({ summary: { date, consumed, targets, remaining } });
+});
+
 // GET /diary?date=YYYY-MM-DD — the day's entries, oldest first.
 diaryRouter.get('/', async (req, res) => {
   const date = req.query.date;

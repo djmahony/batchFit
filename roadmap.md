@@ -80,8 +80,12 @@ _Last updated: 2026-07-15._
 - [x] **F3-2** — Food search (`GET /foods?query=`) + reference-food seed library.
 - [x] **F3-3** — Diary model (`LogEntry`, day-key dates, snapshotted macros).
 - [x] **F3-4** — Diary log CRUD (`POST/GET/PATCH/DELETE /diary`, snapshot-preserving edits).
+- [x] **F3-5** — Daily totals (`GET /diary/summary?date=`: consumed vs. targets vs. remaining).
+  **Feature F3 complete** — the Food & Diary API is exercisable end-to-end.
 
-**Next up (in order):** Phase 2 — **F3-5** (daily totals) → Feature F4 (Diary UI).
+**Next up (in order):** Phase 2 — Feature F4 (Diary UI): **F4-1** (Macro Ring/Bar set) →
+**F4-2** (date selector) → **F4-3** (Diary screen) → **F4-4** (add-food search) → **F4-5**
+(food detail/quantity) → **F4-6** (create custom food) → **F4-7** (edit/delete entry).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -238,7 +242,10 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   `GET ?date=`, `PATCH /:id` (quantity change rescales the **snapshot** proportionally — never
   re-reads the live food; meal/date moves), `DELETE /:id`. Other users' entries/foods → 404.
   Tests cover snapshot immutability after food edits, scoping, validation, all verbs.
-- [ ] **F3-5 — Daily totals.** `GET /diary/summary?date=` returns consumed vs. target for the five nutrients. (+test)
+- [x] **F3-5 — Daily totals.** ✅ Done. `GET /diary/summary?date=` aggregates the day's
+  entries into `{ consumed, targets, remaining }` for the five nutrients; targets/remaining are
+  null before onboarding sets them; remaining may go negative (client phrases it kindly).
+  Tests cover totals, live updates after edit/delete, null targets, validation.
 
 **Verification:** log foods to meals for a day via API; summary totals are correct; editing/deleting updates them.
 

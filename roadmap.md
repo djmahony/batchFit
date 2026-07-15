@@ -55,14 +55,29 @@ _Last updated: 2026-07-15._
   palette on Paper/Deep Kale, Schibsted + Hanken fonts, logo mark on Welcome. The API client
   times out after 12s so an unreachable server shows an error instead of hanging. **Verified on
   device** (register → app; sign out → Welcome; relaunch stays logged in).
-  - **Note:** a freshly-registered user currently lands straight in `(tabs)` — onboarding
-    (F2-7→9) isn't built yet, so `onboardingComplete` isn't gated on.
   - **Temporary scaffolding to remove later:** a "Sign out" link on the **Progress** tab (real
     logout belongs in Settings), and `app/.env.local` points the app at the dev API's LAN IP.
+- [x] **F1-7** — Save onboarding. `PUT /me/profile` (auth-protected) validates and persists
+  goal (+ weekly rate, nulled for maintain), profile, units and the five targets, sets
+  `onboardingComplete`, returns the serialized user. Endpoint-tested.
+- [x] **F2-7 → F2-9** — Onboarding UI (frontend). `(onboarding)` route group, gated in the root
+  layout: logged-in **without** `onboardingComplete` → onboarding; **with** → `(tabs)` (the
+  re-gate). Flow state lives in `OnboardingProvider`; screens styled to
+  `BatchFit Onboarding.dc.html` (light + dark): **Goal** (Lose/Maintain/Build choice cards,
+  gentle/moderate/aggressive rate picker for lose), **About you** (metric/imperial toggle that
+  converts typed values, sex, age/height/weight rows, five activity levels with plain-language
+  descriptions), **Targets** (calls `/tools/tdee`, calorie hero ring + protein/carbs/fat cards +
+  fibre row — all manually editable — then "Looks good" → `PUT /me/profile` → the guard swaps
+  into the app). Adds shared `Segmented`, `ChoiceCard`, `OnboardingStep` components and new
+  mockup-sourced theme tokens.
+  - **Decisions to revisit:** "build" uses a fixed gentle surplus (0.25 kg/wk) since the rate
+    picker only shows for weight loss; the spec's optional "skip setup" affordance and "Ready"
+    micro-screen were not built (not roadmap tasks); the calorie ring is a plain single-colour
+    ring until the real Macro Ring set lands (F4-1).
 
-**Next up (in order):** **F1-7** (Save onboarding — `PUT /me/profile`) → **F2-7** (Onboarding:
-Goal) → **F2-8** (Onboarding: About you) → **F2-9** (Onboarding: Targets). When onboarding lands,
-re-gate navigation on `onboardingComplete`. Confirm which to start when resuming.
+**Next up (in order):** Phase 2 — **F3-1** (scope `/foods` to users + custom foods) → **F3-2**
+(food search) → **F3-3** (diary model) → **F3-4** (log CRUD) → **F3-5** (daily totals). Also
+consider seeding reference foods before F3-2 (search over an empty table isn't testable).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -152,8 +167,10 @@ Auth is **JWT**: register/login return an access token; protected routes require
   inputs, derives age from `birthDate`, and returns `{ bmr, maintenanceKcal, targets }`. Unit
   tests pin the math (incl. the BMR floor + female constant); endpoint tests cover the wiring,
   401, and validation.
-- [ ] **F1-7 — Save onboarding.** `PUT /me/profile` persists goal + profile + targets and
-  sets `onboardingComplete`. (+test)
+- [x] **F1-7 — Save onboarding.** ✅ Done. `PUT /me/profile` validates (enums, positive
+  numbers, birth date) and persists goal + profile + targets, nulls the weekly rate for
+  maintain, sets `onboardingComplete`, returns the serialized user. Tests cover the save,
+  validation failures, and 401.
 
 **Verification:** with `curl`/REST client — register → login → `POST /tools/tdee` →
 `PUT /me/profile` → `GET /me` returns the saved profile with `onboardingComplete: true`.
@@ -180,10 +197,13 @@ The screens that let a user sign up, log in, and complete onboarding against F1.
   Adds shared `TextField`.
 - [x] **F2-6 — Login screen.** ✅ Done. Form → `signIn`; surfaces the API's 401 inline, loading
   state → guard swaps to the app on success.
-- [ ] **F2-7 — Onboarding: Goal.** Lose / Maintain / Build cards (+ rate for weight loss); held in flow state.
-- [ ] **F2-8 — Onboarding: About you.** Sex, age, height, current weight, activity; metric/imperial toggle.
-- [ ] **F2-9 — Onboarding: Targets.** Calls `/tools/tdee`, shows calorie hero + macro set,
-  allows manual override, confirm → `PUT /me/profile` → enters the app.
+- [x] **F2-7 — Onboarding: Goal.** ✅ Done. Lose (with gentle/moderate/aggressive rate picker) /
+  Maintain / Build choice cards; selection held in `OnboardingProvider` flow state.
+- [x] **F2-8 — Onboarding: About you.** ✅ Done. Sex, age, height, current weight, five activity
+  levels with descriptions; metric/imperial toggle converts what's typed; metric sent to the API.
+- [x] **F2-9 — Onboarding: Targets.** ✅ Done. Calls `/tools/tdee`, shows the calorie hero ring +
+  macro cards + fibre (all editable for manual override), "Looks good" → `PUT /me/profile` →
+  the root guard (now gated on `onboardingComplete`) swaps into the app.
 
 **Verification:** on a device via Expo Go — fresh signup → onboarding → land in Today;
 kill & reopen the app stays logged in; sign out returns to Welcome.

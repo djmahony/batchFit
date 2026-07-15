@@ -39,6 +39,47 @@ export type User = {
 
 export type AuthResponse = { token: string; user: User };
 
+export type Sex = 'male' | 'female';
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+export type Goal = 'lose' | 'maintain' | 'build';
+export type Units = 'metric' | 'imperial';
+
+/** Inputs for `POST /tools/tdee` (mirrors api/src/routes/tools.ts). */
+export type TdeeInput = {
+  sex: Sex;
+  birthDate: string;
+  heightCm: number;
+  weightKg: number;
+  activityLevel: ActivityLevel;
+  goal: Goal;
+  /** Required for lose/build, ignored for maintain. */
+  goalRateKgPerWk?: number;
+};
+
+export type TdeeResult = {
+  bmr: number;
+  maintenanceKcal: number;
+  targets: { kcal: number; protein: number; fat: number; carbs: number; fibre: number };
+};
+
+/** Body for `PUT /me/profile` — what onboarding saves (all metric). */
+export type ProfileInput = {
+  sex: Sex;
+  birthDate: string;
+  heightCm: number;
+  activityLevel: ActivityLevel;
+  goal: Goal;
+  goalRateKgPerWk?: number;
+  currentWeightKg: number;
+  goalWeightKg?: number;
+  units: Units;
+  targetKcal: number;
+  targetProtein: number;
+  targetFat: number;
+  targetCarbs: number;
+  targetFibre: number;
+};
+
 /** Thrown for any non-2xx response (or an unreachable server, with `status: 0`). */
 export class ApiError extends Error {
   constructor(
@@ -96,11 +137,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return data as T;
 }
 
-/** Typed calls against the BatchFit auth API (F1). */
+/** Typed calls against the BatchFit auth + onboarding API (F1). */
 export const api = {
   register: (email: string, password: string) =>
     request<AuthResponse>('/auth/register', { method: 'POST', body: { email, password } }),
   login: (email: string, password: string) =>
     request<AuthResponse>('/auth/login', { method: 'POST', body: { email, password } }),
   me: (token: string) => request<{ user: User }>('/me', { token }),
+  tdee: (token: string, input: TdeeInput) =>
+    request<TdeeResult>('/tools/tdee', { method: 'POST', body: input, token }),
+  saveProfile: (token: string, profile: ProfileInput) =>
+    request<{ user: User }>('/me/profile', { method: 'PUT', body: profile, token }),
 };

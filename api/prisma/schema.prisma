@@ -1,9 +1,10 @@
 // BatchFit API schema.
 // Accounts are Phase 1 (client–server, login required — see roadmap.md). This models
-// the User (auth + profile + the five daily targets). The batch-cooking differentiator
-// (Recipe = template, Batch = one cook with snapshotted amounts + portion inventory) is
-// modelled below. Diary, workouts and weight entries arrive in later phases; ownership
-// (scoping foods/recipes/batches to a user) is added in F3-1 / F5-1.
+// the User (auth + profile + the five daily targets), foods (shared reference +
+// user-owned custom), the food diary (LogEntry, snapshotted macros), and the
+// batch-cooking differentiator (Recipe = template, Batch = one cook with snapshotted
+// amounts + portion inventory). Workouts and weight entries arrive in later phases;
+// batch/recipe ownership is added in F5-1.
 
 generator client {
   provider = "prisma-client-js"
@@ -48,10 +49,45 @@ model User {
 
   onboardingComplete Boolean @default(false)
 
-  foods Food[]
+  foods      Food[]
+  logEntries LogEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// One line in the food diary: a food logged to a meal on a day. Macros are
+/// **snapshotted at log time** (scaled to the quantity eaten) so history never
+/// changes when a food or batch is later edited — the MVP's no-rewrite rule.
+/// `date` is a day key ("YYYY-MM-DD") in the user's local day, not a timestamp.
+///   meal — "breakfast" | "lunch" | "dinner" | "snacks"
+model LogEntry {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  date String
+  meal String
+
+  /// What was eaten, snapshotted by name; the food link is kept for "log it
+  /// again" but the entry survives the food being deleted.
+  name     String
+  food     Food?   @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  foodId   String?
+  quantity Float
+  unit     String  @default("g")
+
+  // Snapshotted macros for the logged quantity (not per-100g).
+  kcal    Float
+  protein Float
+  fat     Float
+  carbs   Float
+  fibre   Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
 }
 
 /// A food with macros per 100g. The five tracked nutrients throughout
@@ -73,6 +109,7 @@ model Food {
 
   recipeIngredients RecipeIngredient[]
   batchIngredients  BatchIngredient[]
+  logEntries        LogEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

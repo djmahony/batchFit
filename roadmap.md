@@ -78,9 +78,9 @@ _Last updated: 2026-07-15._
 - [x] **F3-1** — `/foods` scoped to users + custom foods (`Food.ownerId`, auth-required
   routes, macro validation; see Phase 2 below).
 - [x] **F3-2** — Food search (`GET /foods?query=`) + reference-food seed library.
+- [x] **F3-3** — Diary model (`LogEntry`, day-key dates, snapshotted macros).
 
-**Next up (in order):** Phase 2 — **F3-3** (diary model) → **F3-4** (log CRUD) → **F3-5**
-(daily totals).
+**Next up (in order):** Phase 2 — **F3-4** (log CRUD) → **F3-5** (daily totals).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -228,8 +228,10 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   (reference + own) by name or brand, case-insensitive (SQLite LIKE), capped at 50 results;
   blank query returns everything. Seed expanded to ~58 reference foods (idempotent — skips if
   reference foods exist). Tests cover matching, scoping, blank query, and no-match.
-- [ ] **F3-3 — Diary model.** `LogEntry` (user, date, meal group, food, quantity/unit,
-  snapshotted macros) + migration.
+- [x] **F3-3 — Diary model.** ✅ Done. `LogEntry` + `add_log_entry` migration: user (cascade),
+  `date` day-key string ("YYYY-MM-DD"), meal ("breakfast"|"lunch"|"dinner"|"snacks"), snapshotted
+  `name`, optional food link (SetNull on delete), quantity/unit, and the five macros snapshotted
+  **for the logged quantity** — history never rewrites. Indexed on `[userId, date]`.
 - [ ] **F3-4 — Log CRUD.** `POST /diary` (add), `GET /diary?date=`, `PATCH`/`DELETE /diary/:id`. (+tests)
 - [ ] **F3-5 — Daily totals.** `GET /diary/summary?date=` returns consumed vs. target for the five nutrients. (+test)
 

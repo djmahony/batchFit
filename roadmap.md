@@ -79,8 +79,9 @@ _Last updated: 2026-07-15._
   routes, macro validation; see Phase 2 below).
 - [x] **F3-2** — Food search (`GET /foods?query=`) + reference-food seed library.
 - [x] **F3-3** — Diary model (`LogEntry`, day-key dates, snapshotted macros).
+- [x] **F3-4** — Diary log CRUD (`POST/GET/PATCH/DELETE /diary`, snapshot-preserving edits).
 
-**Next up (in order):** Phase 2 — **F3-4** (log CRUD) → **F3-5** (daily totals).
+**Next up (in order):** Phase 2 — **F3-5** (daily totals) → Feature F4 (Diary UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -232,7 +233,11 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   `date` day-key string ("YYYY-MM-DD"), meal ("breakfast"|"lunch"|"dinner"|"snacks"), snapshotted
   `name`, optional food link (SetNull on delete), quantity/unit, and the five macros snapshotted
   **for the logged quantity** — history never rewrites. Indexed on `[userId, date]`.
-- [ ] **F3-4 — Log CRUD.** `POST /diary` (add), `GET /diary?date=`, `PATCH`/`DELETE /diary/:id`. (+tests)
+- [x] **F3-4 — Log CRUD.** ✅ Done. Auth-scoped `/diary` routes: `POST` (validates day-key/
+  meal/quantity, food must be visible to the caller, snapshots name + macros scaled to grams),
+  `GET ?date=`, `PATCH /:id` (quantity change rescales the **snapshot** proportionally — never
+  re-reads the live food; meal/date moves), `DELETE /:id`. Other users' entries/foods → 404.
+  Tests cover snapshot immutability after food edits, scoping, validation, all verbs.
 - [ ] **F3-5 — Daily totals.** `GET /diary/summary?date=` returns consumed vs. target for the five nutrients. (+test)
 
 **Verification:** log foods to meals for a day via API; summary totals are correct; editing/deleting updates them.

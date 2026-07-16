@@ -114,8 +114,10 @@ _Last updated: 2026-07-15._
 - [x] **F8-3** — Active session (set tables + keypad, add-set pre-fill, repeat-last, finish).
 - [x] **F8-4** — Exercise picker/library (search, create/edit own). **F8 complete.**
 
-**Next up (in order):** Phase 5 (Progress & Settings): **F9-1** (weight entries) → **F9-2**
-(trend & stats) → **F9-3** (settings persistence), then Feature F10 (UI).
+- [x] **F9-1** — Weight entries (day-upsert CRUD).
+
+**Next up (in order):** Phase 5 (Progress & Settings): **F9-2** (trend & stats) → **F9-3**
+(settings persistence), then Feature F10 (UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -460,7 +462,10 @@ Bodyweight trend, stats, and editing what onboarding set.
 
 ### Feature F9 — Progress & Settings API (backend)
 
-- [ ] **F9-1 — Weight entries.** `WeightEntry` (date, value, note) + CRUD. (+tests)
+- [x] **F9-1 — Weight entries.** ✅ Done. `WeightEntry` (day-key date, weightKg, note;
+  unique per user+day) + `add_weight_entry` migration. `/weights`: POST **upserts** the day
+  (a second weigh-in updates, not duplicates), GET oldest-first, PATCH value/note, DELETE.
+  Tested (upsert, validation, ordering, scoping).
 - [ ] **F9-2 — Trend & stats.** `GET /progress` returns raw points + smoothed trend + change-over-range
   + simple weekly stats. (+test on the smoothing)
 - [ ] **F9-3 — Settings persistence.** Reuse/extend `PUT /me/profile` for goal/targets/profile/units edits.

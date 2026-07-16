@@ -55,6 +55,7 @@ model User {
   recipes    Recipe[]
   exercises  Exercise[]
   workouts   Workout[]
+  weights    WeightEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -260,4 +261,21 @@ model WorkoutSet {
   distanceM         Float?
 
   @@index([workoutExerciseId])
+}
+
+/// One bodyweight reading. `date` is a day key ("YYYY-MM-DD"); one entry per
+/// day per user — logging again the same day updates it.
+model WeightEntry {
+  id       String  @id @default(cuid())
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  date     String
+  weightKg Float
+  note     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }

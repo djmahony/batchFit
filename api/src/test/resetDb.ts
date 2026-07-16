@@ -7,6 +7,7 @@ import { prisma } from '../prisma.js';
  */
 export async function resetDb() {
   await prisma.workout.deleteMany(); // workout exercises + sets cascade
+  await prisma.weightEntry.deleteMany();
   await prisma.logEntry.deleteMany();
   await prisma.batch.deleteMany(); // batch ingredients cascade
   await prisma.recipe.deleteMany(); // recipe ingredients cascade

@@ -10,6 +10,7 @@ import { foodsRouter } from './routes/foods.js';
 import { meRouter } from './routes/me.js';
 import { recipesRouter } from './routes/recipes.js';
 import { toolsRouter } from './routes/tools.js';
+import { weightsRouter } from './routes/weights.js';
 import { workoutsRouter } from './routes/workouts.js';
 
 export const app = express();
@@ -30,5 +31,6 @@ app.use('/batches', batchesRouter);
 app.use('/recipes', recipesRouter);
 app.use('/exercises', exercisesRouter);
 app.use('/workouts', workoutsRouter);
+app.use('/weights', weightsRouter);
 
 app.use(errorHandler);

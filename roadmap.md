@@ -106,9 +106,10 @@ _Last updated: 2026-07-15._
 
 - [x] **F7-1** — Exercise model + seeded library + CRUD (library read-only).
 - [x] **F7-2** — Workout session models (Workout → WorkoutExercise → WorkoutSet).
+- [x] **F7-3** — Session CRUD (start/resume, PUT structure, finish, list/get/delete).
 
-**Next up (in order):** Phase 4 (Train): **F7-3** (session CRUD) → **F7-4**
-(repeat-last-workout), then Feature F8 (Train UI).
+**Next up (in order):** Phase 4 (Train): **F7-4** (repeat-last-workout), then Feature F8
+(Train UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -408,7 +409,11 @@ Co-equal pillar with food logging. Exercises, sessions, history.
   unfinished, user cascade) → `WorkoutExercise` (ordered blocks; exercise name + trackingMode
   **snapshotted**, SetNull link) → `WorkoutSet` (order + nullable weightKg/reps/seconds/
   distanceM — the block's mode says which apply). `add_workouts` migration.
-- [ ] **F7-3 — Session CRUD.** Create/finish/list/get, including unfinished-session state. (+tests)
+- [x] **F7-3 — Session CRUD.** ✅ Done. `/workouts`: POST start (returns the existing
+  unfinished session instead of forking a second one), GET list newest-first with
+  `?status=unfinished|finished`, GET `/:id`, **PUT `/:id`** replaces blocks + sets
+  transactionally (name/trackingMode snapshotted from visible exercises; sets validated
+  per mode), POST `/:id/finish` (409 if already finished), DELETE `/:id`. Fully tested.
 - [ ] **F7-4 — Repeat-last-workout.** Endpoint returning the previous session's exercises/sets to pre-fill.
 
 **Verification:** create a session, add exercises/sets, finish, list history; repeat-last returns prior numbers.

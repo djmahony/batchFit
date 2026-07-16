@@ -6,6 +6,7 @@ import { prisma } from '../prisma.js';
  * or another file's leftovers break deleteMany with FK violations.
  */
 export async function resetDb() {
+  await prisma.workout.deleteMany(); // workout exercises + sets cascade
   await prisma.logEntry.deleteMany();
   await prisma.batch.deleteMany(); // batch ingredients cascade
   await prisma.recipe.deleteMany(); // recipe ingredients cascade

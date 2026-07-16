@@ -99,8 +99,10 @@ _Last updated: 2026-07-15._
 - [x] **F5-5** — Inventory & history (status filter, adjust-remaining, delete; diary intact).
   **Feature F5 complete.**
 
-**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-1** (inventory view) →
-**F6-2** (batch detail) → **F6-3** (create/edit batch flow) → **F6-4** (recipes list + detail).
+- [x] **F6-1** — Inventory view (batch cards, pips, Eat one, LOW flag, history, empty state).
+
+**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-2** (batch detail) →
+**F6-3** (create/edit batch flow) → **F6-4** (recipes list + detail).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -349,7 +351,13 @@ count drops → deplete → moves to history.
 
 ### Feature F6 — Prep UI (frontend)
 
-- [ ] **F6-1 — Inventory view.** Active batch cards (portions remaining hero, kcal+protein, "Eat one"), low-stock flag.
+- [x] **F6-1 — Inventory view.** ✅ Done. Prep tab rebuilt to mockup 1k/2k/1t: Inventory/
+  Recipes segmented (Recipes filled in F6-4), meals-ready hero strip with "~N days stocked"
+  chip (3 meals/day), "New batch" CTA, batch cards (portion pips, remaining hero number,
+  kcal + protein, one-tap **Eat one** → `POST /batches/:id/eat` with today + time-of-day meal),
+  LOW flag + coral treatment at ≤2 portions, clock icon flips to depleted history, mockup empty
+  state. Diary entries with unit `portion` now carry the coral **BATCH** tag (mockup 1g).
+  Client gains `Batch` types, `batches()`/`eatPortion()`, `mealForNow`/`cookedAgo` helpers.
 - [ ] **F6-2 — Batch detail.** Per-portion macros, whole-batch totals, ingredient snapshot, eat/adjust/duplicate/delete.
 - [ ] **F6-3 — Create/Edit batch flow.** Start → add ingredients → set portions (live per-portion
   macros) → review → "Add to inventory" → success. Optional "Save as recipe".

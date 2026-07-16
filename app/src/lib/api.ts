@@ -106,6 +106,27 @@ export type LogEntry = Macros & {
   createdAt: string;
 };
 
+/** One ingredient of a cook/template, with its food attached. */
+export type BatchIngredient = {
+  id: string;
+  foodId: string;
+  grams: number;
+  food: Food;
+};
+
+/** One actual cook, living in the inventory with a remaining count. */
+export type Batch = {
+  id: string;
+  name: string;
+  recipeId: string | null;
+  portionsTotal: number;
+  portionsRemaining: number;
+  cookedAt: string;
+  ingredients: BatchIngredient[];
+  totalMacros: Macros;
+  perPortionMacros: Macros;
+};
+
 /** `GET /diary/summary` — consumed vs. targets; targets are null pre-onboarding. */
 export type DiarySummary = {
   date: string;
@@ -199,6 +220,14 @@ export const api = {
   ) => request<{ entry: LogEntry }>(`/diary/${id}`, { method: 'PATCH', body: patch, token }),
   deleteDiaryEntry: (token: string, id: string) =>
     request<null>(`/diary/${id}`, { method: 'DELETE', token }),
+  batches: (token: string, status?: 'active' | 'depleted') =>
+    request<{ batches: Batch[] }>(`/batches${status ? `?status=${status}` : ''}`, { token }),
+  eatPortion: (token: string, id: string, input: { date: string; meal: Meal }) =>
+    request<{ batch: Batch; entry: LogEntry }>(`/batches/${id}/eat`, {
+      method: 'POST',
+      body: input,
+      token,
+    }),
   diary: (token: string, date: string) =>
     request<{ entries: LogEntry[] }>(`/diary?date=${date}`, { token }),
   diarySummary: (token: string, date: string) =>

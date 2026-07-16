@@ -32,6 +32,26 @@ export function shiftDayKey(key: string, days: number): string {
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+/** Which meal a one-tap log lands in, judged by the local clock. */
+export function mealForNow(): 'breakfast' | 'lunch' | 'dinner' | 'snacks' {
+  const hour = new Date().getHours();
+  if (hour < 11) return 'breakfast';
+  if (hour < 15) return 'lunch';
+  if (hour < 21) return 'dinner';
+  return 'snacks';
+}
+
+/** "Cooked today" / "Cooked yesterday" / "Cooked N days ago". */
+export function cookedAgo(iso: string): string {
+  const days = Math.max(
+    0,
+    Math.floor((fromDayKey(todayKey()).getTime() - fromDayKey(toDayKey(new Date(iso))).getTime()) / 86400000),
+  );
+  if (days === 0) return 'Cooked today';
+  if (days === 1) return 'Cooked yesterday';
+  return `Cooked ${days} days ago`;
+}
+
 /** "Today" / "Yesterday" / "Tomorrow", else "Wed 12 Jun" (the mockup format). */
 export function formatDayKey(key: string): string {
   const today = todayKey();

@@ -206,9 +206,16 @@ function EntryRow({ entry }: { entry: LogEntry }) {
         pressed && styles.pressed,
       ]}>
       <View style={styles.entryText}>
-        <ThemedText style={styles.entryName} numberOfLines={1}>
-          {entry.name}
-        </ThemedText>
+        <View style={styles.entryNameRow}>
+          <ThemedText style={styles.entryName} numberOfLines={1}>
+            {entry.name}
+          </ThemedText>
+          {entry.unit === 'portion' && (
+            <View style={[styles.batchTag, { backgroundColor: theme.accent }]}>
+              <ThemedText style={styles.batchTagText}>BATCH</ThemedText>
+            </View>
+          )}
+        </View>
         <ThemedText style={[styles.entryMeta, { color: theme.textMuted }]}>
           {amount} · {round(entry.protein)}g protein
         </ThemedText>
@@ -326,10 +333,28 @@ const styles = StyleSheet.create({
   entryText: {
     flex: 1,
   },
+  entryNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
   entryName: {
     fontFamily: Fonts.bodySemibold,
     fontSize: 13.5,
     lineHeight: 18,
+    flexShrink: 1,
+  },
+  batchTag: {
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+  },
+  batchTagText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 8.5,
+    lineHeight: 11,
+    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
   entryMeta: {
     fontFamily: Fonts.body,

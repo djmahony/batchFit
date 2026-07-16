@@ -47,6 +47,8 @@ export const Colors = {
     textMuted: '#9AA39C',
     // Thin progress track under the kcal budget card (Diary day log).
     barTrack: '#E3E0D8',
+    // Coral-tinted border for low-stock batch cards (Prep inventory).
+    lowBorder: '#F3D9CF',
   },
   dark: {
     // Deep Kale surfaces, Paper text, brighter mint-green accent.
@@ -78,6 +80,7 @@ export const Colors = {
     macroFat: '#F5C84B',
     textMuted: '#6E8174',
     barTrack: '#0D1611',
+    lowBorder: '#4A2E24',
   },
 } as const;
 

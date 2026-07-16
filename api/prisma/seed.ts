@@ -71,7 +71,80 @@ const REFERENCE_FOODS: [string, number, number, number, number, number][] = [
   ['Sugar', 387, 0, 0, 100, 0],
 ];
 
+// [name, muscleGroup, equipment, trackingMode]
+const LIBRARY_EXERCISES: [string, string, string, string][] = [
+  // Chest
+  ['Bench press', 'chest', 'barbell', 'weight_reps'],
+  ['Incline bench press', 'chest', 'barbell', 'weight_reps'],
+  ['Dumbbell bench press', 'chest', 'dumbbell', 'weight_reps'],
+  ['Chest fly', 'chest', 'cable', 'weight_reps'],
+  ['Push-up', 'chest', 'bodyweight', 'bodyweight_reps'],
+  ['Dip', 'chest', 'bodyweight', 'bodyweight_reps'],
+  // Back
+  ['Deadlift', 'back', 'barbell', 'weight_reps'],
+  ['Barbell row', 'back', 'barbell', 'weight_reps'],
+  ['Dumbbell row', 'back', 'dumbbell', 'weight_reps'],
+  ['Lat pulldown', 'back', 'machine', 'weight_reps'],
+  ['Seated cable row', 'back', 'cable', 'weight_reps'],
+  ['Pull-up', 'back', 'bodyweight', 'bodyweight_reps'],
+  ['Chin-up', 'back', 'bodyweight', 'bodyweight_reps'],
+  // Legs
+  ['Back squat', 'legs', 'barbell', 'weight_reps'],
+  ['Front squat', 'legs', 'barbell', 'weight_reps'],
+  ['Romanian deadlift', 'legs', 'barbell', 'weight_reps'],
+  ['Leg press', 'legs', 'machine', 'weight_reps'],
+  ['Leg extension', 'legs', 'machine', 'weight_reps'],
+  ['Leg curl', 'legs', 'machine', 'weight_reps'],
+  ['Walking lunge', 'legs', 'dumbbell', 'weight_reps'],
+  ['Bulgarian split squat', 'legs', 'dumbbell', 'weight_reps'],
+  ['Goblet squat', 'legs', 'kettlebell', 'weight_reps'],
+  ['Calf raise', 'legs', 'machine', 'weight_reps'],
+  // Shoulders
+  ['Overhead press', 'shoulders', 'barbell', 'weight_reps'],
+  ['Dumbbell shoulder press', 'shoulders', 'dumbbell', 'weight_reps'],
+  ['Lateral raise', 'shoulders', 'dumbbell', 'weight_reps'],
+  ['Face pull', 'shoulders', 'cable', 'weight_reps'],
+  ['Rear delt fly', 'shoulders', 'dumbbell', 'weight_reps'],
+  // Arms
+  ['Barbell curl', 'arms', 'barbell', 'weight_reps'],
+  ['Dumbbell curl', 'arms', 'dumbbell', 'weight_reps'],
+  ['Hammer curl', 'arms', 'dumbbell', 'weight_reps'],
+  ['Triceps pushdown', 'arms', 'cable', 'weight_reps'],
+  ['Skull crusher', 'arms', 'barbell', 'weight_reps'],
+  // Core
+  ['Plank', 'core', 'bodyweight', 'time'],
+  ['Crunch', 'core', 'bodyweight', 'bodyweight_reps'],
+  ['Hanging leg raise', 'core', 'bodyweight', 'bodyweight_reps'],
+  ['Russian twist', 'core', 'bodyweight', 'bodyweight_reps'],
+  // Full body / cardio
+  ['Kettlebell swing', 'full_body', 'kettlebell', 'weight_reps'],
+  ['Burpee', 'full_body', 'bodyweight', 'bodyweight_reps'],
+  ['Rowing machine', 'cardio', 'machine', 'distance'],
+  ['Treadmill run', 'cardio', 'machine', 'distance'],
+  ['Outdoor run', 'cardio', 'bodyweight', 'distance'],
+  ['Cycling', 'cardio', 'machine', 'time'],
+];
+
+async function seedExercises() {
+  const existing = await prisma.exercise.count({ where: { ownerId: null } });
+  if (existing > 0) {
+    console.log(`Library exercises already seeded (${existing} present) — skipping.`);
+    return;
+  }
+  await prisma.exercise.createMany({
+    data: LIBRARY_EXERCISES.map(([name, muscleGroup, equipment, trackingMode]) => ({
+      name,
+      muscleGroup,
+      equipment,
+      trackingMode,
+    })),
+  });
+  console.log(`Seeded ${LIBRARY_EXERCISES.length} library exercises.`);
+}
+
 async function main() {
+  await seedExercises();
+
   const existing = await prisma.food.count({ where: { ownerId: null } });
   if (existing > 0) {
     console.log(`Reference foods already seeded (${existing} present) — skipping.`);

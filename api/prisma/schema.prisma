@@ -53,6 +53,7 @@ model User {
   logEntries LogEntry[]
   batches    Batch[]
   recipes    Recipe[]
+  exercises  Exercise[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -183,4 +184,26 @@ model BatchIngredient {
   grams   Float
 
   @@index([batchId])
+}
+
+/// A movement you can log in Train. `ownerId` null = shared library exercise;
+/// set = a user's custom exercise. SQLite has no enums; validated at app layer:
+///   muscleGroup  — "chest" | "back" | "legs" | "shoulders" | "arms" | "core" |
+///                  "full_body" | "cardio"
+///   equipment    — "barbell" | "dumbbell" | "machine" | "cable" | "bodyweight" |
+///                  "kettlebell" | "other"
+///   trackingMode — "weight_reps" | "bodyweight_reps" | "time" | "distance"
+model Exercise {
+  id           String  @id @default(cuid())
+  name         String
+  muscleGroup  String
+  equipment    String
+  trackingMode String
+  owner        User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
 }

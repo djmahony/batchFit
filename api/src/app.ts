@@ -5,6 +5,7 @@ import { errorHandler } from './errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { batchesRouter } from './routes/batches.js';
 import { diaryRouter } from './routes/diary.js';
+import { exercisesRouter } from './routes/exercises.js';
 import { foodsRouter } from './routes/foods.js';
 import { meRouter } from './routes/me.js';
 import { recipesRouter } from './routes/recipes.js';
@@ -26,5 +27,6 @@ app.use('/foods', foodsRouter);
 app.use('/diary', diaryRouter);
 app.use('/batches', batchesRouter);
 app.use('/recipes', recipesRouter);
+app.use('/exercises', exercisesRouter);
 
 app.use(errorHandler);

@@ -104,9 +104,10 @@ _Last updated: 2026-07-15._
 - [x] **F6-3** — Create batch wizard (4 steps + green confirmation; save-as-recipe toggle).
 - [x] **F6-4** — Recipes list + detail ("Cook this" pre-fills the wizard). **F6 complete.**
 
-**Next up (in order):** Phase 4 (Train): **F7-1** (exercise model + library) → **F7-2**
-(workout session models) → **F7-3** (session CRUD) → **F7-4** (repeat-last-workout), then
-Feature F8 (Train UI).
+- [x] **F7-1** — Exercise model + seeded library + CRUD (library read-only).
+
+**Next up (in order):** Phase 4 (Train): **F7-2** (workout session models) → **F7-3**
+(session CRUD) → **F7-4** (repeat-last-workout), then Feature F8 (Train UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -397,8 +398,11 @@ Co-equal pillar with food logging. Exercises, sessions, history.
 
 ### Feature F7 — Train API (backend)
 
-- [ ] **F7-1 — Exercise model + library.** `Exercise` (name, muscle group, equipment, tracking
-  mode) + CRUD; seed common exercises. (+tests)
+- [x] **F7-1 — Exercise model + library.** ✅ Done. `Exercise` model (`add_exercise`
+  migration): name, muscleGroup, equipment, trackingMode (weight_reps / bodyweight_reps / time
+  / distance), `ownerId` null = shared library. `/exercises`: GET (library + own, `?query=`
+  name filter), POST custom, PATCH/DELETE own only (library read-only). Seed adds ~43 library
+  exercises (idempotent). Tested (scoping, filters, enum validation, library immutability).
 - [ ] **F7-2 — Workout session model.** `Workout` + `WorkoutExercise` + `Set` (weight×reps,
   bodyweight, time, distance modes) + migration.
 - [ ] **F7-3 — Session CRUD.** Create/finish/list/get, including unfinished-session state. (+tests)

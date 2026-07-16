@@ -10,5 +10,6 @@ export async function resetDb() {
   await prisma.batch.deleteMany(); // batch ingredients cascade
   await prisma.recipe.deleteMany(); // recipe ingredients cascade
   await prisma.food.deleteMany();
+  await prisma.exercise.deleteMany();
   await prisma.user.deleteMany();
 }

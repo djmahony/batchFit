@@ -115,10 +115,18 @@ export default function AddFoodScreen() {
               style={[styles.searchInput, { color: theme.text }]}
             />
           </View>
-          {/* Phase-2 hook: barcode scan lives here (mockup slot, not functional in MVP). */}
-          <View style={[styles.barcodeSlot, { backgroundColor: theme.tintSoft, borderColor: theme.surfaceBorder }]}>
+          {/* Phase-2 hook: barcode scan slot (mockup); opens a "coming soon" screen for now. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Scan barcode"
+            onPress={() => router.push('/barcode-scan')}
+            style={({ pressed }) => [
+              styles.barcodeSlot,
+              { backgroundColor: theme.tintSoft, borderColor: theme.surfaceBorder },
+              pressed && styles.pressed,
+            ]}>
             <Ionicons name="barcode-outline" size={20} color={theme.tint} />
-          </View>
+          </Pressable>
         </View>
 
         {trimmed === '' && (

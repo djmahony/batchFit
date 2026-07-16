@@ -13,7 +13,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type TodayData } from '@/lib/api';
+import { api, ApiError, MEALS, type Meal, type TodayData } from '@/lib/api';
 import { mealForNow, todayKey } from '@/lib/dates';
 
 function greeting(): string {
@@ -178,6 +178,13 @@ export default function TodayScreen() {
               />
             </View>
 
+            {/* Meals strip — F12-3: subtotals per meal, tap through to the Diary. */}
+            <View style={styles.mealsRow}>
+              {MEALS.map((meal) => (
+                <MealChip key={meal} meal={meal} kcal={data.meals[meal]?.kcal ?? 0} />
+              ))}
+            </View>
+
             {error && (
               <ThemedText type="small" themeColor="danger" style={styles.centeredText}>
                 {error}
@@ -196,6 +203,40 @@ export default function TodayScreen() {
         />
       </SafeAreaView>
     </ThemedView>
+  );
+}
+
+const MEAL_LABELS: Record<Meal, string> = {
+  breakfast: 'Breakfast',
+  lunch: 'Lunch',
+  dinner: 'Dinner',
+  snacks: 'Snacks',
+};
+
+/** One meal's kcal subtotal; empty meals show a dashed "+". Taps open the Diary. */
+function MealChip({ meal, kcal }: { meal: Meal; kcal: number }) {
+  const theme = useTheme();
+  const empty = kcal <= 0;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${MEAL_LABELS[meal]}: ${empty ? 'nothing logged' : `${formatKcal(kcal)} kcal`}`}
+      onPress={() => router.push('/diary')}
+      style={({ pressed }) => [
+        styles.mealChip,
+        empty
+          ? { backgroundColor: theme.surface, borderColor: theme.border, borderStyle: 'dashed', borderWidth: 1.5 }
+          : { backgroundColor: theme.surface, borderColor: theme.surfaceBorder, borderWidth: 1 },
+        pressed && styles.pressed,
+      ]}>
+      <ThemedText style={[styles.mealChipLabel, { color: theme.textMuted }]} numberOfLines={1}>
+        {MEAL_LABELS[meal]}
+      </ThemedText>
+      <ThemedText style={[styles.mealChipValue, empty && { color: theme.textMuted }]}>
+        {empty ? '+' : formatKcal(kcal)}
+      </ThemedText>
+    </Pressable>
   );
 }
 
@@ -435,6 +476,27 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemibold,
     fontSize: 13,
     lineHeight: 17,
+  },
+  mealsRow: {
+    flexDirection: 'row',
+    gap: 9,
+  },
+  mealChip: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+  },
+  mealChipLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  mealChipValue: {
+    fontFamily: Fonts.display,
+    fontSize: 15,
+    lineHeight: 20,
+    marginTop: 2,
   },
   pressed: {
     opacity: 0.6,

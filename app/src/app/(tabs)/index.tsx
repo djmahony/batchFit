@@ -1,10 +1,12 @@
-import { useFocusEffect } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { DateSelector } from '@/components/date-selector';
+import { LogWeightSheet } from '@/components/log-weight-sheet';
 import { MacroBar, MacroRing } from '@/components/macros';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -12,7 +14,7 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, type TodayData } from '@/lib/api';
-import { todayKey } from '@/lib/dates';
+import { mealForNow, todayKey } from '@/lib/dates';
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -28,13 +30,15 @@ const formatKcal = (n: number) => Math.round(n).toLocaleString('en-GB');
 // card, meals strip, weight mini-trend.
 export default function TodayScreen() {
   const theme = useTheme();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const [date, setDate] = useState(todayKey);
   const [data, setData] = useState<TodayData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [weightSheetOpen, setWeightSheetOpen] = useState(false);
+  const [busyAction, setBusyAction] = useState<'eat' | 'workout' | null>(null);
 
   const load = useCallback(
     async (day: string, mode: 'initial' | 'refresh' = 'initial') => {
@@ -62,6 +66,42 @@ export default function TodayScreen() {
   );
 
   const refresh = () => void load(date, 'refresh');
+
+  // Quick actions (F12-2): the four fastest paths in the app.
+  const logFood = () =>
+    router.push({ pathname: '/add-food', params: { meal: mealForNow(), date } });
+
+  const eatPrepped = async () => {
+    if (!token || busyAction) return;
+    const top = data?.inventory.topBatch;
+    if (!top) {
+      // Nothing in the fridge — head to Prep to cook something.
+      router.push('/prep');
+      return;
+    }
+    setBusyAction('eat');
+    try {
+      await api.eatPortion(token, top.id, { date, meal: mealForNow() });
+      await load(date, 'refresh');
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const startWorkout = async () => {
+    if (!token || busyAction) return;
+    setBusyAction('workout');
+    try {
+      const res = await api.startWorkout(token);
+      router.push({ pathname: '/workout/[id]', params: { id: res.workout.id } });
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -103,10 +143,111 @@ export default function TodayScreen() {
             }
             showsVerticalScrollIndicator={false}>
             <BudgetHero data={data} />
+
+            {/* Quick actions — F12-2. */}
+            <View style={styles.actionRow}>
+              <QuickAction
+                label="Log food"
+                icon="add"
+                background={theme.tint}
+                color={theme.onTint}
+                onPress={logFood}
+              />
+              <QuickAction
+                label="Eat prepped"
+                icon="restaurant-outline"
+                background={theme.accent}
+                color="#FFFFFF"
+                onPress={() => void eatPrepped()}
+                busy={busyAction === 'eat'}
+              />
+            </View>
+            <View style={styles.actionRow}>
+              <QuickAction
+                label="Workout"
+                icon="barbell-outline"
+                outline
+                onPress={() => void startWorkout()}
+                busy={busyAction === 'workout'}
+              />
+              <QuickAction
+                label="Log weight"
+                icon="time-outline"
+                outline
+                onPress={() => setWeightSheetOpen(true)}
+              />
+            </View>
+
+            {error && (
+              <ThemedText type="small" themeColor="danger" style={styles.centeredText}>
+                {error}
+              </ThemedText>
+            )}
           </ScrollView>
         ) : null}
+
+        <LogWeightSheet
+          visible={weightSheetOpen}
+          defaultUnit={user?.units === 'imperial' ? 'lb' : 'kg'}
+          onClose={(changed) => {
+            setWeightSheetOpen(false);
+            if (changed) refresh();
+          }}
+        />
       </SafeAreaView>
     </ThemedView>
+  );
+}
+
+function QuickAction({
+  label,
+  icon,
+  background,
+  color,
+  outline,
+  busy,
+  onPress,
+}: {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  background?: string;
+  color?: string;
+  outline?: boolean;
+  busy?: boolean;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  const textColor = outline ? theme.textSecondary : (color ?? theme.onTint);
+  const iconColor = outline ? theme.tint : (color ?? theme.onTint);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      disabled={busy}
+      style={({ pressed }) => [
+        styles.action,
+        outline
+          ? { backgroundColor: theme.surface, borderColor: theme.surfaceBorder, borderWidth: 1 }
+          : { backgroundColor: background },
+        outline ? styles.actionOutline : null,
+        (pressed || busy) && styles.pressed,
+      ]}>
+      {busy ? (
+        <ActivityIndicator size="small" color={iconColor} />
+      ) : (
+        <>
+          <Ionicons name={icon} size={outline ? 15 : 16} color={iconColor} />
+          <ThemedText
+            style={[
+              outline ? styles.actionLabelOutline : styles.actionLabel,
+              { color: textColor },
+            ]}>
+            {label}
+          </ThemedText>
+        </>
+      )}
+    </Pressable>
   );
 }
 
@@ -267,5 +408,35 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemibold,
     fontSize: 11,
     lineHeight: 15,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 9,
+  },
+  action: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    paddingVertical: 13,
+    borderRadius: 14,
+  },
+  actionOutline: {
+    paddingVertical: 11,
+    borderRadius: 13,
+  },
+  actionLabel: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 13.5,
+    lineHeight: 18,
+  },
+  actionLabelOutline: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 13,
+    lineHeight: 17,
+  },
+  pressed: {
+    opacity: 0.6,
   },
 });

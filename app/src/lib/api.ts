@@ -127,6 +127,16 @@ export type Batch = {
   perPortionMacros: Macros;
 };
 
+/** A reusable template; cooking one produces a Batch. */
+export type Recipe = {
+  id: string;
+  name: string;
+  defaultPortions: number;
+  ingredients: BatchIngredient[];
+  totalMacros: Macros;
+  perPortionMacros: Macros;
+};
+
 /** `GET /diary/summary` — consumed vs. targets; targets are null pre-onboarding. */
 export type DiarySummary = {
   date: string;
@@ -240,6 +250,21 @@ export const api = {
     }),
   deleteBatch: (token: string, id: string) =>
     request<null>(`/batches/${id}`, { method: 'DELETE', token }),
+  recipes: (token: string) => request<{ recipes: Recipe[] }>('/recipes', { token }),
+  recipe: (token: string, id: string) => request<{ recipe: Recipe }>(`/recipes/${id}`, { token }),
+  createRecipe: (
+    token: string,
+    input: { name: string; defaultPortions: number; ingredients: { foodId: string; grams: number }[] },
+  ) => request<{ recipe: Recipe }>('/recipes', { method: 'POST', body: input, token }),
+  cookRecipe: (
+    token: string,
+    id: string,
+    overrides: {
+      name?: string;
+      portions?: number;
+      ingredients?: { foodId: string; grams: number }[];
+    } = {},
+  ) => request<{ batch: Batch }>(`/recipes/${id}/cook`, { method: 'POST', body: overrides, token }),
   eatPortion: (token: string, id: string, input: { date: string; meal: Meal }) =>
     request<{ batch: Batch; entry: LogEntry }>(`/batches/${id}/eat`, {
       method: 'POST',

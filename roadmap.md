@@ -101,9 +101,10 @@ _Last updated: 2026-07-15._
 
 - [x] **F6-1** — Inventory view (batch cards, pips, Eat one, LOW flag, history, empty state).
 - [x] **F6-2** — Batch detail (per-portion hero, ingredients, eat/adjust/duplicate/delete).
+- [x] **F6-3** — Create batch wizard (4 steps + green confirmation; save-as-recipe toggle).
 
-**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-3** (create/edit batch
-flow) → **F6-4** (recipes list + detail).
+**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-4** (recipes list +
+detail).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -364,8 +365,16 @@ count drops → deplete → moves to history.
   whole-batch row, ingredient snapshot (kg/g formatting). ⋯ menu → adjust portions left
   (inline −/+ stepper via `PATCH`), duplicate ("cook this again"), delete (confirm; diary
   history untouched). Footer "Eat a portion" (or "Cook this again" when depleted).
-- [ ] **F6-3 — Create/Edit batch flow.** Start → add ingredients → set portions (live per-portion
-  macros) → review → "Add to inventory" → success. Optional "Save as recipe".
+- [x] **F6-3 — Create batch flow.** ✅ Done. `(wizard)` modal group (mockups 1m→1q):
+  **Start** (name + "new from scratch" / "from a saved recipe" with inline recipe list; a
+  `recipeId` param pre-fills and jumps ahead for "Cook this") → **Ingredients** (debounced
+  search adds at 100g, inline grams edits, running-total strip) → **Portions ✨** (big coral
+  stepper + "PER PORTION · UPDATES LIVE" panel) → **Review** (per-portion hero, whole-batch
+  rows, **Save as recipe** toggle) → `POST /batches` (+`/recipes`) → **Confirmation** (full
+  Prep-Green "N meals prepped", "Back to inventory" / "Eat one now"). Draft lives in
+  `BatchDraftProvider`; shared `WizardStep` chrome.
+  - **Decision to revisit:** editing a cooked batch's ingredients isn't supported (no API for
+    it — adjust/duplicate/delete cover the MVP); the flow is create-only.
 - [ ] **F6-4 — Recipes list + detail.** Cards with default per-portion macros; "Cook this" → F6-3 pre-filled.
 
 **Verification:** on device — prep a batch, watch per-portion macros update as portions change,

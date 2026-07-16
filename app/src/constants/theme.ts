@@ -49,6 +49,10 @@ export const Colors = {
     barTrack: '#E3E0D8',
     // Coral-tinted border for low-stock batch cards (Prep inventory).
     lowBorder: '#F3D9CF',
+    // The "per portion · updates live" panel in the batch wizard (mockup 1o).
+    accentPanel: '#FFF3EF',
+    accentPanelBorder: '#FBCBBC',
+    onAccentPanel: '#B4705A',
   },
   dark: {
     // Deep Kale surfaces, Paper text, brighter mint-green accent.
@@ -81,6 +85,9 @@ export const Colors = {
     textMuted: '#6E8174',
     barTrack: '#0D1611',
     lowBorder: '#4A2E24',
+    accentPanel: 'rgba(251,110,78,0.10)',
+    accentPanelBorder: '#4A2E24',
+    onAccentPanel: '#E8A48E',
   },
 } as const;
 

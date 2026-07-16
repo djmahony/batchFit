@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, useFocusEffect, type Href } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -78,9 +78,7 @@ export default function PrepScreen() {
   const mealsReady = active.reduce((sum, b) => sum + b.portionsRemaining, 0);
   const daysStocked = Math.round(mealsReady / MEALS_PER_DAY);
 
-  const openNewBatch = () =>
-    // Cast until the new-batch wizard lands in F6-3.
-    router.push('/new-batch' as Href);
+  const openNewBatch = () => router.push('/new-batch');
 
   return (
     <ThemedView style={styles.container}>

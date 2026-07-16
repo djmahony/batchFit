@@ -12,7 +12,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type Batch } from '@/lib/api';
+import { api, ApiError, type Batch, type Recipe } from '@/lib/api';
 import { cookedAgo, mealForNow, todayKey } from '@/lib/dates';
 
 const LOW_STOCK_AT = 2;
@@ -30,6 +30,7 @@ export default function PrepScreen() {
   const [view, setView] = useState<SubView>('inventory');
   const [showHistory, setShowHistory] = useState(false);
   const [batches, setBatches] = useState<Batch[] | null>(null);
+  const [recipes, setRecipes] = useState<Recipe[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -41,10 +42,15 @@ export default function PrepScreen() {
       if (mode === 'initial') setLoading(true);
       setError(null);
       try {
-        const res = await api.batches(token);
-        setBatches(res.batches);
+        const [batchRes, recipeRes] = await Promise.all([
+          api.batches(token),
+          api.recipes(token),
+        ]);
+        setBatches(batchRes.batches);
+        setRecipes(recipeRes.recipes);
       } catch (e) {
         setBatches(null);
+        setRecipes(null);
         setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
       } finally {
         setLoading(false);
@@ -114,11 +120,42 @@ export default function PrepScreen() {
         </View>
 
         {view === 'recipes' ? (
-          <View style={styles.centered}>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
-              Your recipe book lives here — saved templates you can cook anytime.
-            </ThemedText>
-          </View>
+          loading ? (
+            <View style={styles.centered}>
+              <ActivityIndicator color={theme.tint} />
+            </View>
+          ) : (
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}>
+              <ThemedText style={[styles.caption, { color: theme.textMuted }]}>
+                Templates you can cook anytime
+              </ThemedText>
+              {(recipes ?? []).map((recipe) => (
+                <RecipeCard key={recipe.id} recipe={recipe} />
+              ))}
+              {recipes !== null && recipes.length === 0 && (
+                <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
+                  No recipes yet. Cook a batch and flip “Save as recipe” — it lands here as a
+                  template.
+                </ThemedText>
+              )}
+              <Pressable
+                accessibilityRole="button"
+                onPress={openNewBatch}
+                style={({ pressed }) => [
+                  styles.newRecipeRow,
+                  { borderColor: theme.border },
+                  pressed && styles.pressed,
+                ]}>
+                <Ionicons name="add" size={15} color={theme.tint} />
+                <ThemedText style={[styles.newRecipeLabel, { color: theme.textSecondary }]}>
+                  New recipe
+                </ThemedText>
+              </Pressable>
+            </ScrollView>
+          )
         ) : loading ? (
           <View style={styles.centered}>
             <ActivityIndicator color={theme.tint} />
@@ -223,6 +260,50 @@ export default function PrepScreen() {
         )}
       </SafeAreaView>
     </ThemedView>
+  );
+}
+
+function RecipeCard({ recipe }: { recipe: Recipe }) {
+  const theme = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${recipe.name} recipe`}
+      onPress={() => router.push({ pathname: '/recipe/[id]', params: { id: recipe.id } })}
+      style={({ pressed }) => [
+        styles.card,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <View style={styles.cardHeader}>
+        <ThemedText style={styles.cardTitle} numberOfLines={1}>
+          {recipe.name}
+        </ThemedText>
+        <View style={[styles.makesChip, { backgroundColor: theme.track }]}>
+          <ThemedText style={[styles.makesChipText, { color: theme.textSecondary }]}>
+            makes {recipe.defaultPortions}
+          </ThemedText>
+        </View>
+      </View>
+      <ThemedText style={[styles.cardMacros, { color: theme.textSecondary }]}>
+        {Math.round(recipe.perPortionMacros.kcal)} kcal · {Math.round(recipe.perPortionMacros.protein)}g
+        protein / portion
+      </ThemedText>
+      <View style={styles.cookThisRow}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Cook ${recipe.name}`}
+          onPress={() => router.push({ pathname: '/new-batch', params: { recipeId: recipe.id } })}
+          style={({ pressed }) => [
+            styles.cookThisButton,
+            { backgroundColor: theme.tint },
+            pressed && styles.pressed,
+          ]}>
+          <ThemedText style={[styles.cookThisLabel, { color: theme.onTint }]}>Cook this</ThemedText>
+        </Pressable>
+      </View>
+    </Pressable>
   );
 }
 
@@ -539,6 +620,45 @@ const styles = StyleSheet.create({
     fontSize: 20,
     lineHeight: 26,
     letterSpacing: -0.4,
+  },
+  makesChip: {
+    paddingVertical: 4,
+    paddingHorizontal: 9,
+    borderRadius: 8,
+  },
+  makesChipText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  cookThisRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  cookThisButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 9,
+  },
+  cookThisLabel: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 12.5,
+    lineHeight: 17,
+  },
+  newRecipeRow: {
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderRadius: 14,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
+  newRecipeLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 13,
+    lineHeight: 17,
   },
   pressed: {
     opacity: 0.6,

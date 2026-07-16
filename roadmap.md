@@ -102,9 +102,11 @@ _Last updated: 2026-07-15._
 - [x] **F6-1** — Inventory view (batch cards, pips, Eat one, LOW flag, history, empty state).
 - [x] **F6-2** — Batch detail (per-portion hero, ingredients, eat/adjust/duplicate/delete).
 - [x] **F6-3** — Create batch wizard (4 steps + green confirmation; save-as-recipe toggle).
+- [x] **F6-4** — Recipes list + detail ("Cook this" pre-fills the wizard). **F6 complete.**
 
-**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-4** (recipes list +
-detail).
+**Next up (in order):** Phase 4 (Train): **F7-1** (exercise model + library) → **F7-2**
+(workout session models) → **F7-3** (session CRUD) → **F7-4** (repeat-last-workout), then
+Feature F8 (Train UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -375,7 +377,14 @@ count drops → deplete → moves to history.
   `BatchDraftProvider`; shared `WizardStep` chrome.
   - **Decision to revisit:** editing a cooked batch's ingredients isn't supported (no API for
     it — adjust/duplicate/delete cover the MVP); the flow is create-only.
-- [ ] **F6-4 — Recipes list + detail.** Cards with default per-portion macros; "Cook this" → F6-3 pre-filled.
+- [x] **F6-4 — Recipes list + detail.** ✅ Done. Prep's Recipes sub-view (mockup 1r/2r):
+  "Templates you can cook anytime", recipe cards ("makes N" chip, per-portion kcal + protein,
+  **Cook this** → the wizard pre-filled via `?recipeId=`), dashed "New recipe" (opens the wizard
+  — save-as-recipe at review), empty state. `/recipe/[id]` detail (mockup 1s/2s): RECIPE chip,
+  default portions, per-portion hero, default ingredients, footer "Cook this".
+  **Feature F6 complete** — Phase 3 (Prep ⭐) is done end-to-end.
+  - **Decisions to revisit:** no standalone recipe editor (PUT `/recipes/:id` exists but the
+    UI edits via cook-and-resave); no recipe delete endpoint yet, so no delete action.
 
 **Verification:** on device — prep a batch, watch per-portion macros update as portions change,
 eat one from inventory and see it in the Diary.

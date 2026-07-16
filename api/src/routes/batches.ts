@@ -23,10 +23,21 @@ function withMacros(batch: {
 
 const batchInclude = { ingredients: { include: { food: true } }, recipe: true } as const;
 
-// GET /batches — the caller's inventory, newest cook first.
+// GET /batches — the caller's cooks, newest first. `?status=active` keeps only
+// batches with portions remaining (the live inventory); `?status=depleted` is
+// the history of finished batches.
 batchesRouter.get('/', async (req, res) => {
+  const status = req.query.status;
+  if (status !== undefined && status !== 'active' && status !== 'depleted') {
+    return res.status(400).json({ error: 'status must be "active" or "depleted"' });
+  }
+
   const batches = await prisma.batch.findMany({
-    where: { ownerId: req.userId },
+    where: {
+      ownerId: req.userId,
+      ...(status === 'active' ? { portionsRemaining: { gt: 0 } } : {}),
+      ...(status === 'depleted' ? { portionsRemaining: 0 } : {}),
+    },
     include: batchInclude,
     orderBy: { cookedAt: 'desc' },
   });
@@ -92,6 +103,45 @@ batchesRouter.post('/', async (req, res) => {
     include: batchInclude,
   });
   res.status(201).json({ batch: withMacros(batch) });
+});
+
+// PATCH /batches/:id — adjust the remaining count (gave one away, dropped one…).
+// Only stock changes; logged diary history is untouched (entries snapshot).
+batchesRouter.patch('/:id', async (req, res) => {
+  const batch = await prisma.batch.findFirst({
+    where: { id: req.params.id, ownerId: req.userId },
+  });
+  if (!batch) return res.status(404).json({ error: 'batch not found' });
+
+  const { portionsRemaining } = req.body ?? {};
+  if (
+    !Number.isInteger(portionsRemaining) ||
+    portionsRemaining < 0 ||
+    portionsRemaining > batch.portionsTotal
+  ) {
+    return res
+      .status(400)
+      .json({ error: `portionsRemaining must be an integer from 0 to ${batch.portionsTotal}` });
+  }
+
+  const updated = await prisma.batch.update({
+    where: { id: batch.id },
+    data: { portionsRemaining },
+    include: batchInclude,
+  });
+  res.json({ batch: withMacros(updated) });
+});
+
+// DELETE /batches/:id — remove a cook from the inventory. Diary entries eaten
+// from it stay exactly as logged.
+batchesRouter.delete('/:id', async (req, res) => {
+  const batch = await prisma.batch.findFirst({
+    where: { id: req.params.id, ownerId: req.userId },
+  });
+  if (!batch) return res.status(404).json({ error: 'batch not found' });
+
+  await prisma.batch.delete({ where: { id: batch.id } });
+  res.status(204).end();
 });
 
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snacks'];

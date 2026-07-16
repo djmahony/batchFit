@@ -96,9 +96,11 @@ _Last updated: 2026-07-15._
 - [x] **F5-2** — Recipes (owned templates; list/get/create/update; per-portion macros).
 - [x] **F5-3** — Cook a recipe → batch (`POST /recipes/:id/cook`, overridable pre-fill).
 - [x] **F5-4** — Eat a portion → diary (transactional log + decrement; unit `"portion"`).
+- [x] **F5-5** — Inventory & history (status filter, adjust-remaining, delete; diary intact).
+  **Feature F5 complete.**
 
-**Next up (in order):** Phase 3 (Prep ⭐): **F5-5** (inventory/history), then Feature F6
-(Prep UI).
+**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-1** (inventory view) →
+**F6-2** (batch detail) → **F6-3** (create/edit batch flow) → **F6-4** (recipes list + detail).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -336,7 +338,11 @@ The `/foods` and `/batches` scaffolding already exists — these tasks extend it
   decrements `portionsRemaining` in one transaction. Body `{ date?, meal? }` defaults to
   today/snacks. 409 at zero logs nothing. Tests cover the log+decrement, diary/summary
   integration, defaults, validation, and scoping.
-- [ ] **F5-5 — Inventory & history.** Active (remaining > 0) vs. depleted; adjust-remaining endpoint.
+- [x] **F5-5 — Inventory & history.** ✅ Done. `GET /batches?status=active|depleted` splits
+  the live inventory from finished cooks; `PATCH /batches/:id` adjusts `portionsRemaining`
+  (integer 0..total); `DELETE /batches/:id` removes a cook — eaten diary entries stay exactly
+  as logged in both cases. Tested (filtering, adjust bounds, delete-keeps-diary, scoping).
+  **Feature F5 complete** — the Prep API is exercisable end-to-end.
 
 **Verification:** create a batch → per-portion macros correct → eat one → diary gains an entry &
 count drops → deplete → moves to history.

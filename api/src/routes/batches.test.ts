@@ -136,6 +136,116 @@ describe('GET /batches/:id', () => {
   });
 });
 
+describe('GET /batches?status=', () => {
+  it('splits active inventory from depleted history', async () => {
+    const token = await registerAndGetToken();
+    await createBatch(token, { name: 'Still going', portions: 2 });
+    const depleted = await createBatch(token, { name: 'All gone', portions: 1 });
+    await request(app)
+      .post(`/batches/${depleted.body.batch.id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-07-16', meal: 'lunch' });
+
+    const activeRes = await request(app)
+      .get('/batches')
+      .query({ status: 'active' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(activeRes.body.batches.map((b: { name: string }) => b.name)).toEqual(['Still going']);
+
+    const depletedRes = await request(app)
+      .get('/batches')
+      .query({ status: 'depleted' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(depletedRes.body.batches.map((b: { name: string }) => b.name)).toEqual(['All gone']);
+  });
+
+  it('rejects an unknown status with 400', async () => {
+    const token = await registerAndGetToken();
+    const res = await request(app)
+      .get('/batches')
+      .query({ status: 'gone-off' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('PATCH /batches/:id', () => {
+  it('adjusts portions remaining within 0..total', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 6 });
+    const id = created.body.batch.id;
+
+    const res = await request(app)
+      .patch(`/batches/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portionsRemaining: 2 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.batch.portionsRemaining).toBe(2);
+
+    for (const bad of [-1, 7, 1.5, 'three']) {
+      const badRes = await request(app)
+        .patch(`/batches/${id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ portionsRemaining: bad });
+      expect(badRes.status, String(bad)).toBe(400);
+    }
+  });
+
+  it("404s for another user's batch", async () => {
+    const token = await registerAndGetToken();
+    const otherToken = await registerAndGetToken('other@example.com');
+    const created = await createBatch(token);
+
+    const res = await request(app)
+      .patch(`/batches/${created.body.batch.id}`)
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ portionsRemaining: 1 });
+
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('DELETE /batches/:id', () => {
+  it('deletes the batch but keeps diary entries eaten from it', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 3 });
+    const id = created.body.batch.id;
+    await request(app)
+      .post(`/batches/${id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-07-16', meal: 'dinner' });
+
+    const res = await request(app)
+      .delete(`/batches/${id}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(204);
+
+    const list = await request(app).get('/batches').set('Authorization', `Bearer ${token}`);
+    expect(list.body.batches).toHaveLength(0);
+
+    // The eaten portion is still in the diary, snapshot intact.
+    const day = await request(app)
+      .get('/diary')
+      .query({ date: '2026-07-16' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(day.body.entries).toHaveLength(1);
+    expect(day.body.entries[0].kcal).toBeCloseTo(2300 / 3);
+  });
+
+  it("404s for another user's batch", async () => {
+    const token = await registerAndGetToken();
+    const otherToken = await registerAndGetToken('other@example.com');
+    const created = await createBatch(token);
+
+    const res = await request(app)
+      .delete(`/batches/${created.body.batch.id}`)
+      .set('Authorization', `Bearer ${otherToken}`);
+
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('POST /batches/:id/eat', () => {
   it('logs a per-portion diary entry and decrements the count', async () => {
     const token = await registerAndGetToken();

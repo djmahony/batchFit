@@ -55,8 +55,8 @@ _Last updated: 2026-07-15._
   palette on Paper/Deep Kale, Schibsted + Hanken fonts, logo mark on Welcome. The API client
   times out after 12s so an unreachable server shows an error instead of hanging. **Verified on
   device** (register → app; sign out → Welcome; relaunch stays logged in).
-  - **Temporary scaffolding to remove later:** a "Sign out" link on the **Progress** tab (real
-    logout belongs in Settings), and `app/.env.local` points the app at the dev API's LAN IP.
+  - **Temporary scaffolding:** `app/.env.local` points the app at the dev API's LAN IP. (The
+    temporary Progress-tab "Sign out" link moved to Settings in F10-3.)
 - [x] **F1-7** — Save onboarding. `PUT /me/profile` (auth-protected) validates and persists
   goal (+ weekly rate, nulled for maintain), profile, units and the five targets, sets
   `onboardingComplete`, returns the serialized user. Endpoint-tested.
@@ -120,9 +120,9 @@ _Last updated: 2026-07-15._
 
 - [x] **F10-1** — Progress screen (trend chart, range chips, this-week stats).
 - [x] **F10-2** — Log weight sheet (kg/lb converting toggle, note, edit/delete).
+- [x] **F10-3** — Settings (targets/profile editors, units, sync hook, sign out).
 
-**Next up (in order):** Phase 5 frontend — Feature F10: **F10-3** (Settings screen) →
-**F10-4** (TDEE calculator screen).
+**Next up (in order):** Phase 5 frontend — Feature F10: **F10-4** (TDEE calculator screen).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -493,7 +493,13 @@ Bodyweight trend, stats, and editing what onboarding set.
   date (selector, fixed when editing), value with **kg/lb toggle that converts what's typed**
   (kg sent to the API), optional note, Save (day-upsert). Progress gains the "Log weight" CTA
   and a Recent-entries list — tap to edit, delete inside the sheet.
-- [ ] **F10-3 — Settings screen.** Goals & targets, profile, preferences (units), data (export/clear), about.
+- [x] **F10-3 — Settings screen.** ✅ Done. `/settings` (wireframe 1aa): rows → **Goals &
+  targets** (goal + weekly rate + the five targets, `PATCH`), **Profile** (sex, height,
+  current/goal weight in the user's unit, activity level), **Recalculate targets** (F10-4),
+  inline **Units** segmented (optimistic PATCH), the dashed "Account & cloud sync — Phase 3"
+  hook, About, and **Sign out** (moved here from its temporary spot on Progress).
+  - **Decisions to revisit:** "Data — export/clear" row omitted (no API for it yet); height
+    stays in cm even for imperial (ft/in entry deferred); birth date isn't editable.
 - [ ] **F10-4 — TDEE calculator screen.** Reused component (onboarding + settings) to recompute targets.
 
 **Verification:** on device — log several weights, see the trend; change a target in Settings and see rings update app-wide.

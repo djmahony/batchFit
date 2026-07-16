@@ -33,6 +33,7 @@ function RootNavigator() {
         <Stack.Screen name="batch/[id]" />
         <Stack.Screen name="recipe/[id]" />
         <Stack.Screen name="workout/[id]" />
+        <Stack.Screen name="settings" />
       </Stack.Protected>
       <Stack.Protected guard={!!user && !user.onboardingComplete}>
         <Stack.Screen name="(onboarding)" />

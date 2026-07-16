@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, useFocusEffect, type Href } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,7 +29,7 @@ const RANGES = [
 // The gear opens Settings (F10-3).
 export default function ProgressScreen() {
   const theme = useTheme();
-  const { token, user, signOut } = useAuth();
+  const { token, user } = useAuth();
 
   const [rangeIndex, setRangeIndex] = useState(1); // default 3M, like the wireframe
   const [data, setData] = useState<ProgressData | null>(null);
@@ -86,10 +86,7 @@ export default function ProgressScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Settings"
-            onPress={() =>
-              // Cast until the Settings screen lands in F10-3.
-              router.push('/settings' as Href)
-            }
+            onPress={() => router.push('/settings')}
             style={({ pressed }) => [
               styles.gearButton,
               { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
@@ -214,8 +211,6 @@ export default function ProgressScreen() {
               </ThemedText>
             </View>
 
-            {/* Temporary until Settings lands in F10-3 (sign out moves there). */}
-            <Button label="Sign out" variant="link" onPress={() => void signOut()} />
           </ScrollView>
         ) : null}
 

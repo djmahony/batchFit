@@ -265,6 +265,10 @@ export const api = {
     request<TdeeResult>('/tools/tdee', { method: 'POST', body: input, token }),
   saveProfile: (token: string, profile: ProfileInput) =>
     request<{ user: User }>('/me/profile', { method: 'PUT', body: profile, token }),
+  patchProfile: (
+    token: string,
+    patch: Partial<Omit<ProfileInput, 'goalWeightKg'>> & { goalWeightKg?: number | null },
+  ) => request<{ user: User }>('/me/profile', { method: 'PATCH', body: patch, token }),
   searchFoods: (token: string, query = '') =>
     request<{ foods: Food[] }>(`/foods?query=${encodeURIComponent(query)}`, { token }),
   recentFoods: (token: string) => request<{ foods: Food[] }>('/foods/recent', { token }),

@@ -123,8 +123,11 @@ _Last updated: 2026-07-15._
 - [x] **F10-3** — Settings (targets/profile editors, units, sync hook, sign out).
 - [x] **F10-4** — TDEE calculator screen (recompute + use targets). **F10 complete.**
 
-**Next up (in order):** Phase 6 (Today): **F11-1** (daily summary endpoint) → Feature F12
-(Today UI, F12-1..5). Then the MVP is done.
+- [x] **F11-1** — `GET /today` composition endpoint. **F11 complete.**
+
+**Next up (in order):** Phase 6 — Feature F12 (Today UI): **F12-1** (budget hero) → **F12-2**
+(quick actions) → **F12-3** (meals summary) → **F12-4** (inventory card) → **F12-5** (weight
+mini-trend). Then the MVP is done.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -518,8 +521,12 @@ Built last because it aggregates every domain above.
 
 ### Feature F11 — Today API (backend)
 
-- [ ] **F11-1 — Daily summary endpoint.** `GET /today?date=` composing budget (targets vs. intake),
-  meal subtotals, inventory snapshot, and weight mini-trend in one payload. (+test)
+- [x] **F11-1 — Daily summary endpoint.** ✅ Done. `GET /today?date=` composes, in one
+  payload: budget (consumed / targets / remaining for the five nutrients), per-meal kcal +
+  entry counts, inventory snapshot (meals ready, active batches, the newest batch with
+  per-portion macros for one-tap eating), and the bodyweight mini-trend (last 14 EMA points +
+  current + change). Tested against a full seeded day and a fresh account.
+  **Feature F11 complete.**
 
 **Verification:** returns a correct combined snapshot for a day with logged food, a batch, and a weight.
 

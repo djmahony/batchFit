@@ -121,8 +121,10 @@ _Last updated: 2026-07-15._
 - [x] **F10-1** — Progress screen (trend chart, range chips, this-week stats).
 - [x] **F10-2** — Log weight sheet (kg/lb converting toggle, note, edit/delete).
 - [x] **F10-3** — Settings (targets/profile editors, units, sync hook, sign out).
+- [x] **F10-4** — TDEE calculator screen (recompute + use targets). **F10 complete.**
 
-**Next up (in order):** Phase 5 frontend — Feature F10: **F10-4** (TDEE calculator screen).
+**Next up (in order):** Phase 6 (Today): **F11-1** (daily summary endpoint) → Feature F12
+(Today UI, F12-1..5). Then the MVP is done.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -500,7 +502,11 @@ Bodyweight trend, stats, and editing what onboarding set.
   hook, About, and **Sign out** (moved here from its temporary spot on Progress).
   - **Decisions to revisit:** "Data — export/clear" row omitted (no API for it yet); height
     stays in cm even for imperial (ft/in entry deferred); birth date isn't editable.
-- [ ] **F10-4 — TDEE calculator screen.** Reused component (onboarding + settings) to recompute targets.
+- [x] **F10-4 — TDEE calculator screen.** ✅ Done. `/settings/tdee` (wireframe 1ab): goal
+  segmented + rate chips, activity chips, live `POST /tools/tdee` recompute from the stored
+  profile, suggestion hero (ring + protein-emphasised legend + maintenance caption), "Use these
+  targets" → `PATCH` → rings update app-wide. Points to Profile if body stats are missing.
+  **Feature F10 complete** — Phase 5 is done end-to-end.
 
 **Verification:** on device — log several weights, see the trend; change a target in Settings and see rings update app-wide.
 

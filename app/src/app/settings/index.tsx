@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, type Href } from 'expo-router';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,12 +56,12 @@ export default function SettingsScreen() {
         <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
           <SettingsRow
             label="Goals & targets"
-            onPress={() => router.push('/settings/targets' as Href)}
+            onPress={() => router.push('/settings/targets')}
           />
-          <SettingsRow label="Profile" onPress={() => router.push('/settings/profile' as Href)} />
+          <SettingsRow label="Profile" onPress={() => router.push('/settings/profile')} />
           <SettingsRow
             label="Recalculate targets"
-            onPress={() => router.push('/settings/tdee' as Href)}
+            onPress={() => router.push('/settings/tdee')}
           />
 
           <View style={[styles.row, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>

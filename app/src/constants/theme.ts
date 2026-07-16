@@ -38,6 +38,7 @@ export const Colors = {
     // Soft green info banner.
     tintSoft: '#E9F3EC',
     onTintSoft: '#235C3B',
+    tintSoftBorder: '#CDE7D7',
     accentSoft: '#FDEEE8',
     // The macro trio (BatchFit Diary.dc.html food-detail ring): protein leads
     // in bright green, carbs take coral, fat takes gold — same in both themes.
@@ -81,6 +82,7 @@ export const Colors = {
     onHeroMuted: '#8FA396',
     tintSoft: '#16271D',
     onTintSoft: '#A8D8BC',
+    tintSoftBorder: '#265237',
     accentSoft: 'rgba(251,110,78,0.16)',
     macroProtein: '#46C57E',
     macroCarbs: '#FB6E4E',

@@ -107,9 +107,11 @@ _Last updated: 2026-07-15._
 - [x] **F7-1** — Exercise model + seeded library + CRUD (library read-only).
 - [x] **F7-2** — Workout session models (Workout → WorkoutExercise → WorkoutSet).
 - [x] **F7-3** — Session CRUD (start/resume, PUT structure, finish, list/get/delete).
+- [x] **F7-4** — Repeat-last-workout (`GET /workouts/last`). **Feature F7 complete.**
 
-**Next up (in order):** Phase 4 (Train): **F7-4** (repeat-last-workout), then Feature F8
-(Train UI).
+**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-1** (numeric keypad
+entry) → **F8-2** (Train home/history) → **F8-3** (active session) → **F8-4** (exercise
+picker/library).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -414,7 +416,9 @@ Co-equal pillar with food logging. Exercises, sessions, history.
   `?status=unfinished|finished`, GET `/:id`, **PUT `/:id`** replaces blocks + sets
   transactionally (name/trackingMode snapshotted from visible exercises; sets validated
   per mode), POST `/:id/finish` (409 if already finished), DELETE `/:id`. Fully tested.
-- [ ] **F7-4 — Repeat-last-workout.** Endpoint returning the previous session's exercises/sets to pre-fill.
+- [x] **F7-4 — Repeat-last-workout.** ✅ Done. `GET /workouts/last` — the most recent
+  **finished** session with its blocks + sets, for pre-filling a new one; 404 when nothing has
+  been finished yet. Tested. **Feature F7 complete** — the Train API is exercisable end-to-end.
 
 **Verification:** create a session, add exercises/sets, finish, list history; repeat-last returns prior numbers.
 

@@ -75,6 +75,19 @@ workoutsRouter.get('/', async (req, res) => {
   res.json({ workouts });
 });
 
+// GET /workouts/last — the most recent finished session, for "repeat last
+// workout": the client pre-fills a new session from its blocks + sets.
+// Declared before /:id so "last" isn't treated as an id.
+workoutsRouter.get('/last', async (req, res) => {
+  const workout = await prisma.workout.findFirst({
+    where: { userId: req.userId, finishedAt: { not: null } },
+    include: workoutInclude,
+    orderBy: { startedAt: 'desc' },
+  });
+  if (!workout) return res.status(404).json({ error: 'no finished workouts yet' });
+  res.json({ workout });
+});
+
 // GET /workouts/:id
 workoutsRouter.get('/:id', async (req, res) => {
   const workout = await prisma.workout.findFirst({

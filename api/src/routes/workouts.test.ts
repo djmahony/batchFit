@@ -156,6 +156,38 @@ describe('GET /workouts', () => {
   });
 });
 
+describe('GET /workouts/last', () => {
+  it("returns the most recent finished session's blocks + sets", async () => {
+    const token = await registerAndGetToken();
+    const squat = await seedSquat();
+
+    // Finish one workout with sets, then start (but not finish) another.
+    const first = await request(app).post('/workouts').set('Authorization', `Bearer ${token}`);
+    await request(app)
+      .put(`/workouts/${first.body.workout.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exercises: [{ exerciseId: squat.id, sets: [{ weightKg: 100, reps: 5 }] }] });
+    await request(app)
+      .post(`/workouts/${first.body.workout.id}/finish`)
+      .set('Authorization', `Bearer ${token}`);
+    await request(app).post('/workouts').set('Authorization', `Bearer ${token}`);
+
+    const res = await request(app).get('/workouts/last').set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.workout.id).toBe(first.body.workout.id);
+    expect(res.body.workout.exercises[0].sets[0].weightKg).toBe(100);
+  });
+
+  it('404s when nothing has been finished yet', async () => {
+    const token = await registerAndGetToken();
+    await request(app).post('/workouts').set('Authorization', `Bearer ${token}`); // unfinished only
+
+    const res = await request(app).get('/workouts/last').set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('DELETE /workouts/:id', () => {
   it('discards a session', async () => {
     const token = await registerAndGetToken();

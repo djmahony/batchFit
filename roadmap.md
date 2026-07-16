@@ -116,9 +116,11 @@ _Last updated: 2026-07-15._
 
 - [x] **F9-1** — Weight entries (day-upsert CRUD).
 - [x] **F9-2** — Trend & stats (`GET /progress`: EMA trend + range stats).
+- [x] **F9-3** — Settings persistence (`PATCH /me/profile`, partial edits). **F9 complete.**
 
-**Next up (in order):** Phase 5 (Progress & Settings): **F9-3** (settings persistence), then
-Feature F10 (UI).
+**Next up (in order):** Phase 5 frontend — Feature F10: **F10-1** (Progress screen) →
+**F10-2** (log weight modal) → **F10-3** (Settings screen) → **F10-4** (TDEE calculator
+screen).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -471,7 +473,9 @@ Bodyweight trend, stats, and editing what onboarding set.
   daily noise damped, real change followed) + `progressStats` (current / change-over-range /
   weekly rate from the trend line). `GET /progress?days=N` returns `{ entries, trend, stats }`.
   Smoothing maths unit-tested; endpoint tested incl. the window filter.
-- [ ] **F9-3 — Settings persistence.** Reuse/extend `PUT /me/profile` for goal/targets/profile/units edits.
+- [x] **F9-3 — Settings persistence.** ✅ Done. New `PATCH /me/profile` — any subset of goal /
+  profile / units / targets, each field validated as in the PUT; switching to maintain nulls the
+  weekly rate; onboarding state untouched; empty patch → 400. Tested. **Feature F9 complete.**
 
 **Verification:** log weights, fetch trend/stats; update targets and see `/me` reflect them.
 

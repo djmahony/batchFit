@@ -54,6 +54,7 @@ model User {
   batches    Batch[]
   recipes    Recipe[]
   exercises  Exercise[]
+  workouts   Workout[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -202,8 +203,61 @@ model Exercise {
   owner        User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId      String?
 
+  workoutExercises WorkoutExercise[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([ownerId])
+}
+
+/// One training session. Created when the user hits "Start workout"; stays
+/// unfinished (finishedAt null) until they finish it — the app offers to resume.
+model Workout {
+  id         String    @id @default(cuid())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  exercises WorkoutExercise[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, startedAt])
+}
+
+/// One exercise block within a session, in order. The exercise name is
+/// snapshotted so history survives a custom exercise being deleted.
+model WorkoutExercise {
+  id         String    @id @default(cuid())
+  workout    Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  workoutId  String
+  exercise   Exercise? @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  exerciseId String?
+  name       String
+  /// Copied from the exercise at logging time; drives which set fields apply.
+  trackingMode String
+  order        Int
+
+  sets WorkoutSet[]
+
+  @@index([workoutId])
+}
+
+/// One set. Which fields are filled depends on the block's trackingMode:
+///   weight_reps → weightKg + reps · bodyweight_reps → reps
+///   time → seconds · distance → distanceM (+ optional seconds)
+model WorkoutSet {
+  id                String          @id @default(cuid())
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
+  workoutExerciseId String
+  order             Int
+  weightKg          Float?
+  reps              Int?
+  seconds           Int?
+  distanceM         Float?
+
+  @@index([workoutExerciseId])
 }

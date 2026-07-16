@@ -14,7 +14,7 @@ Tick tasks off as they merge. `[ ]` = todo, `[x]` = merged.
 
 ## Current status
 
-_Last updated: 2026-07-15._
+_Last updated: 2026-07-16._
 
 **Baseline already on `main` (pre-roadmap scaffolding):** a monorepo with two folders —
 - `app/` — Expo SDK 57 + Expo Router. Five placeholder tabs (Today, Diary, Prep, Train,
@@ -127,9 +127,19 @@ _Last updated: 2026-07-15._
 
 - [x] **F12-1** — Today budget hero (kcal-left ring + macro bars).
 - [x] **F12-2** — Quick actions (log food · eat prepped · workout · log weight).
+- [x] **F12-3** — Today's meals summary. A four-chip meals strip (`MEALS` order) showing each
+  meal's kcal subtotal, dashed "+" for an empty meal; tapping any chip jumps to the Diary.
+- [x] **F12-4** — Inventory snapshot card. Soft-green card (mockup 1f/2f) with the meals-ready
+  count + "fridge stocked for ~N days" (reusing the Prep tab's 3-meals/day estimate), an inline
+  "Eat one" pill that reuses the existing quick-action eat handler, and a dashed empty state
+  ("No prepped meals" → New batch) when the fridge is empty. Tapping the card opens Prep.
+- [x] **F12-5** — Bodyweight mini-trend. Compact card: latest weight (kg/lb per Settings),
+  a 7-point sparkline from `today.weight.trend` (last two bars highlighted), and a ▼/▲ change
+  pill; an empty state prompts the first weigh-in. Tapping the card opens the Log weight sheet.
+  **Feature F12 complete — the MVP is done end-to-end** (see "MVP done" below).
 
-**Next up (in order):** Feature F12: **F12-3** (meals summary) → **F12-4** (inventory card) →
-**F12-5** (weight mini-trend). Then the MVP is done.
+**Next up:** Phase-2/3 business items only (see "Out of scope for this roadmap" below) —
+nothing left on the MVP roadmap.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -543,9 +553,16 @@ Built last because it aggregates every domain above.
   add-food modal, meal guessed by time of day) · **Eat prepped** (coral → one-tap eat from the
   newest batch, or over to Prep if the fridge is empty) · **Workout** (outline → start/resume →
   active session) · **Log weight** (outline → the F10-2 sheet, reused).
-- [ ] **F12-3 — Today's meals summary.** Meal groups with subtotals → jump to Diary.
-- [ ] **F12-4 — Inventory snapshot card.** "X prepped meals ready" + "Eat one" / view inventory.
-- [ ] **F12-5 — Bodyweight mini-trend.** Sparkline + latest value + "Log weight".
+- [x] **F12-3 — Today's meals summary.** ✅ Done. Meal chips (Breakfast/Lunch/Dinner/Snacks)
+  with kcal subtotals from `today.meals`; empty meals show a dashed "+". Tapping any chip
+  routes to the Diary.
+- [x] **F12-4 — Inventory snapshot card.** ✅ Done. "X prepped meals ready" + days-stocked
+  estimate, with an inline "Eat one" pill (same handler as the F12-2 quick action) and a tap
+  target that opens Prep to view the full inventory. Empty state ("No prepped meals") routes
+  to the new-batch wizard instead.
+- [x] **F12-5 — Bodyweight mini-trend.** ✅ Done. Sparkline (last 7 EMA points, `today.weight.trend`)
+  + latest value + a ▼/▲ change pill; tapping the card opens the Log weight sheet. Empty state
+  prompts the first weigh-in. **F12 complete.**
 
 **Verification:** on device — the Today tab reflects everything logged elsewhere and every card routes correctly.
 

@@ -189,6 +189,32 @@ export type ProgressData = {
   stats: { currentKg: number | null; changeKg: number | null; weeklyRateKg: number | null };
 };
 
+/** `GET /today` — the dashboard payload composing budget/meals/inventory/weight. */
+export type TodayData = {
+  date: string;
+  budget: {
+    consumed: Macros;
+    targets: { [K in keyof Macros]: number | null };
+    remaining: { [K in keyof Macros]: number | null };
+  };
+  meals: Record<Meal, { kcal: number; entries: number }>;
+  inventory: {
+    mealsReady: number;
+    activeBatches: number;
+    topBatch: {
+      id: string;
+      name: string;
+      portionsRemaining: number;
+      perPortionMacros: Macros;
+    } | null;
+  };
+  weight: {
+    currentKg: number | null;
+    changeKg: number | null;
+    trend: { date: string; trendKg: number }[];
+  };
+};
+
 /** `GET /diary/summary` — consumed vs. targets; targets are null pre-onboarding. */
 export type DiarySummary = {
   date: string;
@@ -312,6 +338,8 @@ export const api = {
     token: string,
     input: { name: string; defaultPortions: number; ingredients: { foodId: string; grams: number }[] },
   ) => request<{ recipe: Recipe }>('/recipes', { method: 'POST', body: input, token }),
+  today: (token: string, date: string) =>
+    request<{ today: TodayData }>(`/today?date=${date}`, { token }),
   progress: (token: string, days?: number) =>
     request<ProgressData>(`/progress${days ? `?days=${days}` : ''}`, { token }),
   logWeight: (token: string, input: { date: string; weightKg: number; note?: string | null }) =>

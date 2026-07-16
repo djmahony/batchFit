@@ -1,12 +1,271 @@
-import { ScreenScaffold } from '@/components/screen-scaffold';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Tab 1 — Today: the daily command centre (targets vs. intake, quick actions).
+import { Button } from '@/components/button';
+import { DateSelector } from '@/components/date-selector';
+import { MacroBar, MacroRing } from '@/components/macros';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Fonts, Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/auth';
+import { useTheme } from '@/hooks/use-theme';
+import { api, ApiError, type TodayData } from '@/lib/api';
+import { todayKey } from '@/lib/dates';
+
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+const formatKcal = (n: number) => Math.round(n).toLocaleString('en-GB');
+
+// Tab 1 — Today (mockup 1f/2f): the dashboard that pulls every pillar together.
+// Built section by section through F12: hero budget, quick actions, inventory
+// card, meals strip, weight mini-trend.
 export default function TodayScreen() {
+  const theme = useTheme();
+  const { token } = useAuth();
+
+  const [date, setDate] = useState(todayKey);
+  const [data, setData] = useState<TodayData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(
+    async (day: string, mode: 'initial' | 'refresh' = 'initial') => {
+      if (!token) return;
+      if (mode === 'initial') setLoading(true);
+      setError(null);
+      try {
+        const res = await api.today(token, day);
+        setData(res.today);
+      } catch (e) {
+        setData(null);
+        setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [token],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      void load(date);
+    }, [load, date]),
+  );
+
+  const refresh = () => void load(date, 'refresh');
+
   return (
-    <ScreenScaffold
-      title="Today"
-      icon="today-outline"
-      message="Your daily budget and quick actions will live here. Log your first meal to get going."
-    />
+    <ThemedView style={styles.container}>
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <View style={styles.header}>
+          <View>
+            <ThemedText style={[styles.greeting, { color: theme.textMuted }]}>
+              {greeting()}
+            </ThemedText>
+            <ThemedText style={styles.title}>Today</ThemedText>
+          </View>
+          <DateSelector value={date} onChange={setDate} />
+        </View>
+
+        {loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator color={theme.tint} />
+          </View>
+        ) : error && !data ? (
+          <View style={styles.centered}>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
+              {error}
+            </ThemedText>
+            <Button label="Try again" onPress={() => void load(date)} />
+          </View>
+        ) : data ? (
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                  refresh();
+                }}
+                tintColor={theme.tint}
+              />
+            }
+            showsVerticalScrollIndicator={false}>
+            <BudgetHero data={data} />
+          </ScrollView>
+        ) : null}
+      </SafeAreaView>
+    </ThemedView>
   );
 }
+
+// F12-1 — the calories hero: kcal-left ring + the three macro bars (protein
+// prioritised) on the dark hero card, per mockup 1f.
+function BudgetHero({ data }: { data: TodayData }) {
+  const theme = useTheme();
+  const { consumed, targets, remaining } = data.budget;
+
+  const kcalTarget = targets.kcal;
+  const kcalLeft = remaining.kcal;
+
+  return (
+    <View style={[styles.hero, { backgroundColor: theme.heroSurface, borderColor: theme.surfaceBorder }]}>
+      <MacroRing
+        size={108}
+        thickness={11}
+        segments={[{ color: theme.tint, value: Math.min(consumed.kcal, kcalTarget ?? consumed.kcal) }]}
+        total={kcalTarget ?? undefined}
+        trackColor={theme.heroTrack}>
+        <ThemedText style={[styles.heroKcal, { color: theme.onHero }]}>
+          {kcalLeft !== null ? formatKcal(Math.max(0, kcalLeft)) : formatKcal(consumed.kcal)}
+        </ThemedText>
+        <ThemedText style={[styles.heroKcalLabel, { color: theme.onHeroMuted }]}>
+          {kcalLeft !== null ? (kcalLeft >= 0 ? 'KCAL LEFT' : 'KCAL OVER') : 'KCAL LOGGED'}
+        </ThemedText>
+      </MacroRing>
+
+      <View style={styles.heroBars}>
+        <HeroBar
+          label="Protein"
+          emphasized
+          color={theme.macroProtein}
+          value={consumed.protein}
+          target={targets.protein}
+        />
+        <HeroBar label="Carbs" color={theme.macroCarbs} value={consumed.carbs} target={targets.carbs} />
+        <HeroBar label="Fat" color={theme.macroFat} value={consumed.fat} target={targets.fat} />
+      </View>
+    </View>
+  );
+}
+
+function HeroBar({
+  label,
+  color,
+  value,
+  target,
+  emphasized,
+}: {
+  label: string;
+  color: string;
+  value: number;
+  target: number | null;
+  emphasized?: boolean;
+}) {
+  const theme = useTheme();
+  return (
+    <View>
+      <View style={styles.heroBarHeader}>
+        <ThemedText
+          style={[
+            styles.heroBarLabel,
+            emphasized ? styles.heroBarLabelBold : null,
+            { color: emphasized ? theme.onHero : theme.onHeroMuted },
+          ]}>
+          {label}
+        </ThemedText>
+        <ThemedText style={[styles.heroBarValue, { color: theme.onHeroMuted }]}>
+          {Math.round(value)}
+          {target !== null ? ` / ${Math.round(target)} g` : ' g'}
+        </ThemedText>
+      </View>
+      <MacroBar value={value} target={target ?? Math.max(value, 1)} color={color} trackColor={theme.heroTrack} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  safeArea: { flex: 1 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    paddingTop: Spacing.two,
+    paddingBottom: 6,
+  },
+  greeting: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  title: {
+    fontFamily: Fonts.display,
+    fontSize: 28,
+    lineHeight: 33,
+    letterSpacing: -0.8,
+    marginTop: 1,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.three,
+    paddingHorizontal: Spacing.five,
+  },
+  centeredText: {
+    textAlign: 'center',
+  },
+  scroll: { flex: 1 },
+  scrollContent: {
+    paddingHorizontal: 22,
+    paddingTop: 6,
+    paddingBottom: Spacing.four,
+    gap: 11,
+  },
+  hero: {
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
+  },
+  heroKcal: {
+    fontFamily: Fonts.display,
+    fontSize: 27,
+    lineHeight: 31,
+    letterSpacing: -0.8,
+  },
+  heroKcalLabel: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 9.5,
+    letterSpacing: 1.1,
+    marginTop: 1,
+  },
+  heroBars: {
+    flex: 1,
+    gap: 9,
+  },
+  heroBarHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  heroBarLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  heroBarLabelBold: {
+    fontFamily: Fonts.bodyBold,
+  },
+  heroBarValue: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+});

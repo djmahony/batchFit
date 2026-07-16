@@ -125,9 +125,10 @@ _Last updated: 2026-07-15._
 
 - [x] **F11-1** — `GET /today` composition endpoint. **F11 complete.**
 
-**Next up (in order):** Phase 6 — Feature F12 (Today UI): **F12-1** (budget hero) → **F12-2**
-(quick actions) → **F12-3** (meals summary) → **F12-4** (inventory card) → **F12-5** (weight
-mini-trend). Then the MVP is done.
+- [x] **F12-1** — Today budget hero (kcal-left ring + macro bars).
+
+**Next up (in order):** Feature F12: **F12-2** (quick actions) → **F12-3** (meals summary) →
+**F12-4** (inventory card) → **F12-5** (weight mini-trend). Then the MVP is done.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -532,7 +533,11 @@ Built last because it aggregates every domain above.
 
 ### Feature F12 — Today UI (frontend)
 
-- [ ] **F12-1 — Daily budget hero.** Macro Ring set for calories remaining + macros.
+- [x] **F12-1 — Daily budget hero.** ✅ Done. Today rebuilt (mockup 1f/2f): greeting +
+  title + date pill, and the dark hero card — kcal-left MacroRing (consumed fills against the
+  target; "KCAL LEFT"/"KCAL OVER"/"KCAL LOGGED" as appropriate) beside the three macro bars,
+  protein bold-white and first. Focus refetch + pull-to-refresh; loading/error states. Client
+  gains `TodayData` + `api.today()` and the mockup's `heroTrack`/`sparkMuted` tokens.
 - [ ] **F12-2 — Quick actions row.** Log food · Eat a prepped meal · Start workout · Log weight.
 - [ ] **F12-3 — Today's meals summary.** Meal groups with subtotals → jump to Diary.
 - [ ] **F12-4 — Inventory snapshot card.** "X prepped meals ready" + "Eat one" / view inventory.

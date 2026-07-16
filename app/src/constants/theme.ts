@@ -53,6 +53,9 @@ export const Colors = {
     accentPanel: '#FFF3EF',
     accentPanelBorder: '#FBCBBC',
     onAccentPanel: '#B4705A',
+    // Ring/bar track on the Today hero card, and the muted sparkline bars.
+    heroTrack: '#26352B',
+    sparkMuted: '#DCE6DF',
   },
   dark: {
     // Deep Kale surfaces, Paper text, brighter mint-green accent.
@@ -88,6 +91,8 @@ export const Colors = {
     accentPanel: 'rgba(251,110,78,0.10)',
     accentPanelBorder: '#4A2E24',
     onAccentPanel: '#E8A48E',
+    heroTrack: '#22332A',
+    sparkMuted: '#2A4233',
   },
 } as const;
 

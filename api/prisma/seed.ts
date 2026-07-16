@@ -72,74 +72,165 @@ const REFERENCE_FOODS: [string, number, number, number, number, number][] = [
 ];
 
 // [name, muscleGroup, equipment, trackingMode]
+// muscleGroup  — see MUSCLE_GROUPS in src/routes/exercises.ts
+// equipment    — see EQUIPMENT in src/routes/exercises.ts
+// trackingMode — see TRACKING_MODES in src/routes/exercises.ts
 const LIBRARY_EXERCISES: [string, string, string, string][] = [
-  // Chest
+  // Chest — free weights, cables and machines.
   ['Bench press', 'chest', 'barbell', 'weight_reps'],
   ['Incline bench press', 'chest', 'barbell', 'weight_reps'],
+  ['Decline bench press', 'chest', 'barbell', 'weight_reps'],
+  ['Close-grip bench press', 'chest', 'barbell', 'weight_reps'],
+  ['Smith machine bench press', 'chest', 'machine', 'weight_reps'],
   ['Dumbbell bench press', 'chest', 'dumbbell', 'weight_reps'],
+  ['Incline dumbbell press', 'chest', 'dumbbell', 'weight_reps'],
+  ['Decline dumbbell press', 'chest', 'dumbbell', 'weight_reps'],
+  ['Dumbbell fly', 'chest', 'dumbbell', 'weight_reps'],
+  ['Incline dumbbell fly', 'chest', 'dumbbell', 'weight_reps'],
   ['Chest fly', 'chest', 'cable', 'weight_reps'],
+  ['Low-to-high cable fly', 'chest', 'cable', 'weight_reps'],
+  ['High-to-low cable fly', 'chest', 'cable', 'weight_reps'],
+  ['Pec deck machine', 'chest', 'machine', 'weight_reps'],
+  ['Chest press machine', 'chest', 'machine', 'weight_reps'],
+  ['Incline chest press machine', 'chest', 'machine', 'weight_reps'],
   ['Push-up', 'chest', 'bodyweight', 'bodyweight_reps'],
   ['Dip', 'chest', 'bodyweight', 'bodyweight_reps'],
-  // Back
+  ['Dip machine', 'chest', 'machine', 'weight_reps'],
+  // Back — free weights, cables and machines.
   ['Deadlift', 'back', 'barbell', 'weight_reps'],
+  ['Sumo deadlift', 'back', 'barbell', 'weight_reps'],
+  ['Rack pull', 'back', 'barbell', 'weight_reps'],
+  ['Good morning', 'back', 'barbell', 'weight_reps'],
   ['Barbell row', 'back', 'barbell', 'weight_reps'],
+  ['Pendlay row', 'back', 'barbell', 'weight_reps'],
+  ['T-bar row', 'back', 'machine', 'weight_reps'],
   ['Dumbbell row', 'back', 'dumbbell', 'weight_reps'],
+  ['Single-arm dumbbell row', 'back', 'dumbbell', 'weight_reps'],
   ['Lat pulldown', 'back', 'machine', 'weight_reps'],
+  ['Wide-grip lat pulldown', 'back', 'machine', 'weight_reps'],
+  ['Close-grip lat pulldown', 'back', 'machine', 'weight_reps'],
+  ['Straight-arm pulldown', 'back', 'cable', 'weight_reps'],
+  ['Cable pullover', 'back', 'cable', 'weight_reps'],
   ['Seated cable row', 'back', 'cable', 'weight_reps'],
+  ['Single-arm cable row', 'back', 'cable', 'weight_reps'],
+  ['Machine row', 'back', 'machine', 'weight_reps'],
+  ['Assisted pull-up machine', 'back', 'machine', 'weight_reps'],
   ['Pull-up', 'back', 'bodyweight', 'bodyweight_reps'],
   ['Chin-up', 'back', 'bodyweight', 'bodyweight_reps'],
-  // Legs
+  ['Back extension', 'back', 'bodyweight', 'bodyweight_reps'],
+  // Legs — free weights and machines.
   ['Back squat', 'legs', 'barbell', 'weight_reps'],
   ['Front squat', 'legs', 'barbell', 'weight_reps'],
+  ['Box squat', 'legs', 'barbell', 'weight_reps'],
+  ['Smith machine squat', 'legs', 'machine', 'weight_reps'],
+  ['Hack squat machine', 'legs', 'machine', 'weight_reps'],
   ['Romanian deadlift', 'legs', 'barbell', 'weight_reps'],
+  ['Stiff-leg deadlift', 'legs', 'barbell', 'weight_reps'],
   ['Leg press', 'legs', 'machine', 'weight_reps'],
   ['Leg extension', 'legs', 'machine', 'weight_reps'],
   ['Leg curl', 'legs', 'machine', 'weight_reps'],
+  ['Seated leg curl', 'legs', 'machine', 'weight_reps'],
+  ['Hip thrust', 'legs', 'barbell', 'weight_reps'],
+  ['Glute bridge', 'legs', 'bodyweight', 'bodyweight_reps'],
+  ['Glute ham raise', 'legs', 'bodyweight', 'bodyweight_reps'],
+  ['Cable glute kickback', 'legs', 'cable', 'weight_reps'],
+  ['Hip adductor machine', 'legs', 'machine', 'weight_reps'],
+  ['Hip abductor machine', 'legs', 'machine', 'weight_reps'],
   ['Walking lunge', 'legs', 'dumbbell', 'weight_reps'],
+  ['Reverse lunge', 'legs', 'dumbbell', 'weight_reps'],
   ['Bulgarian split squat', 'legs', 'dumbbell', 'weight_reps'],
+  ['Step-up', 'legs', 'dumbbell', 'weight_reps'],
   ['Goblet squat', 'legs', 'kettlebell', 'weight_reps'],
-  ['Calf raise', 'legs', 'machine', 'weight_reps'],
-  // Shoulders
+  ['Standing calf raise', 'legs', 'machine', 'weight_reps'],
+  ['Seated calf raise', 'legs', 'machine', 'weight_reps'],
+  // Shoulders — free weights, cables and machines.
   ['Overhead press', 'shoulders', 'barbell', 'weight_reps'],
+  ['Landmine press', 'shoulders', 'barbell', 'weight_reps'],
+  ['Barbell upright row', 'shoulders', 'barbell', 'weight_reps'],
+  ['Barbell shrug', 'shoulders', 'barbell', 'weight_reps'],
   ['Dumbbell shoulder press', 'shoulders', 'dumbbell', 'weight_reps'],
+  ['Arnold press', 'shoulders', 'dumbbell', 'weight_reps'],
   ['Lateral raise', 'shoulders', 'dumbbell', 'weight_reps'],
-  ['Face pull', 'shoulders', 'cable', 'weight_reps'],
+  ['Front raise', 'shoulders', 'dumbbell', 'weight_reps'],
   ['Rear delt fly', 'shoulders', 'dumbbell', 'weight_reps'],
-  // Arms
+  ['Dumbbell shrug', 'shoulders', 'dumbbell', 'weight_reps'],
+  ['Cable lateral raise', 'shoulders', 'cable', 'weight_reps'],
+  ['Face pull', 'shoulders', 'cable', 'weight_reps'],
+  ['Machine shoulder press', 'shoulders', 'machine', 'weight_reps'],
+  ['Machine lateral raise', 'shoulders', 'machine', 'weight_reps'],
+  ['Reverse pec deck', 'shoulders', 'machine', 'weight_reps'],
+  // Arms — free weights, cables and machines.
   ['Barbell curl', 'arms', 'barbell', 'weight_reps'],
+  ['EZ-bar curl', 'arms', 'barbell', 'weight_reps'],
+  ['Preacher curl', 'arms', 'barbell', 'weight_reps'],
+  ['Reverse curl', 'arms', 'barbell', 'weight_reps'],
+  ['Skull crusher', 'arms', 'barbell', 'weight_reps'],
   ['Dumbbell curl', 'arms', 'dumbbell', 'weight_reps'],
   ['Hammer curl', 'arms', 'dumbbell', 'weight_reps'],
+  ['Incline dumbbell curl', 'arms', 'dumbbell', 'weight_reps'],
+  ['Concentration curl', 'arms', 'dumbbell', 'weight_reps'],
+  ['Overhead triceps extension', 'arms', 'dumbbell', 'weight_reps'],
+  ['Dumbbell kickback', 'arms', 'dumbbell', 'weight_reps'],
+  ['Wrist curl', 'arms', 'dumbbell', 'weight_reps'],
+  ['Cable curl', 'arms', 'cable', 'weight_reps'],
   ['Triceps pushdown', 'arms', 'cable', 'weight_reps'],
-  ['Skull crusher', 'arms', 'barbell', 'weight_reps'],
-  // Core
+  ['Rope triceps pushdown', 'arms', 'cable', 'weight_reps'],
+  ['Machine bicep curl', 'arms', 'machine', 'weight_reps'],
+  ['Triceps dip machine', 'arms', 'machine', 'weight_reps'],
+  // Core.
   ['Plank', 'core', 'bodyweight', 'time'],
+  ['Side plank', 'core', 'bodyweight', 'time'],
   ['Crunch', 'core', 'bodyweight', 'bodyweight_reps'],
+  ['Sit-up', 'core', 'bodyweight', 'bodyweight_reps'],
+  ['Decline sit-up', 'core', 'bodyweight', 'bodyweight_reps'],
   ['Hanging leg raise', 'core', 'bodyweight', 'bodyweight_reps'],
+  ['Hanging knee raise', 'core', 'bodyweight', 'bodyweight_reps'],
+  ['Ab wheel rollout', 'core', 'bodyweight', 'bodyweight_reps'],
   ['Russian twist', 'core', 'bodyweight', 'bodyweight_reps'],
-  // Full body / cardio
+  ['Cable crunch', 'core', 'cable', 'weight_reps'],
+  ['Cable woodchopper', 'core', 'cable', 'weight_reps'],
+  ['Machine crunch', 'core', 'machine', 'weight_reps'],
+  // Full body / cardio.
   ['Kettlebell swing', 'full_body', 'kettlebell', 'weight_reps'],
+  ['Clean and jerk', 'full_body', 'barbell', 'weight_reps'],
+  ['Snatch', 'full_body', 'barbell', 'weight_reps'],
+  ['Thruster', 'full_body', 'barbell', 'weight_reps'],
+  ['Farmer\u2019s carry', 'full_body', 'dumbbell', 'distance'],
+  ['Battle ropes', 'full_body', 'other', 'time'],
+  ['Sled push', 'full_body', 'other', 'distance'],
   ['Burpee', 'full_body', 'bodyweight', 'bodyweight_reps'],
   ['Rowing machine', 'cardio', 'machine', 'distance'],
   ['Treadmill run', 'cardio', 'machine', 'distance'],
   ['Outdoor run', 'cardio', 'bodyweight', 'distance'],
   ['Cycling', 'cardio', 'machine', 'time'],
+  ['Assault bike', 'cardio', 'machine', 'time'],
+  ['Elliptical', 'cardio', 'machine', 'time'],
+  ['Stair climber', 'cardio', 'machine', 'time'],
 ];
 
 async function seedExercises() {
-  const existing = await prisma.exercise.count({ where: { ownerId: null } });
-  if (existing > 0) {
-    console.log(`Library exercises already seeded (${existing} present) — skipping.`);
+  // Add-missing-by-name rather than all-or-nothing skip, so expanding the
+  // library and re-running `db:seed` fills in new exercises on a database
+  // that was already seeded, without duplicating existing ones.
+  const existingNames = new Set(
+    (await prisma.exercise.findMany({ where: { ownerId: null }, select: { name: true } })).map(
+      (e) => e.name,
+    ),
+  );
+  const toCreate = LIBRARY_EXERCISES.filter(([name]) => !existingNames.has(name));
+  if (toCreate.length === 0) {
+    console.log(`Library exercises already seeded (${existingNames.size} present) — skipping.`);
     return;
   }
   await prisma.exercise.createMany({
-    data: LIBRARY_EXERCISES.map(([name, muscleGroup, equipment, trackingMode]) => ({
+    data: toCreate.map(([name, muscleGroup, equipment, trackingMode]) => ({
       name,
       muscleGroup,
       equipment,
       trackingMode,
     })),
   });
-  console.log(`Seeded ${LIBRARY_EXERCISES.length} library exercises.`);
+  console.log(`Seeded ${toCreate.length} new library exercises (${existingNames.size} already present).`);
 }
 
 async function main() {

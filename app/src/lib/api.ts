@@ -222,6 +222,24 @@ export const api = {
     request<null>(`/diary/${id}`, { method: 'DELETE', token }),
   batches: (token: string, status?: 'active' | 'depleted') =>
     request<{ batches: Batch[] }>(`/batches${status ? `?status=${status}` : ''}`, { token }),
+  batch: (token: string, id: string) => request<{ batch: Batch }>(`/batches/${id}`, { token }),
+  createBatch: (
+    token: string,
+    input: {
+      name: string;
+      portions: number;
+      recipeId?: string;
+      ingredients: { foodId: string; grams: number }[];
+    },
+  ) => request<{ batch: Batch }>('/batches', { method: 'POST', body: input, token }),
+  adjustBatch: (token: string, id: string, portionsRemaining: number) =>
+    request<{ batch: Batch }>(`/batches/${id}`, {
+      method: 'PATCH',
+      body: { portionsRemaining },
+      token,
+    }),
+  deleteBatch: (token: string, id: string) =>
+    request<null>(`/batches/${id}`, { method: 'DELETE', token }),
   eatPortion: (token: string, id: string, input: { date: string; meal: Meal }) =>
     request<{ batch: Batch; entry: LogEntry }>(`/batches/${id}/eat`, {
       method: 'POST',

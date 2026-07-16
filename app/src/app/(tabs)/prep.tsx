@@ -246,10 +246,7 @@ function BatchCard({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${batch.name}, ${batch.portionsRemaining} of ${batch.portionsTotal} portions left`}
-      onPress={() =>
-        // Cast until the batch detail screen lands in F6-2.
-        router.push({ pathname: '/batch/[id]', params: { id: batch.id } } as unknown as Href)
-      }
+      onPress={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: theme.surface, borderColor: low ? theme.lowBorder : theme.surfaceBorder },

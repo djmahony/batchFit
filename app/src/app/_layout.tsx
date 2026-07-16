@@ -29,6 +29,7 @@ function RootNavigator() {
       <Stack.Protected guard={!!user && user.onboardingComplete}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(logging)" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="batch/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={!!user && !user.onboardingComplete}>
         <Stack.Screen name="(onboarding)" />

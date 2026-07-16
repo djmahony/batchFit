@@ -100,9 +100,10 @@ _Last updated: 2026-07-15._
   **Feature F5 complete.**
 
 - [x] **F6-1** — Inventory view (batch cards, pips, Eat one, LOW flag, history, empty state).
+- [x] **F6-2** — Batch detail (per-portion hero, ingredients, eat/adjust/duplicate/delete).
 
-**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-2** (batch detail) →
-**F6-3** (create/edit batch flow) → **F6-4** (recipes list + detail).
+**Next up (in order):** Phase 3 (Prep ⭐) frontend — Feature F6: **F6-3** (create/edit batch
+flow) → **F6-4** (recipes list + detail).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -358,7 +359,11 @@ count drops → deplete → moves to history.
   LOW flag + coral treatment at ≤2 portions, clock icon flips to depleted history, mockup empty
   state. Diary entries with unit `portion` now carry the coral **BATCH** tag (mockup 1g).
   Client gains `Batch` types, `batches()`/`eatPortion()`, `mealForNow`/`cookedAgo` helpers.
-- [ ] **F6-2 — Batch detail.** Per-portion macros, whole-batch totals, ingredient snapshot, eat/adjust/duplicate/delete.
+- [x] **F6-2 — Batch detail.** ✅ Done. `/batch/[id]` to mockup 1l/2l: cooked-ago +
+  remaining-count header, portion pips, per-portion MacroRing hero ("KCAL / PORTION"),
+  whole-batch row, ingredient snapshot (kg/g formatting). ⋯ menu → adjust portions left
+  (inline −/+ stepper via `PATCH`), duplicate ("cook this again"), delete (confirm; diary
+  history untouched). Footer "Eat a portion" (or "Cook this again" when depleted).
 - [ ] **F6-3 — Create/Edit batch flow.** Start → add ingredients → set portions (live per-portion
   macros) → review → "Add to inventory" → success. Optional "Save as recipe".
 - [ ] **F6-4 — Recipes list + detail.** Cards with default per-portion macros; "Cook this" → F6-3 pre-filled.

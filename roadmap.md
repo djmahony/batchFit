@@ -109,9 +109,10 @@ _Last updated: 2026-07-15._
 - [x] **F7-3** — Session CRUD (start/resume, PUT structure, finish, list/get/delete).
 - [x] **F7-4** — Repeat-last-workout (`GET /workouts/last`). **Feature F7 complete.**
 
-**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-1** (numeric keypad
-entry) → **F8-2** (Train home/history) → **F8-3** (active session) → **F8-4** (exercise
-picker/library).
+- [x] **F8-1** — Numeric keypad component.
+
+**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-2** (Train home/history)
+→ **F8-3** (active session) → **F8-4** (exercise picker/library).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -424,7 +425,9 @@ Co-equal pillar with food logging. Exercises, sessions, history.
 
 ### Feature F8 — Train UI (frontend)
 
-- [ ] **F8-1 — Shared: numeric keypad entry.** Fast thumb-friendly numeric input (reused by weights/reps).
+- [x] **F8-1 — Shared: numeric keypad entry.** ✅ Done. `NumericKeypad` (wireframe 1v): fixed
+  3×4 thumb grid (1–9, ·, 0, ⌫) that never opens the system keyboard; decimal key disabled for
+  integer fields (reps/seconds). Wired into the active session in F8-3.
 - [ ] **F8-2 — Train home / history.** "Start workout", unfinished-session banner, history list.
 - [ ] **F8-3 — Active session.** Exercise blocks, set tables, "+ add set" (pre-fill), "repeat last time", finish.
 - [ ] **F8-4 — Exercise picker / library.** Searchable list + create/edit exercise.

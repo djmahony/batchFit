@@ -137,17 +137,79 @@ describe('GET /batches/:id', () => {
 });
 
 describe('POST /batches/:id/eat', () => {
-  it('decrements portions remaining and 409s at zero', async () => {
+  it('logs a per-portion diary entry and decrements the count', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 4 });
+
+    const res = await request(app)
+      .post(`/batches/${created.body.batch.id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-07-16', meal: 'lunch' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.batch.portionsRemaining).toBe(3);
+    // 2300 kcal batch ÷ 4 portions = 575 kcal snapshotted on the entry.
+    expect(res.body.entry.name).toBe('Chicken & Rice');
+    expect(res.body.entry.unit).toBe('portion');
+    expect(res.body.entry.quantity).toBe(1);
+    expect(res.body.entry.kcal).toBeCloseTo(575);
+    expect(res.body.entry.protein).toBeCloseTo((310 + 13.5) / 4);
+
+    // It shows up in the day's diary and totals.
+    const day = await request(app)
+      .get('/diary')
+      .query({ date: '2026-07-16' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(day.body.entries).toHaveLength(1);
+    expect(day.body.entries[0].meal).toBe('lunch');
+
+    const summary = await request(app)
+      .get('/diary/summary')
+      .query({ date: '2026-07-16' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(summary.body.summary.consumed.kcal).toBeCloseTo(575);
+  });
+
+  it('defaults date/meal and rejects bad values', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token);
+    const id = created.body.batch.id;
+
+    const defaulted = await request(app)
+      .post(`/batches/${id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({});
+    expect(defaulted.status).toBe(200);
+    expect(defaulted.body.entry.meal).toBe('snacks');
+    expect(defaulted.body.entry.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+    const badMeal = await request(app)
+      .post(`/batches/${id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ meal: 'brunch' });
+    expect(badMeal.status).toBe(400);
+  });
+
+  it('decrements to zero, then 409s without logging another entry', async () => {
     const token = await registerAndGetToken();
     const created = await createBatch(token, { portions: 2 });
     const id = created.body.batch.id;
 
     const eat = () =>
-      request(app).post(`/batches/${id}/eat`).set('Authorization', `Bearer ${token}`);
+      request(app)
+        .post(`/batches/${id}/eat`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date: '2026-07-16', meal: 'dinner' });
 
     expect((await eat()).body.batch.portionsRemaining).toBe(1);
     expect((await eat()).body.batch.portionsRemaining).toBe(0);
     expect((await eat()).status).toBe(409);
+
+    const day = await request(app)
+      .get('/diary')
+      .query({ date: '2026-07-16' })
+      .set('Authorization', `Bearer ${token}`);
+    expect(day.body.entries).toHaveLength(2);
   });
 
   it("404s for another user's batch", async () => {

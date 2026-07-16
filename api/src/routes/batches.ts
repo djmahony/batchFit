@@ -94,20 +94,59 @@ batchesRouter.post('/', async (req, res) => {
   res.status(201).json({ batch: withMacros(batch) });
 });
 
-// POST /batches/:id/eat — eat one portion: decrement the inventory count.
-// (Logging the portion to the diary lands in F5-4; this only adjusts stock.)
+const MEALS = ['breakfast', 'lunch', 'dinner', 'snacks'];
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
+
+const localToday = () => {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+};
+
+// POST /batches/:id/eat — the core mechanic: eat one portion. Logs the portion
+// to the diary (macros snapshotted per-portion, unit "portion") **and**
+// decrements the inventory count, atomically. Body: { date?, meal? } — date
+// defaults to today (server-local), meal to snacks.
 batchesRouter.post('/:id/eat', async (req, res) => {
+  const { date = localToday(), meal = 'snacks' } = req.body ?? {};
+  if (typeof date !== 'string' || !DAY_KEY.test(date)) {
+    return res.status(400).json({ error: 'date must be "YYYY-MM-DD"' });
+  }
+  if (!MEALS.includes(meal)) {
+    return res.status(400).json({ error: 'meal must be breakfast, lunch, dinner or snacks' });
+  }
+
   const batch = await prisma.batch.findFirst({
     where: { id: req.params.id, ownerId: req.userId },
+    include: batchInclude,
   });
   if (!batch) return res.status(404).json({ error: 'batch not found' });
   if (batch.portionsRemaining <= 0) {
     return res.status(409).json({ error: 'no portions remaining' });
   }
-  const updated = await prisma.batch.update({
-    where: { id: batch.id },
-    data: { portionsRemaining: batch.portionsRemaining - 1 },
-    include: batchInclude,
-  });
-  res.json({ batch: withMacros(updated) });
+
+  const portion = perPortion(totalMacros(batch.ingredients), batch.portionsTotal);
+  const [updated, entry] = await prisma.$transaction([
+    prisma.batch.update({
+      where: { id: batch.id },
+      data: { portionsRemaining: batch.portionsRemaining - 1 },
+      include: batchInclude,
+    }),
+    prisma.logEntry.create({
+      data: {
+        userId: req.userId!,
+        date,
+        meal,
+        name: batch.name,
+        quantity: 1,
+        unit: 'portion',
+        kcal: portion.kcal,
+        protein: portion.protein,
+        fat: portion.fat,
+        carbs: portion.carbs,
+        fibre: portion.fibre,
+      },
+    }),
+  ]);
+  res.json({ batch: withMacros(updated), entry });
 });

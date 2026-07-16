@@ -95,9 +95,10 @@ _Last updated: 2026-07-15._
 - [x] **F5-1** — Batches scoped to users (ownership + validation + per-portion macros, tested).
 - [x] **F5-2** — Recipes (owned templates; list/get/create/update; per-portion macros).
 - [x] **F5-3** — Cook a recipe → batch (`POST /recipes/:id/cook`, overridable pre-fill).
+- [x] **F5-4** — Eat a portion → diary (transactional log + decrement; unit `"portion"`).
 
-**Next up (in order):** Phase 3 (Prep ⭐): **F5-4** (eat → diary) → **F5-5**
-(inventory/history), then Feature F6 (Prep UI).
+**Next up (in order):** Phase 3 (Prep ⭐): **F5-5** (inventory/history), then Feature F6
+(Prep UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -330,8 +331,11 @@ The `/foods` and `/batches` scaffolding already exists — these tasks extend it
   the template is untouched. Also hardened the test harness: shared `resetDb()` clears all
   tables FK-safely per test (cross-file leftovers were breaking suites). Tested (defaults,
   overrides, validation, scoping).
-- [ ] **F5-4 — Eat a portion → diary.** `POST /batches/:id/eat` logs a portion to the diary
-  **and** decrements remaining (integrates F3). (+test for the decrement + log)
+- [x] **F5-4 — Eat a portion → diary.** ✅ Done. `POST /batches/:id/eat` now logs a diary
+  entry (name = batch name, quantity 1, unit `"portion"`, macros snapshotted per-portion) **and**
+  decrements `portionsRemaining` in one transaction. Body `{ date?, meal? }` defaults to
+  today/snacks. 409 at zero logs nothing. Tests cover the log+decrement, diary/summary
+  integration, defaults, validation, and scoping.
 - [ ] **F5-5 — Inventory & history.** Active (remaining > 0) vs. depleted; adjust-remaining endpoint.
 
 **Verification:** create a batch → per-portion macros correct → eat one → diary gains an entry &

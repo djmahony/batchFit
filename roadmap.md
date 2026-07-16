@@ -110,9 +110,10 @@ _Last updated: 2026-07-15._
 - [x] **F7-4** — Repeat-last-workout (`GET /workouts/last`). **Feature F7 complete.**
 
 - [x] **F8-1** — Numeric keypad component.
+- [x] **F8-2** — Train home/history (start, resume banner, history list).
 
-**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-2** (Train home/history)
-→ **F8-3** (active session) → **F8-4** (exercise picker/library).
+**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-3** (active session) →
+**F8-4** (exercise picker/library).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -428,7 +429,12 @@ Co-equal pillar with food logging. Exercises, sessions, history.
 - [x] **F8-1 — Shared: numeric keypad entry.** ✅ Done. `NumericKeypad` (wireframe 1v): fixed
   3×4 thumb grid (1–9, ·, 0, ⌫) that never opens the system keyboard; decimal key disabled for
   integer fields (reps/seconds). Wired into the active session in F8-3.
-- [ ] **F8-2 — Train home / history.** "Start workout", unfinished-session banner, history list.
+- [x] **F8-2 — Train home / history.** ✅ Done. Train tab (wireframe 1u): "Start workout"
+  (POST — resumes rather than forking if one is open), coral **RESUME** banner for the
+  unfinished session ("Started N min ago · X exercises"), History list (time-of-day titles,
+  weekday · duration, exercise/set counts), pull-to-refresh + focus refetch, empty/error states.
+  - **Decision to revisit:** sessions have no user-set name (model has none) — titled
+    "Morning/Afternoon/Evening workout" for now.
 - [ ] **F8-3 — Active session.** Exercise blocks, set tables, "+ add set" (pre-fill), "repeat last time", finish.
 - [ ] **F8-4 — Exercise picker / library.** Searchable list + create/edit exercise.
 

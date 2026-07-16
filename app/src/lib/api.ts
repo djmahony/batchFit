@@ -137,6 +137,43 @@ export type Recipe = {
   perPortionMacros: Macros;
 };
 
+/** A movement from the Train library (ownerId null) or the user's own. */
+export type Exercise = {
+  id: string;
+  name: string;
+  muscleGroup: string;
+  equipment: string;
+  trackingMode: 'weight_reps' | 'bodyweight_reps' | 'time' | 'distance';
+  ownerId: string | null;
+};
+
+export type WorkoutSet = {
+  id: string;
+  order: number;
+  weightKg: number | null;
+  reps: number | null;
+  seconds: number | null;
+  distanceM: number | null;
+};
+
+/** One exercise block in a session; name + trackingMode are snapshots. */
+export type WorkoutExercise = {
+  id: string;
+  exerciseId: string | null;
+  name: string;
+  trackingMode: Exercise['trackingMode'];
+  order: number;
+  sets: WorkoutSet[];
+};
+
+/** A training session; `finishedAt` null = still in progress. */
+export type Workout = {
+  id: string;
+  startedAt: string;
+  finishedAt: string | null;
+  exercises: WorkoutExercise[];
+};
+
 /** `GET /diary/summary` — consumed vs. targets; targets are null pre-onboarding. */
 export type DiarySummary = {
   date: string;
@@ -256,6 +293,10 @@ export const api = {
     token: string,
     input: { name: string; defaultPortions: number; ingredients: { foodId: string; grams: number }[] },
   ) => request<{ recipe: Recipe }>('/recipes', { method: 'POST', body: input, token }),
+  workouts: (token: string, status?: 'unfinished' | 'finished') =>
+    request<{ workouts: Workout[] }>(`/workouts${status ? `?status=${status}` : ''}`, { token }),
+  startWorkout: (token: string) =>
+    request<{ workout: Workout }>('/workouts', { method: 'POST', token }),
   cookRecipe: (
     token: string,
     id: string,

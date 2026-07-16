@@ -2,8 +2,38 @@ import { Router } from 'express';
 
 import { requireAuth } from '../auth/requireAuth.js';
 import { prisma } from '../prisma.js';
+import { progressStats, smoothTrend } from '../progress.js';
 
 export const weightsRouter = Router();
+
+export const progressRouter = Router();
+
+progressRouter.use(requireAuth);
+
+// GET /progress?days=N — raw points + smoothed trend + range stats for the
+// Progress chart. `days` limits the window (default: everything).
+progressRouter.get('/', async (req, res) => {
+  const daysParam = req.query.days;
+  let since: string | null = null;
+  if (daysParam !== undefined) {
+    const days = Number(daysParam);
+    if (!Number.isInteger(days) || days < 1) {
+      return res.status(400).json({ error: 'days must be a positive integer' });
+    }
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    since = `${cutoff.getFullYear()}-${pad(cutoff.getMonth() + 1)}-${pad(cutoff.getDate())}`;
+  }
+
+  const entries = await prisma.weightEntry.findMany({
+    where: { userId: req.userId, ...(since ? { date: { gte: since } } : {}) },
+    orderBy: { date: 'asc' },
+  });
+
+  const trend = smoothTrend(entries.map((e) => ({ date: e.date, weightKg: e.weightKg })));
+  res.json({ entries, trend, stats: progressStats(trend) });
+});
 
 weightsRouter.use(requireAuth);
 

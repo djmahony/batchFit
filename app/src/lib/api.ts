@@ -293,6 +293,17 @@ export const api = {
     token: string,
     input: { name: string; defaultPortions: number; ingredients: { foodId: string; grams: number }[] },
   ) => request<{ recipe: Recipe }>('/recipes', { method: 'POST', body: input, token }),
+  exercises: (token: string, query = '') =>
+    request<{ exercises: Exercise[] }>(`/exercises?query=${encodeURIComponent(query)}`, { token }),
+  createExercise: (
+    token: string,
+    input: Pick<Exercise, 'name' | 'muscleGroup' | 'equipment' | 'trackingMode'>,
+  ) => request<{ exercise: Exercise }>('/exercises', { method: 'POST', body: input, token }),
+  updateExercise: (
+    token: string,
+    id: string,
+    input: Pick<Exercise, 'name' | 'muscleGroup' | 'equipment' | 'trackingMode'>,
+  ) => request<{ exercise: Exercise }>(`/exercises/${id}`, { method: 'PATCH', body: input, token }),
   workouts: (token: string, status?: 'unfinished' | 'finished') =>
     request<{ workouts: Workout[] }>(`/workouts${status ? `?status=${status}` : ''}`, { token }),
   startWorkout: (token: string) =>

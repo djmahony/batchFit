@@ -112,9 +112,10 @@ _Last updated: 2026-07-15._
 - [x] **F8-1** — Numeric keypad component.
 - [x] **F8-2** — Train home/history (start, resume banner, history list).
 - [x] **F8-3** — Active session (set tables + keypad, add-set pre-fill, repeat-last, finish).
+- [x] **F8-4** — Exercise picker/library (search, create/edit own). **F8 complete.**
 
-**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-4** (exercise
-picker/library).
+**Next up (in order):** Phase 5 (Progress & Settings): **F9-1** (weight entries) → **F9-2**
+(trend & stats) → **F9-3** (settings persistence), then Feature F10 (UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -442,7 +443,12 @@ Co-equal pillar with food logging. Exercises, sessions, history.
   pre-fills from the previous set, "Repeat last workout" pre-fills an empty session from
   `GET /workouts/last`, debounced PUT saves the whole session as it changes (flushed before
   finishing), **Finish workout**, ⋯ → discard. Finished sessions open read-only from history.
-- [ ] **F8-4 — Exercise picker / library.** Searchable list + create/edit exercise.
+- [x] **F8-4 — Exercise picker / library.** ✅ Done. `ExercisePicker` full-screen modal
+  (wireframes 1w/1x) inside the session: debounced search over library + own exercises
+  ("Chest · Barbell" meta), pencil edits **own** exercises, "+ Create exercise" form (name,
+  muscle-group/equipment chip grids, tracking-mode chips) → POST/PATCH. Picking appends a
+  block with one empty set; the session's dashed "Add exercise" row opens it.
+  **Feature F8 complete** — Phase 4 (Train) is done end-to-end.
 
 **Verification:** on device — start a workout, log sets, finish; resume an unfinished session; repeat last time works.
 

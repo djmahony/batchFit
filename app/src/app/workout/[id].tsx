@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { ExercisePicker } from '@/components/exercise-picker';
 import { NumericKeypad, type KeypadKey } from '@/components/numeric-keypad';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -81,6 +82,7 @@ export default function WorkoutSessionScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [now, setNow] = useState(Date.now());
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const blocksRef = useRef<SessionBlock[]>([]);
@@ -162,6 +164,18 @@ export default function WorkoutSessionScreen() {
   const removeBlock = (blockIndex: number) => {
     update(blocks.filter((_, i) => i !== blockIndex));
     setSelection(null);
+  };
+
+  const addExercise = (exercise: Exercise) => {
+    update([
+      ...blocks,
+      {
+        exerciseId: exercise.id,
+        name: exercise.name,
+        trackingMode: exercise.trackingMode,
+        sets: [{ ...EMPTY_SET }],
+      },
+    ]);
   };
 
   const repeatLast = async () => {
@@ -429,12 +443,35 @@ export default function WorkoutSessionScreen() {
                 );
               })}
 
+              {!readOnly && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Add exercise"
+                  onPress={() => setPickerOpen(true)}
+                  style={({ pressed }) => [
+                    styles.addExerciseRow,
+                    { borderColor: theme.border },
+                    pressed && styles.pressed,
+                  ]}>
+                  <Ionicons name="add" size={15} color={theme.tint} />
+                  <ThemedText style={[styles.addExerciseLabel, { color: theme.textSecondary }]}>
+                    Add exercise
+                  </ThemedText>
+                </Pressable>
+              )}
+
               {error && (
                 <ThemedText type="small" themeColor="danger" style={styles.centeredText}>
                   {error}
                 </ThemedText>
               )}
             </ScrollView>
+
+            <ExercisePicker
+              visible={pickerOpen}
+              onClose={() => setPickerOpen(false)}
+              onPick={addExercise}
+            />
 
             {!readOnly && (
               <View style={styles.footer}>
@@ -580,6 +617,21 @@ const styles = StyleSheet.create({
   },
   addSetLink: {
     paddingTop: 2,
+  },
+  addExerciseRow: {
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderRadius: 13,
+    paddingVertical: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+  },
+  addExerciseLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 13,
+    lineHeight: 17,
   },
   addSetText: {
     fontFamily: Fonts.bodyBold,

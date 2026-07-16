@@ -111,9 +111,10 @@ _Last updated: 2026-07-15._
 
 - [x] **F8-1** — Numeric keypad component.
 - [x] **F8-2** — Train home/history (start, resume banner, history list).
+- [x] **F8-3** — Active session (set tables + keypad, add-set pre-fill, repeat-last, finish).
 
-**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-3** (active session) →
-**F8-4** (exercise picker/library).
+**Next up (in order):** Phase 4 (Train) frontend — Feature F8: **F8-4** (exercise
+picker/library).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -435,7 +436,12 @@ Co-equal pillar with food logging. Exercises, sessions, history.
   weekday · duration, exercise/set counts), pull-to-refresh + focus refetch, empty/error states.
   - **Decision to revisit:** sessions have no user-set name (model has none) — titled
     "Morning/Afternoon/Evening workout" for now.
-- [ ] **F8-3 — Active session.** Exercise blocks, set tables, "+ add set" (pre-fill), "repeat last time", finish.
+- [x] **F8-3 — Active session.** ✅ Done. `/workout/[id]` (wireframe 1v): ticking ⏱ timer,
+  exercise blocks with per-mode set tables (kg+reps / reps / seconds / metres), tap a cell →
+  in-screen **NumericKeypad** edits it (decimal disabled for integer fields), "+ Add set"
+  pre-fills from the previous set, "Repeat last workout" pre-fills an empty session from
+  `GET /workouts/last`, debounced PUT saves the whole session as it changes (flushed before
+  finishing), **Finish workout**, ⋯ → discard. Finished sessions open read-only from history.
 - [ ] **F8-4 — Exercise picker / library.** Searchable list + create/edit exercise.
 
 **Verification:** on device — start a workout, log sets, finish; resume an unfinished session; repeat last time works.

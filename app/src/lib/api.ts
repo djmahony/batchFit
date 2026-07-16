@@ -297,6 +297,21 @@ export const api = {
     request<{ workouts: Workout[] }>(`/workouts${status ? `?status=${status}` : ''}`, { token }),
   startWorkout: (token: string) =>
     request<{ workout: Workout }>('/workouts', { method: 'POST', token }),
+  workout: (token: string, id: string) =>
+    request<{ workout: Workout }>(`/workouts/${id}`, { token }),
+  lastWorkout: (token: string) => request<{ workout: Workout }>('/workouts/last', { token }),
+  saveWorkout: (
+    token: string,
+    id: string,
+    exercises: {
+      exerciseId: string;
+      sets: { weightKg?: number | null; reps?: number | null; seconds?: number | null; distanceM?: number | null }[];
+    }[],
+  ) => request<{ workout: Workout }>(`/workouts/${id}`, { method: 'PUT', body: { exercises }, token }),
+  finishWorkout: (token: string, id: string) =>
+    request<{ workout: Workout }>(`/workouts/${id}/finish`, { method: 'POST', token }),
+  deleteWorkout: (token: string, id: string) =>
+    request<null>(`/workouts/${id}`, { method: 'DELETE', token }),
   cookRecipe: (
     token: string,
     id: string,

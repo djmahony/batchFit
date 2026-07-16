@@ -32,6 +32,7 @@ function RootNavigator() {
         <Stack.Screen name="(wizard)" options={{ presentation: 'modal' }} />
         <Stack.Screen name="batch/[id]" />
         <Stack.Screen name="recipe/[id]" />
+        <Stack.Screen name="workout/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={!!user && !user.onboardingComplete}>
         <Stack.Screen name="(onboarding)" />

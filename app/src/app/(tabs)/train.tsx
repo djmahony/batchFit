@@ -1,4 +1,4 @@
-import { router, useFocusEffect, type Href } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -79,8 +79,7 @@ export default function TrainScreen() {
   );
 
   const openSession = (id: string) =>
-    // Cast until the active-session screen lands in F8-3.
-    router.push({ pathname: '/workout/[id]', params: { id } } as unknown as Href);
+    router.push({ pathname: '/workout/[id]', params: { id } });
 
   const startWorkout = async () => {
     if (!token || starting) return;

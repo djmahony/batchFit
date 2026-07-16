@@ -98,6 +98,56 @@ recipesRouter.post('/', async (req, res) => {
   res.status(201).json({ recipe: withMacros(recipe) });
 });
 
+// POST /recipes/:id/cook — record a cook of this recipe. The recipe's defaults
+// pre-fill the batch; the body can override any of them (real cooking varies):
+// { name?, portions?, ingredients?: [{ foodId, grams }] }. The batch snapshots
+// whatever was actually used and lands in the inventory with recipeId linked.
+recipesRouter.post('/:id/cook', async (req, res) => {
+  const recipe = await prisma.recipe.findFirst({
+    where: { id: req.params.id, ownerId: req.userId },
+    include: recipeInclude,
+  });
+  if (!recipe) return res.status(404).json({ error: 'recipe not found' });
+
+  const overrides = req.body ?? {};
+  const merged = {
+    name: overrides.name !== undefined ? overrides.name : recipe.name,
+    defaultPortions:
+      overrides.portions !== undefined ? overrides.portions : recipe.defaultPortions,
+    ingredients:
+      overrides.ingredients !== undefined
+        ? overrides.ingredients
+        : recipe.ingredients.map((i) => ({ foodId: i.foodId, grams: i.grams })),
+  };
+  const error = await validateBody(req.userId!, merged);
+  if (error) return res.status(error === 'food not found' ? 404 : 400).json({ error });
+
+  const batch = await prisma.batch.create({
+    data: {
+      name: (merged.name as string).trim(),
+      ownerId: req.userId!,
+      recipeId: recipe.id,
+      portionsTotal: merged.defaultPortions as number,
+      portionsRemaining: merged.defaultPortions as number,
+      ingredients: {
+        create: (merged.ingredients as IngredientInput[]).map((i) => ({
+          foodId: i.foodId,
+          grams: i.grams,
+        })),
+      },
+    },
+    include: { ingredients: { include: { food: true } }, recipe: true },
+  });
+  const total = totalMacros(batch.ingredients);
+  res.status(201).json({
+    batch: {
+      ...batch,
+      totalMacros: total,
+      perPortionMacros: perPortion(total, batch.portionsTotal),
+    },
+  });
+});
+
 // PUT /recipes/:id — update the template (name, portions, full ingredient list).
 // Editing a recipe never touches batches already cooked from it — they snapshot.
 recipesRouter.put('/:id', async (req, res) => {

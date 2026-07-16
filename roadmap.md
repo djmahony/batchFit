@@ -94,9 +94,10 @@ _Last updated: 2026-07-15._
 
 - [x] **F5-1** — Batches scoped to users (ownership + validation + per-portion macros, tested).
 - [x] **F5-2** — Recipes (owned templates; list/get/create/update; per-portion macros).
+- [x] **F5-3** — Cook a recipe → batch (`POST /recipes/:id/cook`, overridable pre-fill).
 
-**Next up (in order):** Phase 3 (Prep ⭐): **F5-3** (cook → batch) → **F5-4** (eat → diary) →
-**F5-5** (inventory/history), then Feature F6 (Prep UI).
+**Next up (in order):** Phase 3 (Prep ⭐): **F5-4** (eat → diary) → **F5-5**
+(inventory/history), then Feature F6 (Prep UI).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -323,7 +324,12 @@ The `/foods` and `/batches` scaffolding already exists — these tasks extend it
   list transactionally — cooked batches are untouched, they snapshot). Same validation as
   batches (positive grams, visible foods). Total + per-portion macros from default amounts.
   Endpoint-tested (macros, validation, scoping, update).
-- [ ] **F5-3 — Cook a recipe → batch.** `POST /recipes/:id/cook` pre-fills a batch (editable amounts) into inventory.
+- [x] **F5-3 — Cook a recipe → batch.** ✅ Done. `POST /recipes/:id/cook` — the recipe's
+  defaults pre-fill the batch; the body may override name/portions/ingredients (real cooking
+  varies). Creates an owned batch with `recipeId` linked, snapshotting what was actually used;
+  the template is untouched. Also hardened the test harness: shared `resetDb()` clears all
+  tables FK-safely per test (cross-file leftovers were breaking suites). Tested (defaults,
+  overrides, validation, scoping).
 - [ ] **F5-4 — Eat a portion → diary.** `POST /batches/:id/eat` logs a portion to the diary
   **and** decrements remaining (integrates F3). (+test for the decrement + log)
 - [ ] **F5-5 — Inventory & history.** Active (remaining > 0) vs. depleted; adjust-remaining endpoint.

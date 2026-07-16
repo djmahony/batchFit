@@ -3,12 +3,9 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../app.js';
 import { prisma } from '../prisma.js';
+import { resetDb } from '../test/resetDb.js';
 
-beforeEach(async () => {
-  await prisma.recipe.deleteMany();
-  await prisma.food.deleteMany();
-  await prisma.user.deleteMany();
-});
+beforeEach(resetDb);
 
 afterAll(async () => {
   await prisma.$disconnect();
@@ -103,6 +100,91 @@ describe('GET /recipes', () => {
     expect(res.status).toBe(200);
     expect(res.body.recipes).toHaveLength(1);
     expect(res.body.recipes[0].name).toBe('Mine');
+  });
+});
+
+describe('POST /recipes/:id/cook', () => {
+  async function createRecipe(token: string) {
+    const { chicken, rice } = await seedFoods();
+    const res = await request(app)
+      .post('/recipes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Chicken & Rice',
+        defaultPortions: 4,
+        ingredients: [
+          { foodId: chicken.id, grams: 1000 },
+          { foodId: rice.id, grams: 500 },
+        ],
+      });
+    return { recipe: res.body.recipe, chicken, rice };
+  }
+
+  it('cooks with the recipe defaults into the inventory', async () => {
+    const token = await registerAndGetToken();
+    const { recipe } = await createRecipe(token);
+
+    const res = await request(app)
+      .post(`/recipes/${recipe.id}/cook`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({});
+
+    expect(res.status).toBe(201);
+    const { batch } = res.body;
+    expect(batch.name).toBe('Chicken & Rice');
+    expect(batch.recipeId).toBe(recipe.id);
+    expect(batch.portionsTotal).toBe(4);
+    expect(batch.portionsRemaining).toBe(4);
+    expect(batch.perPortionMacros.kcal).toBeCloseTo(575);
+
+    const inventory = await request(app).get('/batches').set('Authorization', `Bearer ${token}`);
+    expect(inventory.body.batches).toHaveLength(1);
+  });
+
+  it('lets the cook override portions and amounts without touching the recipe', async () => {
+    const token = await registerAndGetToken();
+    const { recipe, chicken } = await createRecipe(token);
+
+    const res = await request(app)
+      .post(`/recipes/${recipe.id}/cook`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 6, ingredients: [{ foodId: chicken.id, grams: 1200 }] });
+
+    expect(res.status).toBe(201);
+    expect(res.body.batch.portionsTotal).toBe(6);
+    expect(res.body.batch.totalMacros.kcal).toBeCloseTo(1980);
+
+    // The template still has its defaults.
+    const after = await request(app)
+      .get(`/recipes/${recipe.id}`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(after.body.recipe.defaultPortions).toBe(4);
+    expect(after.body.recipe.ingredients).toHaveLength(2);
+  });
+
+  it('rejects invalid overrides with 400', async () => {
+    const token = await registerAndGetToken();
+    const { recipe } = await createRecipe(token);
+
+    const res = await request(app)
+      .post(`/recipes/${recipe.id}/cook`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 0 });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("404s for another user's recipe", async () => {
+    const token = await registerAndGetToken();
+    const otherToken = await registerAndGetToken('other@example.com');
+    const { recipe } = await createRecipe(token);
+
+    const res = await request(app)
+      .post(`/recipes/${recipe.id}/cook`)
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({});
+
+    expect(res.status).toBe(404);
   });
 });
 

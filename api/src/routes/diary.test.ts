@@ -3,12 +3,9 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../app.js';
 import { prisma } from '../prisma.js';
+import { resetDb } from '../test/resetDb.js';
 
-beforeEach(async () => {
-  await prisma.logEntry.deleteMany();
-  await prisma.food.deleteMany();
-  await prisma.user.deleteMany();
-});
+beforeEach(resetDb);
 
 afterAll(async () => {
   await prisma.$disconnect();

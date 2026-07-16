@@ -6,12 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Polyline } from 'react-native-svg';
 
 import { Button } from '@/components/button';
+import { LogWeightSheet } from '@/components/log-weight-sheet';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type Batch, type ProgressData, type Workout } from '@/lib/api';
+import { api, ApiError, type Batch, type ProgressData, type WeightEntry, type Workout } from '@/lib/api';
+import { formatDayKey } from '@/lib/dates';
 
 const KG_PER_LB = 0.45359237;
 
@@ -34,6 +36,8 @@ export default function ProgressScreen() {
   const [thisWeek, setThisWeek] = useState<{ workouts: number; mealsStocked: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<WeightEntry | null>(null);
 
   const imperial = user?.units === 'imperial';
   const formatWeight = (kg: number) =>
@@ -156,6 +160,50 @@ export default function ProgressScreen() {
               })}
             </View>
 
+            <Button
+              label="Log weight"
+              onPress={() => {
+                setEditingEntry(null);
+                setSheetOpen(true);
+              }}
+            />
+
+            {data.entries.length > 0 && (
+              <>
+                <ThemedText style={styles.sectionHeader}>Recent entries</ThemedText>
+                {[...data.entries]
+                  .slice(-5)
+                  .reverse()
+                  .map((entry) => (
+                    <Pressable
+                      key={entry.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Edit weight for ${formatDayKey(entry.date)}`}
+                      onPress={() => {
+                        setEditingEntry(entry);
+                        setSheetOpen(true);
+                      }}
+                      style={({ pressed }) => [
+                        styles.weekRow,
+                        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+                        pressed && styles.pressed,
+                      ]}>
+                      <View>
+                        <ThemedText style={styles.weekValue}>{formatWeight(entry.weightKg)}</ThemedText>
+                        {entry.note && (
+                          <ThemedText style={[styles.entryNote, { color: theme.textMuted }]} numberOfLines={1}>
+                            {entry.note}
+                          </ThemedText>
+                        )}
+                      </View>
+                      <ThemedText style={[styles.weekLabel, { color: theme.textMuted }]}>
+                        {formatDayKey(entry.date)}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+              </>
+            )}
+
             <ThemedText style={styles.sectionHeader}>This week</ThemedText>
             <View style={[styles.weekRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
               <ThemedText style={[styles.weekLabel, { color: theme.textSecondary }]}>
@@ -170,6 +218,17 @@ export default function ProgressScreen() {
             <Button label="Sign out" variant="link" onPress={() => void signOut()} />
           </ScrollView>
         ) : null}
+
+        <LogWeightSheet
+          visible={sheetOpen}
+          entry={editingEntry}
+          defaultUnit={imperial ? 'lb' : 'kg'}
+          onClose={(changed) => {
+            setSheetOpen(false);
+            setEditingEntry(null);
+            if (changed) void load();
+          }}
+        />
       </SafeAreaView>
     </ThemedView>
   );
@@ -333,6 +392,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
     fontSize: 13.5,
     lineHeight: 18,
+  },
+  entryNote: {
+    fontFamily: Fonts.body,
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 1,
   },
   pressed: {
     opacity: 0.6,

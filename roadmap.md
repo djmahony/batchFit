@@ -119,9 +119,10 @@ _Last updated: 2026-07-15._
 - [x] **F9-3** — Settings persistence (`PATCH /me/profile`, partial edits). **F9 complete.**
 
 - [x] **F10-1** — Progress screen (trend chart, range chips, this-week stats).
+- [x] **F10-2** — Log weight sheet (kg/lb converting toggle, note, edit/delete).
 
-**Next up (in order):** Phase 5 frontend — Feature F10: **F10-2** (log weight modal) →
-**F10-3** (Settings screen) → **F10-4** (TDEE calculator screen).
+**Next up (in order):** Phase 5 frontend — Feature F10: **F10-3** (Settings screen) →
+**F10-4** (TDEE calculator screen).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -488,7 +489,10 @@ Bodyweight trend, stats, and editing what onboarding set.
   gear → Settings. "Log weight" + recent entries arrive with the modal in F10-2.
   - **Decision to revisit:** the wireframe's "Avg calories" this-week stat needs a weekly
     summary endpoint (7 per-day calls otherwise) — deferred.
-- [ ] **F10-2 — Log weight modal.** Date/value/unit/note; edit/delete.
+- [x] **F10-2 — Log weight modal.** ✅ Done. `LogWeightSheet` bottom sheet (wireframe 1z):
+  date (selector, fixed when editing), value with **kg/lb toggle that converts what's typed**
+  (kg sent to the API), optional note, Save (day-upsert). Progress gains the "Log weight" CTA
+  and a Recent-entries list — tap to edit, delete inside the sheet.
 - [ ] **F10-3 — Settings screen.** Goals & targets, profile, preferences (units), data (export/clear), about.
 - [ ] **F10-4 — TDEE calculator screen.** Reused component (onboarding + settings) to recompute targets.
 

@@ -174,6 +174,21 @@ export type Workout = {
   exercises: WorkoutExercise[];
 };
 
+/** One bodyweight reading (kg canonical; one per day). */
+export type WeightEntry = {
+  id: string;
+  date: string;
+  weightKg: number;
+  note: string | null;
+};
+
+/** `GET /progress` — raw readings + smoothed trend + range stats. */
+export type ProgressData = {
+  entries: WeightEntry[];
+  trend: { date: string; trendKg: number }[];
+  stats: { currentKg: number | null; changeKg: number | null; weeklyRateKg: number | null };
+};
+
 /** `GET /diary/summary` — consumed vs. targets; targets are null pre-onboarding. */
 export type DiarySummary = {
   date: string;
@@ -293,6 +308,12 @@ export const api = {
     token: string,
     input: { name: string; defaultPortions: number; ingredients: { foodId: string; grams: number }[] },
   ) => request<{ recipe: Recipe }>('/recipes', { method: 'POST', body: input, token }),
+  progress: (token: string, days?: number) =>
+    request<ProgressData>(`/progress${days ? `?days=${days}` : ''}`, { token }),
+  logWeight: (token: string, input: { date: string; weightKg: number; note?: string | null }) =>
+    request<{ entry: WeightEntry }>('/weights', { method: 'POST', body: input, token }),
+  deleteWeight: (token: string, id: string) =>
+    request<null>(`/weights/${id}`, { method: 'DELETE', token }),
   exercises: (token: string, query = '') =>
     request<{ exercises: Exercise[] }>(`/exercises?query=${encodeURIComponent(query)}`, { token }),
   createExercise: (

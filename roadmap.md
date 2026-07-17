@@ -141,6 +141,31 @@ _Last updated: 2026-07-16._
 **Next up:** Phase-2/3 business items only (see "Out of scope for this roadmap" below) —
 nothing left on the MVP roadmap.
 
+### Additional notes — how the MVP run ended (2026-07-18)
+
+**Everything on this roadmap (F3-1 → F12-5) is built, tested, and merged to `main`.** The work
+shipped as 41 stacked PRs (#28–#68, one per task, each based on its predecessor; F12-4/F12-5
+were finished by Copilot mid-run while limits reset).
+
+- **How it landed:** sequentially merging the stack hit a GitHub retargeting race — after each
+  merged PR's branch was deleted, the next PR briefly reported "not mergeable", so only #28
+  landed directly on `main` and the rest cascaded into intermediate branches. The complete,
+  unchanged stack was then landed in one merge via **PR #69**; `main`'s tree was verified
+  identical to the stack tip. Side effect: the odd-numbered PRs (#29–#67) show **Closed**
+  rather than **Merged** on GitHub — their commits are all on `main` regardless.
+- **Verified on the merged tree:** `tsc --noEmit` green in both `api/` and `app/`; all
+  **122 API tests** pass. The per-feature **on-device Verification passes** listed under each
+  feature above have *not* been run on a real device for Phases 2–6 — worth a sweep in Expo Go.
+- **Before first run:** `npm run db:seed` in `api/` (reference foods + ~123-exercise library).
+- **Housekeeping:** stale remote branches from the stack were deleted; a few pre-roadmap
+  remote branches (`feat/api-auth-*`, `docs/*`, `chore/*`, `fix/*`) and the dev machine's
+  local branches were left untouched.
+- **Deferred decisions** are recorded inline on their tasks above. The recurring ones:
+  Favourites tab (needs a favourite flag), swipe-to-delete diary entries, serving/portion
+  units beyond grams, recipe edit/delete UI, user-named workouts, imperial height entry,
+  Settings data export/clear, and the Progress "avg calories" weekly stat (wants a weekly
+  summary endpoint).
+
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
 

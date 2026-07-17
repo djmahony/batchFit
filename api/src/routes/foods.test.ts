@@ -3,11 +3,9 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../app.js';
 import { prisma } from '../prisma.js';
+import { resetDb } from '../test/resetDb.js';
 
-beforeEach(async () => {
-  await prisma.food.deleteMany();
-  await prisma.user.deleteMany();
-});
+beforeEach(resetDb);
 
 afterAll(async () => {
   await prisma.$disconnect();
@@ -49,6 +47,140 @@ describe('GET /foods', () => {
     expect(names).toContain('Oats');
     expect(names).toContain('My protein granola');
     expect(names).not.toContain('Someone else’s food');
+  });
+});
+
+describe('GET /foods?query=', () => {
+  it('searches name and brand across reference + own foods, case-insensitively', async () => {
+    const token = await registerAndGetToken('searcher@example.com');
+    const otherToken = await registerAndGetToken('other@example.com');
+
+    await prisma.food.createMany({
+      data: [
+        { ...oats, name: 'Chicken breast' },
+        { ...oats, name: 'Chicken thigh (skinless)' },
+        { ...oats, name: 'Cooked white rice' },
+      ],
+    });
+    await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...oats, name: 'Leftover roast chicken' });
+    await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ ...oats, name: 'Chicken curry (not mine)' });
+    await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...oats, name: 'Granola', brand: 'ChickenBrand Co' });
+
+    const res = await request(app)
+      .get('/foods')
+      .query({ query: 'chicken' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const names = res.body.foods.map((f: { name: string }) => f.name).sort();
+    expect(names).toEqual([
+      'Chicken breast',
+      'Chicken thigh (skinless)',
+      'Granola',
+      'Leftover roast chicken',
+    ]);
+  });
+
+  it('returns everything visible for a blank query', async () => {
+    const token = await registerAndGetToken('searcher@example.com');
+    await prisma.food.create({ data: { ...oats } });
+
+    const res = await request(app)
+      .get('/foods')
+      .query({ query: '  ' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toHaveLength(1);
+  });
+
+  it('returns an empty list when nothing matches', async () => {
+    const token = await registerAndGetToken('searcher@example.com');
+    await prisma.food.create({ data: { ...oats } });
+
+    const res = await request(app)
+      .get('/foods')
+      .query({ query: 'xyzzy' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([]);
+  });
+});
+
+describe('GET /foods/recent', () => {
+  it('returns recently logged foods, newest first, one row per food', async () => {
+    const token = await registerAndGetToken('recent@example.com');
+    const chicken = await prisma.food.create({ data: { ...oats, name: 'Chicken breast' } });
+    const rice = await prisma.food.create({ data: { ...oats, name: 'Cooked white rice' } });
+
+    const log = (foodId: string, date: string) =>
+      request(app)
+        .post('/diary')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ date, meal: 'lunch', foodId, quantity: 100 });
+
+    await log(chicken.id, '2026-07-13');
+    await log(rice.id, '2026-07-14');
+    await log(chicken.id, '2026-07-15'); // chicken again — should dedupe & lead
+
+    const res = await request(app).get('/foods/recent').set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods.map((f: { name: string }) => f.name)).toEqual([
+      'Chicken breast',
+      'Cooked white rice',
+    ]);
+  });
+
+  it('is empty for a user with no logs', async () => {
+    const token = await registerAndGetToken('fresh@example.com');
+    const res = await request(app).get('/foods/recent').set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([]);
+  });
+
+  it('rejects a request with no token with 401', async () => {
+    const res = await request(app).get('/foods/recent');
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('GET /foods/:id', () => {
+  it('returns a reference food or an own food', async () => {
+    const token = await registerAndGetToken('viewer@example.com');
+    const reference = await prisma.food.create({ data: { ...oats } });
+
+    const res = await request(app)
+      .get(`/foods/${reference.id}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.food.name).toBe('Oats');
+  });
+
+  it("404s for another user's custom food", async () => {
+    const token = await registerAndGetToken('viewer@example.com');
+    const otherToken = await registerAndGetToken('other@example.com');
+    const created = await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ ...oats, name: 'Not yours' });
+
+    const res = await request(app)
+      .get(`/foods/${created.body.food.id}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
   });
 });
 

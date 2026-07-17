@@ -14,7 +14,7 @@ Tick tasks off as they merge. `[ ]` = todo, `[x]` = merged.
 
 ## Current status
 
-_Last updated: 2026-07-15._
+_Last updated: 2026-07-16._
 
 **Baseline already on `main` (pre-roadmap scaffolding):** a monorepo with two folders —
 - `app/` — Expo SDK 57 + Expo Router. Five placeholder tabs (Today, Diary, Prep, Train,
@@ -55,8 +55,8 @@ _Last updated: 2026-07-15._
   palette on Paper/Deep Kale, Schibsted + Hanken fonts, logo mark on Welcome. The API client
   times out after 12s so an unreachable server shows an error instead of hanging. **Verified on
   device** (register → app; sign out → Welcome; relaunch stays logged in).
-  - **Temporary scaffolding to remove later:** a "Sign out" link on the **Progress** tab (real
-    logout belongs in Settings), and `app/.env.local` points the app at the dev API's LAN IP.
+  - **Temporary scaffolding:** `app/.env.local` points the app at the dev API's LAN IP. (The
+    temporary Progress-tab "Sign out" link moved to Settings in F10-3.)
 - [x] **F1-7** — Save onboarding. `PUT /me/profile` (auth-protected) validates and persists
   goal (+ weekly rate, nulled for maintain), profile, units and the five targets, sets
   `onboardingComplete`, returns the serialized user. Endpoint-tested.
@@ -77,10 +77,69 @@ _Last updated: 2026-07-15._
 
 - [x] **F3-1** — `/foods` scoped to users + custom foods (`Food.ownerId`, auth-required
   routes, macro validation; see Phase 2 below).
+- [x] **F3-2** — Food search (`GET /foods?query=`) + reference-food seed library.
+- [x] **F3-3** — Diary model (`LogEntry`, day-key dates, snapshotted macros).
+- [x] **F3-4** — Diary log CRUD (`POST/GET/PATCH/DELETE /diary`, snapshot-preserving edits).
+- [x] **F3-5** — Daily totals (`GET /diary/summary?date=`: consumed vs. targets vs. remaining).
+  **Feature F3 complete** — the Food & Diary API is exercisable end-to-end.
 
-**Next up (in order):** Phase 2 — **F3-2** (food search) → **F3-3** (diary model) → **F3-4**
-(log CRUD) → **F3-5** (daily totals). Also consider seeding reference foods before F3-2
-(search over an empty table isn't testable).
+- [x] **F4-1** — Macro Ring/Bar set (`src/components/macros.tsx`, react-native-svg).
+- [x] **F4-2** — Date selector pill + day-key helpers (`src/lib/dates.ts`).
+- [x] **F4-3** — Diary screen (budget hero + bar, meal groups, entry cards, four states).
+- [x] **F4-4** — Add-food search modal (Recents via new `GET /foods/recent`, My foods, search).
+- [x] **F4-5** — Food detail/quantity (`(logging)` modal group, live ring, add to diary).
+- [x] **F4-6** — Create custom food (per-serving form → per-100g save → straight into logging).
+- [x] **F4-7** — Edit/delete entry (tap → `/entry/[id]`, snapshot-rescaled preview, delete).
+  **Feature F4 complete** — Phase 2 (food logging) is done end-to-end.
+
+- [x] **F5-1** — Batches scoped to users (ownership + validation + per-portion macros, tested).
+- [x] **F5-2** — Recipes (owned templates; list/get/create/update; per-portion macros).
+- [x] **F5-3** — Cook a recipe → batch (`POST /recipes/:id/cook`, overridable pre-fill).
+- [x] **F5-4** — Eat a portion → diary (transactional log + decrement; unit `"portion"`).
+- [x] **F5-5** — Inventory & history (status filter, adjust-remaining, delete; diary intact).
+  **Feature F5 complete.**
+
+- [x] **F6-1** — Inventory view (batch cards, pips, Eat one, LOW flag, history, empty state).
+- [x] **F6-2** — Batch detail (per-portion hero, ingredients, eat/adjust/duplicate/delete).
+- [x] **F6-3** — Create batch wizard (4 steps + green confirmation; save-as-recipe toggle).
+- [x] **F6-4** — Recipes list + detail ("Cook this" pre-fills the wizard). **F6 complete.**
+
+- [x] **F7-1** — Exercise model + seeded library + CRUD (library read-only).
+- [x] **F7-2** — Workout session models (Workout → WorkoutExercise → WorkoutSet).
+- [x] **F7-3** — Session CRUD (start/resume, PUT structure, finish, list/get/delete).
+- [x] **F7-4** — Repeat-last-workout (`GET /workouts/last`). **Feature F7 complete.**
+
+- [x] **F8-1** — Numeric keypad component.
+- [x] **F8-2** — Train home/history (start, resume banner, history list).
+- [x] **F8-3** — Active session (set tables + keypad, add-set pre-fill, repeat-last, finish).
+- [x] **F8-4** — Exercise picker/library (search, create/edit own). **F8 complete.**
+
+- [x] **F9-1** — Weight entries (day-upsert CRUD).
+- [x] **F9-2** — Trend & stats (`GET /progress`: EMA trend + range stats).
+- [x] **F9-3** — Settings persistence (`PATCH /me/profile`, partial edits). **F9 complete.**
+
+- [x] **F10-1** — Progress screen (trend chart, range chips, this-week stats).
+- [x] **F10-2** — Log weight sheet (kg/lb converting toggle, note, edit/delete).
+- [x] **F10-3** — Settings (targets/profile editors, units, sync hook, sign out).
+- [x] **F10-4** — TDEE calculator screen (recompute + use targets). **F10 complete.**
+
+- [x] **F11-1** — `GET /today` composition endpoint. **F11 complete.**
+
+- [x] **F12-1** — Today budget hero (kcal-left ring + macro bars).
+- [x] **F12-2** — Quick actions (log food · eat prepped · workout · log weight).
+- [x] **F12-3** — Today's meals summary. A four-chip meals strip (`MEALS` order) showing each
+  meal's kcal subtotal, dashed "+" for an empty meal; tapping any chip jumps to the Diary.
+- [x] **F12-4** — Inventory snapshot card. Soft-green card (mockup 1f/2f) with the meals-ready
+  count + "fridge stocked for ~N days" (reusing the Prep tab's 3-meals/day estimate), an inline
+  "Eat one" pill that reuses the existing quick-action eat handler, and a dashed empty state
+  ("No prepped meals" → New batch) when the fridge is empty. Tapping the card opens Prep.
+- [x] **F12-5** — Bodyweight mini-trend. Compact card: latest weight (kg/lb per Settings),
+  a 7-point sparkline from `today.weight.trend` (last two bars highlighted), and a ▼/▲ change
+  pill; an empty state prompts the first weigh-in. Tapping the card opens the Log weight sheet.
+  **Feature F12 complete — the MVP is done end-to-end** (see "MVP done" below).
+
+**Next up:** Phase-2/3 business items only (see "Out of scope for this roadmap" below) —
+nothing left on the MVP roadmap.
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -224,24 +283,66 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
   auth: GET returns reference + the caller's own foods; POST creates a food owned by the caller
   and validates all five macros as non-negative numbers. Responses wrapped as `{ foods }` /
   `{ food }`. Tests cover visibility scoping, creation, validation, and 401s.
-- [ ] **F3-2 — Food search endpoint.** `GET /foods?query=` across reference + the user's foods.
-- [ ] **F3-3 — Diary model.** `LogEntry` (user, date, meal group, food, quantity/unit,
-  snapshotted macros) + migration.
-- [ ] **F3-4 — Log CRUD.** `POST /diary` (add), `GET /diary?date=`, `PATCH`/`DELETE /diary/:id`. (+tests)
-- [ ] **F3-5 — Daily totals.** `GET /diary/summary?date=` returns consumed vs. target for the five nutrients. (+test)
+- [x] **F3-2 — Food search endpoint.** ✅ Done. `GET /foods?query=` filters the visible set
+  (reference + own) by name or brand, case-insensitive (SQLite LIKE), capped at 50 results;
+  blank query returns everything. Seed expanded to ~58 reference foods (idempotent — skips if
+  reference foods exist). Tests cover matching, scoping, blank query, and no-match.
+- [x] **F3-3 — Diary model.** ✅ Done. `LogEntry` + `add_log_entry` migration: user (cascade),
+  `date` day-key string ("YYYY-MM-DD"), meal ("breakfast"|"lunch"|"dinner"|"snacks"), snapshotted
+  `name`, optional food link (SetNull on delete), quantity/unit, and the five macros snapshotted
+  **for the logged quantity** — history never rewrites. Indexed on `[userId, date]`.
+- [x] **F3-4 — Log CRUD.** ✅ Done. Auth-scoped `/diary` routes: `POST` (validates day-key/
+  meal/quantity, food must be visible to the caller, snapshots name + macros scaled to grams),
+  `GET ?date=`, `PATCH /:id` (quantity change rescales the **snapshot** proportionally — never
+  re-reads the live food; meal/date moves), `DELETE /:id`. Other users' entries/foods → 404.
+  Tests cover snapshot immutability after food edits, scoping, validation, all verbs.
+- [x] **F3-5 — Daily totals.** ✅ Done. `GET /diary/summary?date=` aggregates the day's
+  entries into `{ consumed, targets, remaining }` for the five nutrients; targets/remaining are
+  null before onboarding sets them; remaining may go negative (client phrases it kindly).
+  Tests cover totals, live updates after edit/delete, null targets, validation.
 
 **Verification:** log foods to meals for a day via API; summary totals are correct; editing/deleting updates them.
 
 ### Feature F4 — Food & Diary UI (frontend)
 
-- [ ] **F4-1 — Shared: Macro Ring/Bar set.** Build the reusable macro component (calories hero,
-  protein prioritised, remaining-vs-target + total modes). Reused everywhere after this.
-- [ ] **F4-2 — Shared: Date selector.** Day strip / `< date >` header, defaults to today.
-- [ ] **F4-3 — Diary screen.** Meal groups (B/L/D/Snacks), per-meal subtotals, pinned daily totals bar.
-- [ ] **F4-4 — Add-food search flow.** Search + Recents/Favourites/My foods tabs → results.
-- [ ] **F4-5 — Food detail / quantity.** Quantity control + live macros → add to meal/day.
-- [ ] **F4-6 — Create custom food.** Form (name, serving, per-serving macros) → saves & logs.
-- [ ] **F4-7 — Edit / delete entry.** Tap to edit quantity; swipe to delete.
+- [x] **F4-1 — Shared: Macro Ring/Bar set.** ✅ Done. `src/components/macros.tsx`
+  (react-native-svg): `MacroRing` (SVG donut, segments clockwise from 12; total mode fills the
+  ring, remaining-vs-target mode leaves track; centre takes children), `macroSegments` (splits
+  P/C/F by 4/4/9 kcal), `MacroBar` (thin budget bar), `MacroLegendRow` (dot+label+value, protein
+  emphasised). New theme tokens `macroProtein`/`macroCarbs`/`barTrack` from the Diary mockup.
+- [x] **F4-2 — Shared: Date selector.** ✅ Done. `src/components/date-selector.tsx` — the
+  `‹ Wed 12 Jun ›` pill from the day-log mockup (Today/Yesterday/Tomorrow for nearby days) —
+  plus local-time day-key helpers in `src/lib/dates.ts` (`todayKey`, `shiftDayKey`,
+  `formatDayKey`; local time so "today" stays honest around midnight).
+- [x] **F4-3 — Diary screen.** ✅ Done. Styled to mockup 1g/2g: header + date selector, kcal
+  budget hero card (logged / target, "left"—or "over" in coral, never shaming copy—plus thin
+  MacroBar), four meal groups with per-meal kcal subtotals, entry cards (name, grams · protein,
+  kcal), dashed per-meal "Add food" rows (wired in F4-4). Pull-to-refresh + refetch-on-focus;
+  loading / error+retry / empty-meal states. API client gains diary/diarySummary + types.
+- [x] **F4-4 — Add-food search flow.** ✅ Done. Modal `/add-food?meal&date` (mockup 1h/2h):
+  ✕ + "Add to <Meal>" header, debounced search over all visible foods, Recents / My foods chips
+  when the field is empty (Recents backed by new `GET /foods/recent` — most recently logged,
+  deduped, endpoint-tested), barcode Phase-2 slot, result rows with kcal + green add bubble →
+  food detail (F4-5), "No match? Create a custom food" footer → F4-6. Diary add rows now open it.
+  - **Decision to revisit:** Favourites chip deferred — no favourite flag in the data model
+    (needs its own task); spec's "My recipes/batches" source arrives with Prep (F6).
+- [x] **F4-5 — Food detail / quantity.** ✅ Done. `/food/[id]` inside a new `(logging)` modal
+  route group (search → detail → create push within one sheet). Styled to mockup 1i/2i: grams
+  stepper (±10g, editable), live MacroRing card on the hero surface with protein-emphasised
+  legend, "Updates live…" caption, expandable Meal + Date rows, "Add to diary" → `POST /diary`
+  → the sheet dismisses and Diary refetches on focus. API adds `GET /foods/:id` (+tests).
+  - **Decision to revisit:** quantity is grams-only (foods are per-100g); serving/portion units
+    from the mockup's toggle arrive with recipes/batches (F5/F6).
+- [x] **F4-6 — Create custom food.** ✅ Done. `/create-food` (mockup 1j/2j): name, serving
+  size (grams), PER SERVING calories/protein/carbs/fat + optional fibre (blank = 0). Converts
+  per-serving → per-100g for `POST /foods`, then replaces into `/food/[id]` pre-filled with one
+  serving so saving flows straight into logging. Client-side validation with kind copy.
+- [x] **F4-7 — Edit / delete entry.** ✅ Done. Diary entries are tappable → `/entry/[id]`
+  (same sheet visual language as food detail): grams stepper + live ring **rescaled from the
+  entry's own snapshot** (mirrors the API's PATCH maths — the live food is never re-read), meal
+  mover, "Delete entry" destructive row, "Save changes". Batch-portion entries (F5-4) show a
+  fixed portion note instead of a grams stepper. API adds `GET /diary/:id` (+test).
+  - **Decision to revisit:** swipe-to-delete fast path not built (tap → delete covers MVP).
 
 **Verification:** on device — add, edit, delete foods across meals; totals and the rings update live.
 
@@ -254,24 +355,69 @@ The `/foods` and `/batches` scaffolding already exists — these tasks extend it
 
 ### Feature F5 — Prep API (backend)
 
-- [ ] **F5-1 — Scope batches to users** and return total + per-portion macros (extend existing routes). (+tests)
-- [ ] **F5-2 — Recipes.** `Recipe`/`RecipeIngredient` routes: list/create/get/update; per-portion
-  macros from default amounts.
-- [ ] **F5-3 — Cook a recipe → batch.** `POST /recipes/:id/cook` pre-fills a batch (editable amounts) into inventory.
-- [ ] **F5-4 — Eat a portion → diary.** `POST /batches/:id/eat` logs a portion to the diary
-  **and** decrements remaining (integrates F3). (+test for the decrement + log)
-- [ ] **F5-5 — Inventory & history.** Active (remaining > 0) vs. depleted; adjust-remaining endpoint.
+- [x] **F5-1 — Scope batches to users.** ✅ Done. `Batch.ownerId` + `add_batch_owner`
+  migration (nullable only so pre-ownership rows survive; API always sets it, unowned rows are
+  invisible). All `/batches` routes require auth and filter by owner; POST validates portions/
+  ingredients and requires every ingredient food to be visible to the caller; responses wrapped
+  `{ batches }`/`{ batch }` with total + per-portion macros. Seed no longer creates an example
+  batch. Full endpoint tests (macros maths, validation, scoping, eat decrement/409).
+- [x] **F5-2 — Recipes.** ✅ Done. `Recipe.ownerId` (+ migration) and auth-scoped `/recipes`:
+  list (A→Z) / get / create / **PUT update** (replaces name, portions and the full ingredient
+  list transactionally — cooked batches are untouched, they snapshot). Same validation as
+  batches (positive grams, visible foods). Total + per-portion macros from default amounts.
+  Endpoint-tested (macros, validation, scoping, update).
+- [x] **F5-3 — Cook a recipe → batch.** ✅ Done. `POST /recipes/:id/cook` — the recipe's
+  defaults pre-fill the batch; the body may override name/portions/ingredients (real cooking
+  varies). Creates an owned batch with `recipeId` linked, snapshotting what was actually used;
+  the template is untouched. Also hardened the test harness: shared `resetDb()` clears all
+  tables FK-safely per test (cross-file leftovers were breaking suites). Tested (defaults,
+  overrides, validation, scoping).
+- [x] **F5-4 — Eat a portion → diary.** ✅ Done. `POST /batches/:id/eat` now logs a diary
+  entry (name = batch name, quantity 1, unit `"portion"`, macros snapshotted per-portion) **and**
+  decrements `portionsRemaining` in one transaction. Body `{ date?, meal? }` defaults to
+  today/snacks. 409 at zero logs nothing. Tests cover the log+decrement, diary/summary
+  integration, defaults, validation, and scoping.
+- [x] **F5-5 — Inventory & history.** ✅ Done. `GET /batches?status=active|depleted` splits
+  the live inventory from finished cooks; `PATCH /batches/:id` adjusts `portionsRemaining`
+  (integer 0..total); `DELETE /batches/:id` removes a cook — eaten diary entries stay exactly
+  as logged in both cases. Tested (filtering, adjust bounds, delete-keeps-diary, scoping).
+  **Feature F5 complete** — the Prep API is exercisable end-to-end.
 
 **Verification:** create a batch → per-portion macros correct → eat one → diary gains an entry &
 count drops → deplete → moves to history.
 
 ### Feature F6 — Prep UI (frontend)
 
-- [ ] **F6-1 — Inventory view.** Active batch cards (portions remaining hero, kcal+protein, "Eat one"), low-stock flag.
-- [ ] **F6-2 — Batch detail.** Per-portion macros, whole-batch totals, ingredient snapshot, eat/adjust/duplicate/delete.
-- [ ] **F6-3 — Create/Edit batch flow.** Start → add ingredients → set portions (live per-portion
-  macros) → review → "Add to inventory" → success. Optional "Save as recipe".
-- [ ] **F6-4 — Recipes list + detail.** Cards with default per-portion macros; "Cook this" → F6-3 pre-filled.
+- [x] **F6-1 — Inventory view.** ✅ Done. Prep tab rebuilt to mockup 1k/2k/1t: Inventory/
+  Recipes segmented (Recipes filled in F6-4), meals-ready hero strip with "~N days stocked"
+  chip (3 meals/day), "New batch" CTA, batch cards (portion pips, remaining hero number,
+  kcal + protein, one-tap **Eat one** → `POST /batches/:id/eat` with today + time-of-day meal),
+  LOW flag + coral treatment at ≤2 portions, clock icon flips to depleted history, mockup empty
+  state. Diary entries with unit `portion` now carry the coral **BATCH** tag (mockup 1g).
+  Client gains `Batch` types, `batches()`/`eatPortion()`, `mealForNow`/`cookedAgo` helpers.
+- [x] **F6-2 — Batch detail.** ✅ Done. `/batch/[id]` to mockup 1l/2l: cooked-ago +
+  remaining-count header, portion pips, per-portion MacroRing hero ("KCAL / PORTION"),
+  whole-batch row, ingredient snapshot (kg/g formatting). ⋯ menu → adjust portions left
+  (inline −/+ stepper via `PATCH`), duplicate ("cook this again"), delete (confirm; diary
+  history untouched). Footer "Eat a portion" (or "Cook this again" when depleted).
+- [x] **F6-3 — Create batch flow.** ✅ Done. `(wizard)` modal group (mockups 1m→1q):
+  **Start** (name + "new from scratch" / "from a saved recipe" with inline recipe list; a
+  `recipeId` param pre-fills and jumps ahead for "Cook this") → **Ingredients** (debounced
+  search adds at 100g, inline grams edits, running-total strip) → **Portions ✨** (big coral
+  stepper + "PER PORTION · UPDATES LIVE" panel) → **Review** (per-portion hero, whole-batch
+  rows, **Save as recipe** toggle) → `POST /batches` (+`/recipes`) → **Confirmation** (full
+  Prep-Green "N meals prepped", "Back to inventory" / "Eat one now"). Draft lives in
+  `BatchDraftProvider`; shared `WizardStep` chrome.
+  - **Decision to revisit:** editing a cooked batch's ingredients isn't supported (no API for
+    it — adjust/duplicate/delete cover the MVP); the flow is create-only.
+- [x] **F6-4 — Recipes list + detail.** ✅ Done. Prep's Recipes sub-view (mockup 1r/2r):
+  "Templates you can cook anytime", recipe cards ("makes N" chip, per-portion kcal + protein,
+  **Cook this** → the wizard pre-filled via `?recipeId=`), dashed "New recipe" (opens the wizard
+  — save-as-recipe at review), empty state. `/recipe/[id]` detail (mockup 1s/2s): RECIPE chip,
+  default portions, per-portion hero, default ingredients, footer "Cook this".
+  **Feature F6 complete** — Phase 3 (Prep ⭐) is done end-to-end.
+  - **Decisions to revisit:** no standalone recipe editor (PUT `/recipes/:id` exists but the
+    UI edits via cook-and-resave); no recipe delete endpoint yet, so no delete action.
 
 **Verification:** on device — prep a batch, watch per-portion macros update as portions change,
 eat one from inventory and see it in the Diary.
@@ -284,21 +430,49 @@ Co-equal pillar with food logging. Exercises, sessions, history.
 
 ### Feature F7 — Train API (backend)
 
-- [ ] **F7-1 — Exercise model + library.** `Exercise` (name, muscle group, equipment, tracking
-  mode) + CRUD; seed common exercises. (+tests)
-- [ ] **F7-2 — Workout session model.** `Workout` + `WorkoutExercise` + `Set` (weight×reps,
-  bodyweight, time, distance modes) + migration.
-- [ ] **F7-3 — Session CRUD.** Create/finish/list/get, including unfinished-session state. (+tests)
-- [ ] **F7-4 — Repeat-last-workout.** Endpoint returning the previous session's exercises/sets to pre-fill.
+- [x] **F7-1 — Exercise model + library.** ✅ Done. `Exercise` model (`add_exercise`
+  migration): name, muscleGroup, equipment, trackingMode (weight_reps / bodyweight_reps / time
+  / distance), `ownerId` null = shared library. `/exercises`: GET (library + own, `?query=`
+  name filter), POST custom, PATCH/DELETE own only (library read-only). Seed adds ~43 library
+  exercises (idempotent). Tested (scoping, filters, enum validation, library immutability).
+- [x] **F7-2 — Workout session model.** ✅ Done. `Workout` (startedAt / nullable finishedAt =
+  unfinished, user cascade) → `WorkoutExercise` (ordered blocks; exercise name + trackingMode
+  **snapshotted**, SetNull link) → `WorkoutSet` (order + nullable weightKg/reps/seconds/
+  distanceM — the block's mode says which apply). `add_workouts` migration.
+- [x] **F7-3 — Session CRUD.** ✅ Done. `/workouts`: POST start (returns the existing
+  unfinished session instead of forking a second one), GET list newest-first with
+  `?status=unfinished|finished`, GET `/:id`, **PUT `/:id`** replaces blocks + sets
+  transactionally (name/trackingMode snapshotted from visible exercises; sets validated
+  per mode), POST `/:id/finish` (409 if already finished), DELETE `/:id`. Fully tested.
+- [x] **F7-4 — Repeat-last-workout.** ✅ Done. `GET /workouts/last` — the most recent
+  **finished** session with its blocks + sets, for pre-filling a new one; 404 when nothing has
+  been finished yet. Tested. **Feature F7 complete** — the Train API is exercisable end-to-end.
 
 **Verification:** create a session, add exercises/sets, finish, list history; repeat-last returns prior numbers.
 
 ### Feature F8 — Train UI (frontend)
 
-- [ ] **F8-1 — Shared: numeric keypad entry.** Fast thumb-friendly numeric input (reused by weights/reps).
-- [ ] **F8-2 — Train home / history.** "Start workout", unfinished-session banner, history list.
-- [ ] **F8-3 — Active session.** Exercise blocks, set tables, "+ add set" (pre-fill), "repeat last time", finish.
-- [ ] **F8-4 — Exercise picker / library.** Searchable list + create/edit exercise.
+- [x] **F8-1 — Shared: numeric keypad entry.** ✅ Done. `NumericKeypad` (wireframe 1v): fixed
+  3×4 thumb grid (1–9, ·, 0, ⌫) that never opens the system keyboard; decimal key disabled for
+  integer fields (reps/seconds). Wired into the active session in F8-3.
+- [x] **F8-2 — Train home / history.** ✅ Done. Train tab (wireframe 1u): "Start workout"
+  (POST — resumes rather than forking if one is open), coral **RESUME** banner for the
+  unfinished session ("Started N min ago · X exercises"), History list (time-of-day titles,
+  weekday · duration, exercise/set counts), pull-to-refresh + focus refetch, empty/error states.
+  - **Decision to revisit:** sessions have no user-set name (model has none) — titled
+    "Morning/Afternoon/Evening workout" for now.
+- [x] **F8-3 — Active session.** ✅ Done. `/workout/[id]` (wireframe 1v): ticking ⏱ timer,
+  exercise blocks with per-mode set tables (kg+reps / reps / seconds / metres), tap a cell →
+  in-screen **NumericKeypad** edits it (decimal disabled for integer fields), "+ Add set"
+  pre-fills from the previous set, "Repeat last workout" pre-fills an empty session from
+  `GET /workouts/last`, debounced PUT saves the whole session as it changes (flushed before
+  finishing), **Finish workout**, ⋯ → discard. Finished sessions open read-only from history.
+- [x] **F8-4 — Exercise picker / library.** ✅ Done. `ExercisePicker` full-screen modal
+  (wireframes 1w/1x) inside the session: debounced search over library + own exercises
+  ("Chest · Barbell" meta), pencil edits **own** exercises, "+ Create exercise" form (name,
+  muscle-group/equipment chip grids, tracking-mode chips) → POST/PATCH. Picking appends a
+  block with one empty set; the session's dashed "Add exercise" row opens it.
+  **Feature F8 complete** — Phase 4 (Train) is done end-to-end.
 
 **Verification:** on device — start a workout, log sets, finish; resume an unfinished session; repeat last time works.
 
@@ -310,20 +484,44 @@ Bodyweight trend, stats, and editing what onboarding set.
 
 ### Feature F9 — Progress & Settings API (backend)
 
-- [ ] **F9-1 — Weight entries.** `WeightEntry` (date, value, note) + CRUD. (+tests)
-- [ ] **F9-2 — Trend & stats.** `GET /progress` returns raw points + smoothed trend + change-over-range
-  + simple weekly stats. (+test on the smoothing)
-- [ ] **F9-3 — Settings persistence.** Reuse/extend `PUT /me/profile` for goal/targets/profile/units edits.
+- [x] **F9-1 — Weight entries.** ✅ Done. `WeightEntry` (day-key date, weightKg, note;
+  unique per user+day) + `add_weight_entry` migration. `/weights`: POST **upserts** the day
+  (a second weigh-in updates, not duplicates), GET oldest-first, PATCH value/note, DELETE.
+  Tested (upsert, validation, ordering, scoping).
+- [x] **F9-2 — Trend & stats.** ✅ Done. Pure `src/progress.ts`: EMA smoothing (α=0.25 —
+  daily noise damped, real change followed) + `progressStats` (current / change-over-range /
+  weekly rate from the trend line). `GET /progress?days=N` returns `{ entries, trend, stats }`.
+  Smoothing maths unit-tested; endpoint tested incl. the window filter.
+- [x] **F9-3 — Settings persistence.** ✅ Done. New `PATCH /me/profile` — any subset of goal /
+  profile / units / targets, each field validated as in the PUT; switching to maintain nulls the
+  weekly rate; onboarding state untouched; empty patch → 400. Tested. **Feature F9 complete.**
 
 **Verification:** log weights, fetch trend/stats; update targets and see `/me` reflect them.
 
 ### Feature F10 — Progress & Settings UI (frontend)
 
-- [ ] **F10-1 — Progress screen.** Trend chart (raw points + emphasised trend line), range toggle,
-  current/goal, "Log weight".
-- [ ] **F10-2 — Log weight modal.** Date/value/unit/note; edit/delete.
-- [ ] **F10-3 — Settings screen.** Goals & targets, profile, preferences (units), data (export/clear), about.
-- [ ] **F10-4 — TDEE calculator screen.** Reused component (onboarding + settings) to recompute targets.
+- [x] **F10-1 — Progress screen.** ✅ Done. Progress tab (wireframe 1y): current smoothed
+  weight in the user's units + ▼/▲ change over the range, SVG **trend chart** (light raw dots,
+  emphasised green trend line), 1M/3M/6M/All chips, "This week" workouts · meals-stocked row,
+  gear → Settings. "Log weight" + recent entries arrive with the modal in F10-2.
+  - **Decision to revisit:** the wireframe's "Avg calories" this-week stat needs a weekly
+    summary endpoint (7 per-day calls otherwise) — deferred.
+- [x] **F10-2 — Log weight modal.** ✅ Done. `LogWeightSheet` bottom sheet (wireframe 1z):
+  date (selector, fixed when editing), value with **kg/lb toggle that converts what's typed**
+  (kg sent to the API), optional note, Save (day-upsert). Progress gains the "Log weight" CTA
+  and a Recent-entries list — tap to edit, delete inside the sheet.
+- [x] **F10-3 — Settings screen.** ✅ Done. `/settings` (wireframe 1aa): rows → **Goals &
+  targets** (goal + weekly rate + the five targets, `PATCH`), **Profile** (sex, height,
+  current/goal weight in the user's unit, activity level), **Recalculate targets** (F10-4),
+  inline **Units** segmented (optimistic PATCH), the dashed "Account & cloud sync — Phase 3"
+  hook, About, and **Sign out** (moved here from its temporary spot on Progress).
+  - **Decisions to revisit:** "Data — export/clear" row omitted (no API for it yet); height
+    stays in cm even for imperial (ft/in entry deferred); birth date isn't editable.
+- [x] **F10-4 — TDEE calculator screen.** ✅ Done. `/settings/tdee` (wireframe 1ab): goal
+  segmented + rate chips, activity chips, live `POST /tools/tdee` recompute from the stored
+  profile, suggestion hero (ring + protein-emphasised legend + maintenance caption), "Use these
+  targets" → `PATCH` → rings update app-wide. Points to Profile if body stats are missing.
+  **Feature F10 complete** — Phase 5 is done end-to-end.
 
 **Verification:** on device — log several weights, see the trend; change a target in Settings and see rings update app-wide.
 
@@ -335,18 +533,36 @@ Built last because it aggregates every domain above.
 
 ### Feature F11 — Today API (backend)
 
-- [ ] **F11-1 — Daily summary endpoint.** `GET /today?date=` composing budget (targets vs. intake),
-  meal subtotals, inventory snapshot, and weight mini-trend in one payload. (+test)
+- [x] **F11-1 — Daily summary endpoint.** ✅ Done. `GET /today?date=` composes, in one
+  payload: budget (consumed / targets / remaining for the five nutrients), per-meal kcal +
+  entry counts, inventory snapshot (meals ready, active batches, the newest batch with
+  per-portion macros for one-tap eating), and the bodyweight mini-trend (last 14 EMA points +
+  current + change). Tested against a full seeded day and a fresh account.
+  **Feature F11 complete.**
 
 **Verification:** returns a correct combined snapshot for a day with logged food, a batch, and a weight.
 
 ### Feature F12 — Today UI (frontend)
 
-- [ ] **F12-1 — Daily budget hero.** Macro Ring set for calories remaining + macros.
-- [ ] **F12-2 — Quick actions row.** Log food · Eat a prepped meal · Start workout · Log weight.
-- [ ] **F12-3 — Today's meals summary.** Meal groups with subtotals → jump to Diary.
-- [ ] **F12-4 — Inventory snapshot card.** "X prepped meals ready" + "Eat one" / view inventory.
-- [ ] **F12-5 — Bodyweight mini-trend.** Sparkline + latest value + "Log weight".
+- [x] **F12-1 — Daily budget hero.** ✅ Done. Today rebuilt (mockup 1f/2f): greeting +
+  title + date pill, and the dark hero card — kcal-left MacroRing (consumed fills against the
+  target; "KCAL LEFT"/"KCAL OVER"/"KCAL LOGGED" as appropriate) beside the three macro bars,
+  protein bold-white and first. Focus refetch + pull-to-refresh; loading/error states. Client
+  gains `TodayData` + `api.today()` and the mockup's `heroTrack`/`sparkMuted` tokens.
+- [x] **F12-2 — Quick actions row.** ✅ Done. Two rows per mockup 1f: **Log food** (green →
+  add-food modal, meal guessed by time of day) · **Eat prepped** (coral → one-tap eat from the
+  newest batch, or over to Prep if the fridge is empty) · **Workout** (outline → start/resume →
+  active session) · **Log weight** (outline → the F10-2 sheet, reused).
+- [x] **F12-3 — Today's meals summary.** ✅ Done. Meal chips (Breakfast/Lunch/Dinner/Snacks)
+  with kcal subtotals from `today.meals`; empty meals show a dashed "+". Tapping any chip
+  routes to the Diary.
+- [x] **F12-4 — Inventory snapshot card.** ✅ Done. "X prepped meals ready" + days-stocked
+  estimate, with an inline "Eat one" pill (same handler as the F12-2 quick action) and a tap
+  target that opens Prep to view the full inventory. Empty state ("No prepped meals") routes
+  to the new-batch wizard instead.
+- [x] **F12-5 — Bodyweight mini-trend.** ✅ Done. Sparkline (last 7 EMA points, `today.weight.trend`)
+  + latest value + a ▼/▲ change pill; tapping the card opens the Log weight sheet. Empty state
+  prompts the first weigh-in. **F12 complete.**
 
 **Verification:** on device — the Today tab reflects everything logged elsewhere and every card routes correctly.
 

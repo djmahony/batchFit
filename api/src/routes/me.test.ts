@@ -3,10 +3,9 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../app.js';
 import { prisma } from '../prisma.js';
+import { resetDb } from '../test/resetDb.js';
 
-beforeEach(async () => {
-  await prisma.user.deleteMany();
-});
+beforeEach(resetDb);
 
 afterAll(async () => {
   await prisma.$disconnect();
@@ -141,5 +140,72 @@ describe('PUT /me/profile', () => {
     const res = await request(app).put('/me/profile').send(validProfile);
 
     expect(res.status).toBe(401);
+  });
+});
+
+describe('PATCH /me/profile', () => {
+  const credentials = { email: 'tweaker@example.com', password: 'password123' };
+
+  const validProfile = {
+    sex: 'male',
+    birthDate: '1990-06-15',
+    heightCm: 180,
+    activityLevel: 'moderate',
+    goal: 'lose',
+    goalRateKgPerWk: 0.5,
+    currentWeightKg: 90,
+    units: 'metric',
+    targetKcal: 2200,
+    targetProtein: 180,
+    targetFat: 61,
+    targetCarbs: 232,
+    targetFibre: 31,
+  };
+
+  async function onboardedToken() {
+    const res = await request(app).post('/auth/register').send(credentials);
+    const token = res.body.token as string;
+    await request(app).put('/me/profile').set('Authorization', `Bearer ${token}`).send(validProfile);
+    return token;
+  }
+
+  it('updates just the provided fields and leaves the rest alone', async () => {
+    const token = await onboardedToken();
+
+    const res = await request(app)
+      .patch('/me/profile')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ targetKcal: 2000, units: 'imperial' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.targetKcal).toBe(2000);
+    expect(res.body.user.units).toBe('imperial');
+    expect(res.body.user.targetProtein).toBe(180);
+    expect(res.body.user.onboardingComplete).toBe(true);
+  });
+
+  it('nulls the weekly rate when switching to maintain', async () => {
+    const token = await onboardedToken();
+
+    const res = await request(app)
+      .patch('/me/profile')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ goal: 'maintain' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.goal).toBe('maintain');
+    expect(res.body.user.goalRateKgPerWk).toBeNull();
+  });
+
+  it('validates provided fields and rejects empty patches', async () => {
+    const token = await onboardedToken();
+
+    for (const bad of [{ targetKcal: -5 }, { goal: 'bulk' }, {}]) {
+      const res = await request(app)
+        .patch('/me/profile')
+        .set('Authorization', `Bearer ${token}`)
+        .send(bad);
+      expect(res.status, JSON.stringify(bad)).toBe(400);
+    }
   });
 });

@@ -4,9 +4,15 @@ import express from 'express';
 import { errorHandler } from './errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { batchesRouter } from './routes/batches.js';
+import { diaryRouter } from './routes/diary.js';
+import { exercisesRouter } from './routes/exercises.js';
 import { foodsRouter } from './routes/foods.js';
 import { meRouter } from './routes/me.js';
+import { recipesRouter } from './routes/recipes.js';
+import { todayRouter } from './routes/today.js';
 import { toolsRouter } from './routes/tools.js';
+import { progressRouter, weightsRouter } from './routes/weights.js';
+import { workoutsRouter } from './routes/workouts.js';
 
 export const app = express();
 
@@ -21,6 +27,13 @@ app.use('/auth', authRouter);
 app.use('/me', meRouter);
 app.use('/tools', toolsRouter);
 app.use('/foods', foodsRouter);
+app.use('/diary', diaryRouter);
 app.use('/batches', batchesRouter);
+app.use('/recipes', recipesRouter);
+app.use('/exercises', exercisesRouter);
+app.use('/workouts', workoutsRouter);
+app.use('/weights', weightsRouter);
+app.use('/progress', progressRouter);
+app.use('/today', todayRouter);
 
 app.use(errorHandler);

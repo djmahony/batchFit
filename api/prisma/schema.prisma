@@ -1,9 +1,10 @@
 // BatchFit API schema.
 // Accounts are Phase 1 (client–server, login required — see roadmap.md). This models
-// the User (auth + profile + the five daily targets). The batch-cooking differentiator
-// (Recipe = template, Batch = one cook with snapshotted amounts + portion inventory) is
-// modelled below. Diary, workouts and weight entries arrive in later phases; ownership
-// (scoping foods/recipes/batches to a user) is added in F3-1 / F5-1.
+// the User (auth + profile + the five daily targets), foods (shared reference +
+// user-owned custom), the food diary (LogEntry, snapshotted macros), and the
+// batch-cooking differentiator (Recipe = template, Batch = one cook with snapshotted
+// amounts + portion inventory). Workouts and weight entries arrive in later phases;
+// batch/recipe ownership is added in F5-1.
 
 generator client {
   provider = "prisma-client-js"
@@ -48,10 +49,50 @@ model User {
 
   onboardingComplete Boolean @default(false)
 
-  foods Food[]
+  foods      Food[]
+  logEntries LogEntry[]
+  batches    Batch[]
+  recipes    Recipe[]
+  exercises  Exercise[]
+  workouts   Workout[]
+  weights    WeightEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// One line in the food diary: a food logged to a meal on a day. Macros are
+/// **snapshotted at log time** (scaled to the quantity eaten) so history never
+/// changes when a food or batch is later edited — the MVP's no-rewrite rule.
+/// `date` is a day key ("YYYY-MM-DD") in the user's local day, not a timestamp.
+///   meal — "breakfast" | "lunch" | "dinner" | "snacks"
+model LogEntry {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  date String
+  meal String
+
+  /// What was eaten, snapshotted by name; the food link is kept for "log it
+  /// again" but the entry survives the food being deleted.
+  name     String
+  food     Food?   @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  foodId   String?
+  quantity Float
+  unit     String  @default("g")
+
+  // Snapshotted macros for the logged quantity (not per-100g).
+  kcal    Float
+  protein Float
+  fat     Float
+  carbs   Float
+  fibre   Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
 }
 
 /// A food with macros per 100g. The five tracked nutrients throughout
@@ -73,6 +114,7 @@ model Food {
 
   recipeIngredients RecipeIngredient[]
   batchIngredients  BatchIngredient[]
+  logEntries        LogEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -82,9 +124,12 @@ model Food {
 
 /// A reusable template: an ingredient list + a default portion count.
 /// Cooking a recipe produces a Batch (which snapshots the actual amounts used).
+/// `ownerId` nullable only for migration compatibility — see Batch.
 model Recipe {
   id              String @id @default(cuid())
   name            String
+  owner           User?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId         String?
   defaultPortions Int    @default(1)
 
   ingredients RecipeIngredient[]
@@ -92,6 +137,8 @@ model Recipe {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
 }
 
 model RecipeIngredient {
@@ -108,9 +155,13 @@ model RecipeIngredient {
 /// One actual cook. Amounts are snapshotted here (real cooking varies cook-to-cook),
 /// so editing the source recipe never rewrites a batch. `portionsRemaining` is the
 /// live inventory count and is decremented when a portion is eaten.
+/// `ownerId` is nullable only so pre-ownership rows survive the migration; every
+/// batch created through the API has an owner, and unowned rows are invisible.
 model Batch {
   id                String  @id @default(cuid())
   name              String
+  owner             User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId           String?
   recipe            Recipe? @relation(fields: [recipeId], references: [id])
   recipeId          String?
   portionsTotal     Int
@@ -123,6 +174,7 @@ model Batch {
   updatedAt DateTime @updatedAt
 
   @@index([recipeId])
+  @@index([ownerId])
 }
 
 model BatchIngredient {
@@ -134,4 +186,96 @@ model BatchIngredient {
   grams   Float
 
   @@index([batchId])
+}
+
+/// A movement you can log in Train. `ownerId` null = shared library exercise;
+/// set = a user's custom exercise. SQLite has no enums; validated at app layer:
+///   muscleGroup  — "chest" | "back" | "legs" | "shoulders" | "arms" | "core" |
+///                  "full_body" | "cardio"
+///   equipment    — "barbell" | "dumbbell" | "machine" | "cable" | "bodyweight" |
+///                  "kettlebell" | "other"
+///   trackingMode — "weight_reps" | "bodyweight_reps" | "time" | "distance"
+model Exercise {
+  id           String  @id @default(cuid())
+  name         String
+  muscleGroup  String
+  equipment    String
+  trackingMode String
+  owner        User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId      String?
+
+  workoutExercises WorkoutExercise[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+}
+
+/// One training session. Created when the user hits "Start workout"; stays
+/// unfinished (finishedAt null) until they finish it — the app offers to resume.
+model Workout {
+  id         String    @id @default(cuid())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  exercises WorkoutExercise[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, startedAt])
+}
+
+/// One exercise block within a session, in order. The exercise name is
+/// snapshotted so history survives a custom exercise being deleted.
+model WorkoutExercise {
+  id         String    @id @default(cuid())
+  workout    Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  workoutId  String
+  exercise   Exercise? @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  exerciseId String?
+  name       String
+  /// Copied from the exercise at logging time; drives which set fields apply.
+  trackingMode String
+  order        Int
+
+  sets WorkoutSet[]
+
+  @@index([workoutId])
+}
+
+/// One set. Which fields are filled depends on the block's trackingMode:
+///   weight_reps → weightKg + reps · bodyweight_reps → reps
+///   time → seconds · distance → distanceM (+ optional seconds)
+model WorkoutSet {
+  id                String          @id @default(cuid())
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
+  workoutExerciseId String
+  order             Int
+  weightKg          Float?
+  reps              Int?
+  seconds           Int?
+  distanceM         Float?
+
+  @@index([workoutExerciseId])
+}
+
+/// One bodyweight reading. `date` is a day key ("YYYY-MM-DD"); one entry per
+/// day per user — logging again the same day updates it.
+model WeightEntry {
+  id       String  @id @default(cuid())
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  date     String
+  weightKg Float
+  note     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }

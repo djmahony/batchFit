@@ -7,3 +7,5 @@ prisma/*.db
 prisma/*.db-journal
 
 .env
+*.db
+*.db-journal

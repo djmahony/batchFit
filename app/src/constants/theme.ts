@@ -38,9 +38,25 @@ export const Colors = {
     // Soft green info banner.
     tintSoft: '#E9F3EC',
     onTintSoft: '#235C3B',
+    tintSoftBorder: '#CDE7D7',
     accentSoft: '#FDEEE8',
+    // The macro trio (BatchFit Diary.dc.html food-detail ring): protein leads
+    // in bright green, carbs take coral, fat takes gold — same in both themes.
+    macroProtein: '#46C57E',
+    macroCarbs: '#FB6E4E',
     macroFat: '#F5C84B',
     textMuted: '#9AA39C',
+    // Thin progress track under the kcal budget card (Diary day log).
+    barTrack: '#E3E0D8',
+    // Coral-tinted border for low-stock batch cards (Prep inventory).
+    lowBorder: '#F3D9CF',
+    // The "per portion · updates live" panel in the batch wizard (mockup 1o).
+    accentPanel: '#FFF3EF',
+    accentPanelBorder: '#FBCBBC',
+    onAccentPanel: '#B4705A',
+    // Ring/bar track on the Today hero card, and the muted sparkline bars.
+    heroTrack: '#26352B',
+    sparkMuted: '#DCE6DF',
   },
   dark: {
     // Deep Kale surfaces, Paper text, brighter mint-green accent.
@@ -66,9 +82,19 @@ export const Colors = {
     onHeroMuted: '#8FA396',
     tintSoft: '#16271D',
     onTintSoft: '#A8D8BC',
+    tintSoftBorder: '#265237',
     accentSoft: 'rgba(251,110,78,0.16)',
+    macroProtein: '#46C57E',
+    macroCarbs: '#FB6E4E',
     macroFat: '#F5C84B',
     textMuted: '#6E8174',
+    barTrack: '#0D1611',
+    lowBorder: '#4A2E24',
+    accentPanel: 'rgba(251,110,78,0.10)',
+    accentPanelBorder: '#4A2E24',
+    onAccentPanel: '#E8A48E',
+    heroTrack: '#22332A',
+    sparkMuted: '#2A4233',
   },
 } as const;
 

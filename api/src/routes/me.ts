@@ -111,3 +111,79 @@ meRouter.put('/profile', requireAuth, async (req, res) => {
 
   res.json({ user: serializeUser(user) });
 });
+
+// PATCH /me/profile — Settings edits: any subset of goal / profile / units /
+// targets. Each provided field is validated like the PUT; switching to a
+// maintain goal nulls the weekly rate. Onboarding state is untouched.
+meRouter.patch('/profile', requireAuth, async (req, res) => {
+  const body = req.body ?? {};
+  const data: Record<string, unknown> = {};
+
+  if (body.sex !== undefined) {
+    if (!SEXES.includes(body.sex)) {
+      return res.status(400).json({ error: 'sex must be "male" or "female"' });
+    }
+    data.sex = body.sex;
+  }
+  if (body.activityLevel !== undefined) {
+    if (!ACTIVITY_LEVELS.includes(body.activityLevel)) {
+      return res.status(400).json({ error: 'activityLevel is invalid' });
+    }
+    data.activityLevel = body.activityLevel;
+  }
+  if (body.goal !== undefined) {
+    if (!GOALS.includes(body.goal)) {
+      return res.status(400).json({ error: 'goal must be "lose", "maintain" or "build"' });
+    }
+    data.goal = body.goal;
+    if (body.goal === 'maintain') data.goalRateKgPerWk = null;
+  }
+  if (body.units !== undefined) {
+    if (!UNITS.includes(body.units)) {
+      return res.status(400).json({ error: 'units must be "metric" or "imperial"' });
+    }
+    data.units = body.units;
+  }
+  if (body.birthDate !== undefined) {
+    const birth = new Date(body.birthDate);
+    if (typeof body.birthDate !== 'string' || Number.isNaN(birth.getTime())) {
+      return res.status(400).json({ error: 'birthDate must be a valid date' });
+    }
+    data.birthDate = birth;
+  }
+  for (const field of [
+    'heightCm',
+    'currentWeightKg',
+    'goalRateKgPerWk',
+    'targetKcal',
+    'targetProtein',
+    'targetFat',
+    'targetCarbs',
+    'targetFibre',
+  ] as const) {
+    if (body[field] !== undefined) {
+      if (!isPositive(body[field])) {
+        return res.status(400).json({ error: `${field} must be a positive number` });
+      }
+      data[field] = body[field];
+    }
+  }
+  if (body.goalWeightKg !== undefined) {
+    if (body.goalWeightKg !== null && !isPositive(body.goalWeightKg)) {
+      return res.status(400).json({ error: 'goalWeightKg must be a positive number' });
+    }
+    data.goalWeightKg = body.goalWeightKg;
+  }
+
+  if (Object.keys(data).length === 0) {
+    return res.status(400).json({ error: 'nothing to update' });
+  }
+
+  const existing = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (!existing) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const user = await prisma.user.update({ where: { id: req.userId }, data });
+  res.json({ user: serializeUser(user) });
+});

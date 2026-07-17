@@ -16,6 +16,9 @@ import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, MEALS, type Meal, type TodayData } from '@/lib/api';
 import { mealForNow, todayKey } from '@/lib/dates';
 
+const MEALS_PER_DAY = 3; // "~N days stocked" assumes three prepped meals a day (matches Prep tab).
+const KG_PER_LB = 0.45359237;
+
 function greeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
@@ -178,12 +181,22 @@ export default function TodayScreen() {
               />
             </View>
 
+            {/* Inventory snapshot — F12-4: meals ready, tap through to Prep, "Eat one" inline. */}
+            <InventoryCard data={data} onEatOne={() => void eatPrepped()} busy={busyAction === 'eat'} />
+
             {/* Meals strip — F12-3: subtotals per meal, tap through to the Diary. */}
             <View style={styles.mealsRow}>
               {MEALS.map((meal) => (
                 <MealChip key={meal} meal={meal} kcal={data.meals[meal]?.kcal ?? 0} />
               ))}
             </View>
+
+            {/* Bodyweight mini-trend — F12-5: sparkline + latest value, tap opens Log weight. */}
+            <WeightTrendCard
+              weight={data.weight}
+              imperial={user?.units === 'imperial'}
+              onPress={() => setWeightSheetOpen(true)}
+            />
 
             {error && (
               <ThemedText type="small" themeColor="danger" style={styles.centeredText}>
@@ -236,6 +249,172 @@ function MealChip({ meal, kcal }: { meal: Meal; kcal: number }) {
       <ThemedText style={[styles.mealChipValue, empty && { color: theme.textMuted }]}>
         {empty ? '+' : formatKcal(kcal)}
       </ThemedText>
+    </Pressable>
+  );
+}
+
+/** Inventory snapshot (F12-4): meals-ready count + "Eat one", or a cook-something
+ * prompt when the fridge is empty. Tapping the card opens Prep; the pill acts inline. */
+function InventoryCard({
+  data,
+  onEatOne,
+  busy,
+}: {
+  data: TodayData;
+  onEatOne: () => void;
+  busy: boolean;
+}) {
+  const theme = useTheme();
+  const { mealsReady } = data.inventory;
+
+  if (mealsReady <= 0) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="No prepped meals. Cook a batch."
+        onPress={() => router.push('/new-batch')}
+        style={({ pressed }) => [
+          styles.inventoryCard,
+          { backgroundColor: theme.surface, borderColor: theme.border, borderStyle: 'dashed', borderWidth: 1.5 },
+          pressed && styles.pressed,
+        ]}>
+        <View style={[styles.inventoryIcon, { backgroundColor: theme.track }]}>
+          <Ionicons name="restaurant-outline" size={20} color={theme.textMuted} />
+        </View>
+        <View style={styles.inventoryCopy}>
+          <ThemedText style={styles.inventoryTitle}>No prepped meals</ThemedText>
+          <ThemedText style={[styles.inventorySubtitle, { color: theme.textMuted }]}>
+            Cook a batch to stock your fridge
+          </ThemedText>
+        </View>
+      </Pressable>
+    );
+  }
+
+  const daysStocked = Math.max(1, Math.round(mealsReady / MEALS_PER_DAY));
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${mealsReady} prepped meals ready. View inventory.`}
+      onPress={() => router.push('/prep')}
+      style={({ pressed }) => [
+        styles.inventoryCard,
+        { backgroundColor: theme.tintSoft, borderColor: theme.tintSoftBorder, borderWidth: 1 },
+        pressed && styles.pressed,
+      ]}>
+      <View style={[styles.inventoryIcon, { backgroundColor: theme.tint }]}>
+        <Ionicons name="restaurant-outline" size={20} color={theme.onTint} />
+      </View>
+      <View style={styles.inventoryCopy}>
+        <ThemedText style={styles.inventoryTitle}>
+          {mealsReady} prepped meal{mealsReady === 1 ? '' : 's'} ready
+        </ThemedText>
+        <ThemedText style={[styles.inventorySubtitle, { color: theme.onTintSoft }]}>
+          Fridge stocked for ~{daysStocked} day{daysStocked === 1 ? '' : 's'}
+        </ThemedText>
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Eat one"
+        disabled={busy}
+        onPress={onEatOne}
+        style={({ pressed }) => [
+          styles.eatOnePill,
+          { backgroundColor: theme.tint },
+          (pressed || busy) && styles.pressed,
+        ]}>
+        {busy ? (
+          <ActivityIndicator size="small" color={theme.onTint} />
+        ) : (
+          <ThemedText style={[styles.eatOnePillLabel, { color: theme.onTint }]}>Eat one</ThemedText>
+        )}
+      </Pressable>
+    </Pressable>
+  );
+}
+
+/** Bodyweight mini-trend (F12-5): sparkline + latest value + change pill. Tapping
+ * opens the Log weight sheet. Empty state prompts the first weigh-in. */
+function WeightTrendCard({
+  weight,
+  imperial,
+  onPress,
+}: {
+  weight: TodayData['weight'];
+  imperial: boolean;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  const formatWeight = (kg: number) => (imperial ? `${(kg / KG_PER_LB).toFixed(1)} lb` : `${kg.toFixed(1)} kg`);
+  const weightNumber = (kg: number) => (imperial ? (kg / KG_PER_LB).toFixed(1) : kg.toFixed(1));
+  const weightUnit = imperial ? 'lb' : 'kg';
+
+  if (weight.currentKg === null) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="No weight logged yet. Log weight."
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.weightCard,
+          { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+          pressed && styles.pressed,
+        ]}>
+        <View>
+          <ThemedText style={[styles.weightLabel, { color: theme.textMuted }]}>Weight trend</ThemedText>
+          <ThemedText style={styles.weightEmptyValue}>No weigh-ins yet</ThemedText>
+        </View>
+        <ThemedText style={[styles.weightEmptyCta, { color: theme.tint }]}>Log weight</ThemedText>
+      </Pressable>
+    );
+  }
+
+  const recent = weight.trend.slice(-7);
+  const values = recent.map((p) => p.trendKg);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const change = weight.changeKg;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Weight trend, ${formatWeight(weight.currentKg)}. Log weight.`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.weightCard,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <View>
+        <ThemedText style={[styles.weightLabel, { color: theme.textMuted }]}>Weight trend</ThemedText>
+        <ThemedText style={styles.weightValue}>
+          {weightNumber(weight.currentKg)} <ThemedText style={[styles.weightUnit, { color: theme.textMuted }]}>{weightUnit}</ThemedText>
+        </ThemedText>
+      </View>
+      <View style={styles.sparkline}>
+        {values.map((v, i) => {
+          const heightPct = 30 + 70 * ((v - min) / range);
+          const highlighted = i >= values.length - 2;
+          return (
+            <View
+              key={i}
+              style={[
+                styles.sparkBar,
+                { height: `${heightPct}%`, backgroundColor: highlighted ? theme.tint : theme.sparkMuted },
+              ]}
+            />
+          );
+        })}
+      </View>
+      {change !== null && (
+        <View style={[styles.changePill, { backgroundColor: theme.tintSoft }]}>
+          <ThemedText style={[styles.changePillLabel, { color: change <= 0 ? theme.tint : theme.textSecondary }]}>
+            {change <= 0 ? '▼' : '▲'} {formatWeight(Math.abs(change))}
+          </ThemedText>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -497,6 +676,103 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
     marginTop: 2,
+  },
+  inventoryCard: {
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  inventoryIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inventoryCopy: {
+    flex: 1,
+  },
+  inventoryTitle: {
+    fontFamily: Fonts.display,
+    fontSize: 15.5,
+    lineHeight: 19,
+  },
+  inventorySubtitle: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 12.5,
+    lineHeight: 16,
+    marginTop: 1,
+  },
+  eatOnePill: {
+    paddingVertical: 8,
+    paddingHorizontal: 13,
+    borderRadius: 10,
+    minWidth: 66,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eatOnePillLabel: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 12.5,
+    lineHeight: 16,
+  },
+  weightCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 12,
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  weightLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 11.5,
+    lineHeight: 15,
+  },
+  weightValue: {
+    fontFamily: Fonts.display,
+    fontSize: 17,
+    lineHeight: 21,
+    marginTop: 1,
+  },
+  weightUnit: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 12,
+  },
+  weightEmptyValue: {
+    fontFamily: Fonts.display,
+    fontSize: 15,
+    lineHeight: 19,
+    marginTop: 1,
+  },
+  weightEmptyCta: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 13,
+    lineHeight: 17,
+  },
+  sparkline: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 3,
+    height: 30,
+  },
+  sparkBar: {
+    width: 6,
+    borderRadius: 2,
+  },
+  changePill: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 7,
+  },
+  changePillLabel: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 12,
+    lineHeight: 16,
   },
   pressed: {
     opacity: 0.6,

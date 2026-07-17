@@ -48,16 +48,21 @@ model User {
 
   onboardingComplete Boolean @default(false)
 
+  foods Food[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-/// A reference food with macros per 100g. The five tracked nutrients throughout
+/// A food with macros per 100g. The five tracked nutrients throughout
 /// BatchFit are: calories, protein, fat, carbs, fibre.
+/// `ownerId` is null for shared reference foods; set for a user's custom foods.
 model Food {
   id       String @id @default(cuid())
   name     String
   brand    String?
+  owner    User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId  String?
 
   // Macros per 100g.
   kcal     Float
@@ -71,6 +76,8 @@ model Food {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
 }
 
 /// A reusable template: an ingredient list + a default portion count.

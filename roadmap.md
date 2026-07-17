@@ -75,9 +75,12 @@ _Last updated: 2026-07-15._
     micro-screen were not built (not roadmap tasks); the calorie ring is a plain single-colour
     ring until the real Macro Ring set lands (F4-1).
 
-**Next up (in order):** Phase 2 — **F3-1** (scope `/foods` to users + custom foods) → **F3-2**
-(food search) → **F3-3** (diary model) → **F3-4** (log CRUD) → **F3-5** (daily totals). Also
-consider seeding reference foods before F3-2 (search over an empty table isn't testable).
+- [x] **F3-1** — `/foods` scoped to users + custom foods (`Food.ownerId`, auth-required
+  routes, macro validation; see Phase 2 below).
+
+**Next up (in order):** Phase 2 — **F3-2** (food search) → **F3-3** (diary model) → **F3-4**
+(log CRUD) → **F3-5** (daily totals). Also consider seeding reference foods before F3-2
+(search over an empty table isn't testable).
 
 **Workflow reminder:** every task is its own branch → small commits as you go → push the
 branch → open a PR into `main` for review. Do **not** commit feature work straight to `main`.
@@ -216,8 +219,11 @@ Reference foods, custom foods, and the daily food log. Foundation for Prep and T
 
 ### Feature F3 — Food & Diary API (backend)
 
-- [ ] **F3-1 — Scope existing food routes to users + custom foods.** Add ownership so a user
-  can create custom foods; keep shared reference foods. Extend the scaffolded `/foods` routes.
+- [x] **F3-1 — Scope existing food routes to users + custom foods.** ✅ Done. `Food.ownerId`
+  (nullable — null = shared reference food) + `add_food_owner` migration. `/foods` now requires
+  auth: GET returns reference + the caller's own foods; POST creates a food owned by the caller
+  and validates all five macros as non-negative numbers. Responses wrapped as `{ foods }` /
+  `{ food }`. Tests cover visibility scoping, creation, validation, and 401s.
 - [ ] **F3-2 — Food search endpoint.** `GET /foods?query=` across reference + the user's foods.
 - [ ] **F3-3 — Diary model.** `LogEntry` (user, date, meal group, food, quantity/unit,
   snapshotted macros) + migration.

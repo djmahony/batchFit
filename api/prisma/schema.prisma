@@ -170,12 +170,33 @@ model Batch {
   cookedAt          DateTime @default(now())
 
   ingredients BatchIngredient[]
+  adjustments BatchAdjustment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([recipeId])
   @@index([ownerId])
+}
+
+/// A reasoned reduction of a batch's stock that isn't an "eat" — given away,
+/// spoiled, damaged, or another reason. Kept separate from LogEntry: nothing
+/// here was consumed, so it must never add macros to a day's diary. `portions`
+/// covers the whole reduction in one go, not one row per portion. The "eaten"
+/// count for a batch is derived (portionsTotal - portionsRemaining - the sum
+/// of these), not stored directly — no need to link back to LogEntry.
+///   reason — "given_away" | "spoiled" | "damaged" | "other"
+model BatchAdjustment {
+  id       String @id @default(cuid())
+  batch    Batch  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  batchId  String
+  portions Int
+  reason   String
+  note     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([batchId])
 }
 
 model BatchIngredient {

@@ -59,10 +59,15 @@ These guidelines are working if: fewer unnecessary changes in diffs, fewer rewri
 
 ## Working from the roadmap
 
-`roadmap.md` is the single source of truth for what to build, in what order, and how far we've
-got. It is a living document — **Phases → Features → Tasks** — with a **Current status** section
-at the top (baseline, completed tasks, what's next). When prose elsewhere (including this file)
-disagrees with `roadmap.md`'s Current status about what exists, **trust `roadmap.md`.**
+`roadmap.md` (repo root) is the single source of truth for what to build, in what order, and how
+far we've got. It is a living document — **Phases → Features → Tasks** — with a **Current
+status** section at the top (baseline, completed tasks, what's next). When prose elsewhere
+(including this file) disagrees with `roadmap.md`'s Current status about what exists, **trust
+`roadmap.md`.**
+
+Finished roadmaps are archived under `agents/completed/` (e.g. the original MVP roadmap). Treat
+files in `agents/completed/` as historical records only — **ignore them unless the user
+explicitly asks you to look at one.** Always work from the root `roadmap.md`.
 
 ### When the user says "continue" (or similar)
 

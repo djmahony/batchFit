@@ -333,4 +333,40 @@ describe('POST /batches/:id/eat', () => {
 
     expect(res.status).toBe(404);
   });
+
+  it('logs multiple portions at once and scales the snapshot', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 4 });
+
+    const res = await request(app)
+      .post(`/batches/${created.body.batch.id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-07-16', meal: 'dinner', portions: 2 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.batch.portionsRemaining).toBe(2);
+    expect(res.body.entry.quantity).toBe(2);
+    // 2300 kcal batch ÷ 4 portions × 2 portions eaten = 1150 kcal.
+    expect(res.body.entry.kcal).toBeCloseTo(1150);
+  });
+
+  it('rejects a portions count that is not a positive integer, or exceeds stock', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 2 });
+    const id = created.body.batch.id;
+
+    for (const bad of [0, -1, 1.5, 'two']) {
+      const res = await request(app)
+        .post(`/batches/${id}/eat`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ portions: bad });
+      expect(res.status).toBe(400);
+    }
+
+    const tooMany = await request(app)
+      .post(`/batches/${id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 3 });
+    expect(tooMany.status).toBe(409);
+  });
 });

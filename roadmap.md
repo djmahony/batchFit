@@ -59,15 +59,12 @@ way."
    later without re-architecting anything. We **link out to the YouTube app/browser** rather than
    embedding a player in-app — simplest build, no WebView, no "video disabled for embedding"
    edge cases, and it doesn't cost focus mid-set since watching a form video isn't a mid-set action.
-2. **1RM, two possible readings — going with the first:** (a) an **estimated** 1RM computed
-   automatically from ordinary working sets (weight × reps, via a standard formula), tracked as
-   a rolling personal best — **this is the plan below (F14)** — or (b) a distinct **manual
-   "tested max" entry** (an actual all-out single-rep attempt the user logs specifically, kept
-   separate from working-set estimates). (a) needs no new UI beyond what's already planned and
-   updates itself from data you're logging anyway; (b) is a small, clearly separable add-on
-   (one new "Log a 1RM test" action + a place to show it alongside the estimate) if you want a
-   true tested max kept distinct from the estimate — say the word and it's a one-task addition
-   on top of F14.
+2. **1RM — decided (2026-07-21): both.** An **estimated** 1RM is computed automatically from
+   ordinary working sets (Epley formula) and tracked as a rolling personal best, **and** the
+   user can manually record a **tested max** — a real all-out single-rep attempt — kept
+   separate from the estimate (F14-5/F14-6). The PB display is **tap-to-reveal** (decided
+   2026-07-21): the always-visible strip shows *last time* only, and a small "PB" affordance
+   expands to show best estimate + tested max + the "Log 1RM test" action.
 3. **"Custom exercise DB table"** — already exists. `Exercise.ownerId` (nullable, FK → `User`)
    already distinguishes shared library exercises (`ownerId: null`) from a user's own
    (`ownerId` set), with working create/edit/delete routes and UI. No new table — the tasks
@@ -81,12 +78,18 @@ way."
 
 ### Feature F13 — Grouped exercise picker (browse hierarchy + instant search bypass)
 
-**Goal:** opening "+ Add exercise" defaults to **Weights or Cardio** → (Weights: body part /
-Cardio: machine) → exercise list, with **create/edit exercise** at the end exactly as today.
-Typing anything in the ever-visible search field at any step **immediately** shows a flat,
-name-matched list across the whole library + your own exercises (today's existing behaviour),
-skipping the hierarchy entirely. Clearing the search field back to empty returns to the category
-root (simplest, least surprising — not "back to wherever you were").
+**Goal:** opening "+ Add exercise" shows a **Recent exercises** quick-pick row (your usual
+lifts are one tap — decided 2026-07-21), then the **Strength or Cardio** choice →
+(Strength: body part / Cardio: machine) → exercise list, with **create/edit exercise** at the
+end exactly as today. Typing anything in the ever-visible search field at any step
+**immediately** shows a flat, name-matched list across the whole library + your own exercises
+(today's existing behaviour), skipping the hierarchy entirely. Clearing the search field
+returns you to **the step you were on** before typing (mid-gym you shortcut, mistype, clear —
+being bounced to the root would lose your place).
+
+> Copy note: the top-level split is labelled **Strength / Cardio** on screen (not "Weights") —
+> the strength bucket contains bodyweight work like planks and burpees. Data-model-wise it's
+> simply `muscleGroup === "cardio"` vs everything else; no new field needed for the split.
 
 - [ ] **F13-1 (api)** — Schema: add `cardioMachine String?` to `Exercise` in
   `api/prisma/schema.prisma`, migration `add_exercise_cardio_machine`. Document the fixed value
@@ -100,9 +103,13 @@ root (simplest, least surprising — not "back to wherever you were").
     "Other" in the UI, see F13-4). Reject a non-null `cardioMachine` when `muscleGroup !==
     "cardio"` (keeps the data clean — it's meaningless outside cardio).
   - `POST /exercises` and `PATCH /exercises/:id`: accept `cardioMachine` in the body under the
-    same rule.
+    same rule. **PATCH must auto-clear `cardioMachine` when the (merged) muscle group is no
+    longer `"cardio"`** — otherwise editing a cardio exercise's muscle group to e.g. `chest`
+    would trip the "machine only on cardio" rule via the *lingering* stored value and 400
+    confusingly.
   - Endpoint tests: create a cardio exercise with each machine value; reject an invalid machine
-    value; reject a non-null machine value on a non-cardio exercise.
+    value; reject a non-null machine value on a non-cardio exercise; PATCH a cardio exercise
+    with a machine set to `muscleGroup: "chest"` → succeeds and `cardioMachine` comes back null.
 
 - [ ] **F13-2 (api)** — Backfill: extend `api/prisma/seed.ts`'s `LIBRARY_EXERCISES`/cardio rows
   with a `cardioMachine` value per existing seeded cardio exercise (idempotent — this seed script
@@ -126,10 +133,10 @@ root (simplest, least surprising — not "back to wherever you were").
 - [ ] **F13-4 (app)** — Build the hierarchy step components in `exercise-picker.tsx` (or split
   into `components/exercise-picker/` if the file gets unwieldy — use judgement at implementation
   time, don't split pre-emptively):
-  - **Category step** — two large `ChoiceCard`-style buttons, "Weights" and "Cardio" (reuse the
+  - **Category step** — two large `ChoiceCard`-style buttons, "Strength" and "Cardio" (reuse the
     existing `ChoiceCard` component/visual language from onboarding's goal screen — don't invent
-    a new card style).
-  - **Body-part step** (Weights only) — chip grid of the 7 non-cardio `MUSCLE_GROUPS`
+    a new card style). The **Recent exercises row (F13-7)** renders above these cards.
+  - **Body-part step** (Strength only) — chip grid of the 7 non-cardio `MUSCLE_GROUPS`
     (chest/back/legs/shoulders/arms/core/full_body), reusing the existing `ChipGrid` pattern
     already in this file.
   - **Machine step** (Cardio only) — chip grid of `CARDIO_MACHINES`, pretty-labelled (existing
@@ -143,29 +150,49 @@ root (simplest, least surprising — not "back to wherever you were").
   - **Search bypass** — the search field stays visible and focusable at every step (mount it
     once, outside the step content, not re-created per step). The instant the trimmed query is
     non-empty, swap the body to today's flat filtered list (existing debounce timing/behaviour
-    unchanged) regardless of which step you were on; clearing it back to empty returns to the
-    category root.
+    unchanged) regardless of which step you were on; clearing it back to empty **returns to the
+    step you were on** before typing.
   - State: a small local `step` state machine — `{ kind: 'category' } | { kind: 'bodyPart' } |
-    { kind: 'machine' } | { kind: 'exercises'; muscleGroup: string; cardioMachine?: string } |
-    { kind: 'search' }` — driven by taps and by the query becoming non-empty/empty.
+    { kind: 'machine' } | { kind: 'exercises'; muscleGroup: string; cardioMachine?: string }` —
+    driven by taps. Search is **not a step**: the flat-results view is an overlay derived from
+    "trimmed query is non-empty", so the step state survives a search untouched and clearing
+    the query naturally lands you back where you were.
 
 - [ ] **F13-5 (app)** — `ExerciseForm` (create/edit own exercise): show a `cardioMachine` chip
   row (same `ChipGrid` pattern) **only when** the selected muscle group is `"cardio"`; hidden and
   cleared otherwise. Defaults to unset (no machine pre-selected) — pushes the user to pick one
   but doesn't hard-block save if they skip it (matches the non-required validation in F13-1).
 
-**Feature F13 verification:** from a fresh "+ Add exercise", Weights → Legs → shows only leg
-exercises; Cardio → Bike → shows Cycling and Assault bike; typing at any step jumps straight to
-matching results across everything; creating a custom cardio exercise lets you tag a machine,
-creating a custom weights exercise doesn't show the machine row at all.
+- [ ] **F13-6 (api)** — `GET /exercises/recent`: the caller's most recently logged exercises,
+  newest first, de-duplicated, capped at ~8. Mirror the existing `GET /foods/recent`
+  implementation (`foods.ts:35`): query the caller's `WorkoutExercise` rows (via their
+  `Workout`s) ordered by workout `startedAt` desc, keep the first occurrence of each
+  `exerciseId`, drop null `exerciseId`s (deleted exercises), return the `Exercise` rows in that
+  order. Include unfinished sessions here (unlike F14's history) — "the thing I logged five
+  minutes ago" is exactly what recents is for. Endpoint-tested: order is by most recent use;
+  duplicates collapse; another user's workouts don't leak in.
+
+- [ ] **F13-7 (app)** — Recent exercises quick-pick row on the picker's category step (above the
+  Strength/Cardio cards): a compact horizontal strip of chips (exercise names, existing chip
+  visual language), fetched from `GET /exercises/recent` when the picker opens. Tapping a chip
+  picks that exercise immediately — same `onPick` path as a list row. No history yet → render
+  nothing (no empty state; the category cards are already the "start here" affordance).
+
+**Feature F13 verification:** from a fresh "+ Add exercise", the exercises you logged last
+session sit at the top as one-tap chips; Strength → Legs → shows only leg exercises; Cardio →
+Bike → shows Cycling and Assault bike; typing at any step jumps straight to matching results
+across everything, and clearing the query returns to the step you were on; creating a custom
+cardio exercise lets you tag a machine, creating a custom strength exercise doesn't show the
+machine row at all.
 
 ---
 
 ### Feature F14 — Exercise history: "last time" + personal bests + estimated 1RM
 
-**Goal:** the moment an exercise is added to the active session, show what you did last time and
-your all-time best, without asking for it — and give every weight/reps set a live estimated
-1-rep-max as you type. Read-only, glanceable, never blocks logging if there's no history yet.
+**Goal:** the moment an exercise is added to the active session, show what you did last time
+without asking for it, with your all-time best one tap away — and give every weight/reps set a
+live estimated 1-rep-max as you type, plus a separate manually-recorded **tested max** for
+weight exercises. Glanceable, never blocks logging if there's no history yet.
 
 - [ ] **F14-1 (api)** — `src/lib/oneRepMax.ts`: pure `estimateOneRepMax(weightKg: number, reps:
   number): number` using the Epley formula (`weight × (1 + reps / 30)`), rounded to 1 decimal.
@@ -184,6 +211,8 @@ your all-time best, without asking for it — and give every weight/reps set a l
     - `bodyweight_reps` → the set with the max `reps`; return `{ reps, date }`.
     - `time` → the set with the max `seconds`; return `{ seconds, date }`.
     - `distance` → the set with the max `distanceM`; return `{ distanceM, seconds, date }`.
+      (Deliberate decision: "best" here means *longest*, not *fastest pace* — a pace-based best
+      needs distance+time on every set to be meaningful and is deferred, not forgotten.)
   - Only considers sets belonging to **finished** workouts (`finishedAt` not null) — an
     in-progress session's not-yet-committed numbers shouldn't count as your new PB while you're
     mid-set.
@@ -195,14 +224,20 @@ your all-time best, without asking for it — and give every weight/reps set a l
 
 - [ ] **F14-3 (app)** — On adding an exercise to the active session (`addExercise` in
   `workout/[id].tsx`), fetch `GET /exercises/:id/history` once and cache it in the block's local
-  state for the session's lifetime (no re-fetch on every render/set-add). Render a compact one-
-  or-two-line strip under the exercise block header:
-  - `weight_reps`: `"Last: 3×8 @ 60kg · 12 Jun   Best: 72.5kg e1RM (5×65kg) · 3 Jun"`
-  - `bodyweight_reps`: `"Last: 3×12 · 12 Jun   Best: 18 reps · 3 Jun"`
-  - `time`: `"Last: 3×45s · 12 Jun   Best: 90s · 3 Jun"`
-  - `distance`: `"Last: 5.0km · 12 Jun   Best: 8.2km · 3 Jun"`
-  - Nothing to show (first time doing this exercise) → **render nothing**, not an empty state —
-    this is a glance-and-go strip, not a data screen; don't spend a state on "no history yet."
+  state for the session's lifetime (no re-fetch on every render/set-add). Render a compact
+  one-line strip under the exercise block header showing **last time only**, with a small
+  **"PB" chip** on its right end (tap-to-reveal — decided 2026-07-21):
+  - `weight_reps`: `"Last: 3×8 @ 60kg · 12 Jun"` · `bodyweight_reps`: `"Last: 3×12 · 12 Jun"` ·
+    `time`: `"Last: 3×45s · 12 Jun"` · `distance`: `"Last: 5.0km · 12 Jun"`.
+  - Tapping the **PB chip** expands an inline panel below the strip with the personal best for
+    the tracking mode (e.g. `"Best: 72.5kg e1RM (5×65kg) · 3 Jun"`), and — for `weight_reps`
+    exercises — the **tested 1RM** line + "Log 1RM test" action (F14-6). Tap again to collapse;
+    collapsed is the default every session.
+  - PB chip only renders when there *is* a best (`best !== null`); no chip on a first-ever
+    exercise.
+  - Nothing to show at all (first time doing this exercise) → **render nothing**, not an empty
+    state — this is a glance-and-go strip, not a data screen; don't spend a state on "no
+    history yet."
   - Loading: render nothing until it resolves rather than a spinner — the strip should just pop
     in a moment after the block appears, no layout jank from a placeholder.
 
@@ -213,11 +248,36 @@ your all-time best, without asking for it — and give every weight/reps set a l
   in two places without a comment tying them together). Purely derived from what's already
   typed — no network round-trip, updates instantly on every keystroke.
 
-**Feature F14 verification:** add an exercise you've logged before → last-time and best strip
-appears within a beat; add one you've never logged → no strip, no flash of empty state; type a
+- [ ] **F14-5 (api)** — Manual tested 1RM (decided 2026-07-21: kept separate from the
+  estimate). New Prisma model `OneRepMaxEntry`: `id`, `userId` (FK → User, cascade),
+  `exerciseId` (FK → Exercise, cascade — a tested max is meaningless without its exercise),
+  `weightKg Float`, `date String` (day key, same convention as `WeightEntry`), `createdAt` /
+  `updatedAt`; index on `[userId, exerciseId, date]`. Migration `add_one_rep_max_entry`. Routes
+  (auth-protected):
+  - `POST /exercises/:id/one-rep-max` — body `{ weightKg, date? }` (date defaults to today);
+    validates `weightKg > 0` and the exercise is visible to the caller **and** is
+    `trackingMode: "weight_reps"` (a tested 1RM on a plank makes no sense → 400).
+  - `GET /exercises/:id/history` (F14-2) grows a `testedMax` field: the caller's heaviest
+    `OneRepMaxEntry` for this exercise as `{ weightKg, date }`, or `null`.
+  - `DELETE /one-rep-max/:id` — remove one of the caller's own entries (mis-taps happen).
+  - Endpoint-tested: create + shows up in history; heaviest wins over most-recent; non-owner
+    entries invisible; rejected on a non-weight exercise; delete works and 404s on others'
+    entries.
+
+- [ ] **F14-6 (app)** — "Log 1RM test" flow inside the F14-3 PB reveal panel (`weight_reps`
+  blocks only): the panel shows `"Tested max: 100kg · 15 May"` (or `"No tested max yet"`) and a
+  small "Log 1RM test" action. Tapping it opens a minimal sheet — weight in kg/lb per the
+  user's Settings units (convert on save like the Log weight sheet does), defaulting the field
+  to the current tested max as a starting point — save → `POST`, panel refreshes. Keep it one
+  field + one button; this is logged maybe once a month, it must not add weight to the
+  every-set flow.
+
+**Feature F14 verification:** add an exercise you've logged before → last-time strip appears
+within a beat with a PB chip; tap the chip → best (and, for weights, tested max + log action)
+expands inline; add an exercise you've never logged → no strip, no flash of empty state; type a
 weight+reps into a set → e1RM appears immediately and updates as you adjust either number;
 finish two sessions with a bigger lift in the first → best still reflects the first, not just
-most-recent.
+most-recent; log a tested 1RM → it shows in the panel, separate from the estimate.
 
 ---
 
@@ -263,9 +323,6 @@ focus, one-handed, mid-set, in a gym" constraint. Not built, not estimated in de
   eyeballing a phone clock.
 - **Warm-up set flag** — a per-set toggle (`isWarmup` on `WorkoutSet`) excluded from the F14
   best/PB calculation, so a light warm-up rep doesn't quietly overwrite a real personal best.
-- **Favourites / recent exercises row** — a "Recent" strip above the F13 category chooser
-  (mirrors Diary's existing `GET /foods/recent` pattern) so your usual 5–10 exercises need zero
-  taps through the hierarchy at all.
 - **Plate calculator** — given a target weight + bar type, show plates-per-side; removes mental
   math mid-set for barbell `weight_reps` exercises.
 - **Optional RPE per set** — already flagged as a hook in `mvp-spec.md` (5.2) and never built;

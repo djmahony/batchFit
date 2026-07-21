@@ -166,6 +166,7 @@ export type ExerciseHistory = {
       inclinePct: number | null;
       level: number | null;
       lengths: number | null;
+      speedKmh: number | null;
     }[];
   } | null;
   best: {
@@ -191,6 +192,7 @@ export type WorkoutSet = {
   inclinePct: number | null;
   level: number | null;
   lengths: number | null;
+  speedKmh: number | null;
 };
 
 /** One exercise block in a session; name, trackingMode and cardioMachine are
@@ -437,6 +439,7 @@ export const api = {
         inclinePct?: number | null;
         level?: number | null;
         lengths?: number | null;
+        speedKmh?: number | null;
       }[];
     }[],
   ) => request<{ workout: Workout }>(`/workouts/${id}`, { method: 'PUT', body: { exercises }, token }),

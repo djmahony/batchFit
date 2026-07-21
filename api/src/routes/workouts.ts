@@ -22,13 +22,14 @@ type SetInput = {
   inclinePct?: number | null;
   level?: number | null;
   lengths?: number | null;
+  speedKmh?: number | null;
 };
 type ExerciseInput = { exerciseId: string; sets: SetInput[] };
 
 const isNonNegative = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0;
 
 function validateSet(set: SetInput): string | null {
-  for (const key of ['weightKg', 'distanceM', 'inclinePct'] as const) {
+  for (const key of ['weightKg', 'distanceM', 'inclinePct', 'speedKmh'] as const) {
     const value = set?.[key];
     if (value !== undefined && value !== null && !isNonNegative(value)) {
       return `${key} must be a non-negative number`;
@@ -161,6 +162,7 @@ workoutsRouter.put('/:id', async (req, res) => {
                   inclinePct: set.inclinePct ?? null,
                   level: set.level ?? null,
                   lengths: set.lengths ?? null,
+                  speedKmh: set.speedKmh ?? null,
                 })),
               },
             };

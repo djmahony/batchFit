@@ -14,6 +14,20 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, type Exercise, type ExerciseHistory, type Workout } from '@/lib/api';
+import {
+  digitsFromSeconds,
+  displayToKmh,
+  displayToMetres,
+  distanceUnitFor,
+  formatDistance,
+  formatDuration,
+  kmhToDisplay,
+  metresToDisplay,
+  parseSecondsFromDigits,
+  speedUnitFor,
+  type DistanceUnit,
+  type SpeedUnit,
+} from '@/lib/cardioUnits';
 import { formatDayKey } from '@/lib/dates';
 import { estimateOneRepMax } from '@/lib/oneRepMax';
 
@@ -26,6 +40,7 @@ export type SessionSet = {
   inclinePct: number | null;
   level: number | null;
   lengths: number | null;
+  speedKmh: number | null;
 };
 export type SessionBlock = {
   exerciseId: string;
@@ -35,42 +50,84 @@ export type SessionBlock = {
   sets: SessionSet[];
 };
 
-type SetField = 'weightKg' | 'reps' | 'seconds' | 'distanceM' | 'inclinePct' | 'level' | 'lengths';
+type SetField =
+  | 'weightKg'
+  | 'reps'
+  | 'seconds'
+  | 'distanceM'
+  | 'inclinePct'
+  | 'level'
+  | 'lengths'
+  | 'speedKmh';
 type Selection = { block: number; set: number; field: SetField; fresh: boolean };
 
-type Column = { field: SetField; label: string; decimal: boolean };
+/** How a column's value is entered/displayed:
+ *  plain — raw number as typed (kg, reps, incline %, level, lengths, and the
+ *    stand-alone "time"/"distance" modes used outside cardio, e.g. Plank).
+ *  time — mm:ss digit-shift entry over an underlying total-seconds value.
+ *  distance/speed — entered in the user's display unit, converted to/from
+ *    the canonical metric value (metres / km/h) for storage. */
+type Column = { field: SetField; decimal: boolean; kind: 'plain' | 'time' | 'distance' | 'speed'; label?: string };
 
-/** Which value columns a tracking mode shows, with their headers. */
+/** Which value columns a tracking mode shows. Cardio's own time/distance
+ *  columns get the mm:ss and km/mile treatment; the stand-alone "time" mode
+ *  (e.g. Plank) and "distance" mode (e.g. Farmer's carry) are short/gym-scale
+ *  and deliberately keep raw seconds/metres. */
 export const MODE_COLUMNS: Record<Exercise['trackingMode'], Column[]> = {
   weight_reps: [
-    { field: 'weightKg', label: 'kg', decimal: true },
-    { field: 'reps', label: 'reps', decimal: false },
+    { field: 'weightKg', label: 'kg', decimal: true, kind: 'plain' },
+    { field: 'reps', label: 'reps', decimal: false, kind: 'plain' },
   ],
-  bodyweight_reps: [{ field: 'reps', label: 'reps', decimal: false }],
-  time: [{ field: 'seconds', label: 'seconds', decimal: false }],
-  distance: [{ field: 'distanceM', label: 'metres', decimal: true }],
+  bodyweight_reps: [{ field: 'reps', label: 'reps', decimal: false, kind: 'plain' }],
+  time: [{ field: 'seconds', label: 'seconds', decimal: false, kind: 'plain' }],
+  distance: [{ field: 'distanceM', label: 'metres', decimal: true, kind: 'plain' }],
   // Combined cardio: log time or distance (or both — fill the other in at the
   // end); machine-specific extras are appended per block by columnsFor().
   cardio: [
-    { field: 'seconds', label: 'seconds', decimal: false },
-    { field: 'distanceM', label: 'metres', decimal: true },
+    { field: 'seconds', decimal: false, kind: 'time' },
+    { field: 'distanceM', decimal: true, kind: 'distance' },
   ],
 };
 
 /** Extra per-machine columns for combined-cardio blocks. */
 const MACHINE_COLUMNS: Record<string, Column[]> = {
-  treadmill: [{ field: 'inclinePct', label: 'incline %', decimal: true }],
-  bike: [{ field: 'level', label: 'level', decimal: false }],
-  elliptical: [{ field: 'level', label: 'level', decimal: false }],
-  stair_climber: [{ field: 'level', label: 'level', decimal: false }],
-  rower: [{ field: 'level', label: 'level', decimal: false }],
-  swim: [{ field: 'lengths', label: 'lengths', decimal: false }],
+  treadmill: [
+    { field: 'inclinePct', label: 'incline %', decimal: true, kind: 'plain' },
+    { field: 'speedKmh', decimal: true, kind: 'speed' },
+  ],
+  bike: [{ field: 'level', label: 'level', decimal: false, kind: 'plain' }],
+  elliptical: [{ field: 'level', label: 'level', decimal: false, kind: 'plain' }],
+  stair_climber: [{ field: 'level', label: 'level', decimal: false, kind: 'plain' }],
+  rower: [{ field: 'level', label: 'level', decimal: false, kind: 'plain' }],
+  swim: [{ field: 'lengths', label: 'lengths', decimal: false, kind: 'plain' }],
 };
 
 const columnsFor = (block: Pick<SessionBlock, 'trackingMode' | 'cardioMachine'>): Column[] =>
   block.trackingMode === 'cardio'
     ? [...MODE_COLUMNS.cardio, ...(MACHINE_COLUMNS[block.cardioMachine ?? ''] ?? [])]
     : MODE_COLUMNS[block.trackingMode];
+
+/** Header label for a column, given the user's distance/speed display units. */
+const columnLabel = (column: Column, distanceUnit: DistanceUnit, speedUnit: SpeedUnit): string => {
+  if (column.kind === 'time') return 'time';
+  if (column.kind === 'distance') return distanceUnit;
+  if (column.kind === 'speed') return speedUnit;
+  return column.label!;
+};
+
+/** The text shown in a set's value cell, given its canonical stored value. */
+const displayCellValue = (
+  value: number | null,
+  column: Column,
+  distanceUnit: DistanceUnit,
+  speedUnit: SpeedUnit,
+): string => {
+  if (value === null) return '—';
+  if (column.kind === 'time') return formatDuration(value);
+  if (column.kind === 'distance') return metresToDisplay(value, distanceUnit).toFixed(2);
+  if (column.kind === 'speed') return kmhToDisplay(value, speedUnit).toFixed(1);
+  return String(value);
+};
 
 const EMPTY_SET: SessionSet = {
   weightKg: null,
@@ -80,6 +137,7 @@ const EMPTY_SET: SessionSet = {
   inclinePct: null,
   level: null,
   lengths: null,
+  speedKmh: null,
 };
 
 const toBlocks = (workout: Workout): SessionBlock[] =>
@@ -100,6 +158,7 @@ const toBlocks = (workout: Workout): SessionBlock[] =>
         inclinePct: set.inclinePct,
         level: set.level,
         lengths: set.lengths,
+        speedKmh: set.speedKmh,
       })),
     }));
 
@@ -110,12 +169,16 @@ function formatElapsed(startedAt: string, now: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
-const formatDistance = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`);
-
-const formatSeconds = (s: number) => (s >= 120 ? `${Math.round(s / 60)}min` : `${s}s`);
+/** Raw-metres distance for the stand-alone "distance" mode (e.g. Farmer's
+ *  carry) — short, gym-scale distances that don't want km/mile conversion. */
+const formatPlainDistance = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`);
 
 /** "3×8 @ 60kg" when the sets are uniform, "3 sets · best 60kg×8" when not. */
-function formatLast(last: NonNullable<ExerciseHistory['last']>, mode: Exercise['trackingMode']): string {
+function formatLast(
+  last: NonNullable<ExerciseHistory['last']>,
+  mode: Exercise['trackingMode'],
+  distanceUnit: DistanceUnit,
+): string {
   const sets = last.sets;
   if (sets.length === 0) return 'no sets';
   if (mode === 'weight_reps') {
@@ -137,19 +200,23 @@ function formatLast(last: NonNullable<ExerciseHistory['last']>, mode: Exercise['
     return `${sets.length} sets · best ${Math.max(...sets.map((s) => s.seconds ?? 0))}s`;
   }
   if (mode === 'cardio') {
-    // Whatever was actually logged: "15.0km · 40min", or just one of the two.
+    // Whatever was actually logged: "15.0km · 40:00", or just one of the two.
     const distance = Math.max(...sets.map((s) => s.distanceM ?? 0));
     const seconds = Math.max(...sets.map((s) => s.seconds ?? 0));
     const parts = [
-      ...(distance > 0 ? [formatDistance(distance)] : []),
-      ...(seconds > 0 ? [formatSeconds(seconds)] : []),
+      ...(distance > 0 ? [formatDistance(distance, distanceUnit)] : []),
+      ...(seconds > 0 ? [formatDuration(seconds)] : []),
     ];
     return parts.length > 0 ? parts.join(' · ') : 'no numbers';
   }
-  return formatDistance(Math.max(...sets.map((s) => s.distanceM ?? 0)));
+  return formatPlainDistance(Math.max(...sets.map((s) => s.distanceM ?? 0)));
 }
 
-function formatBest(best: NonNullable<ExerciseHistory['best']>, mode: Exercise['trackingMode']): string {
+function formatBest(
+  best: NonNullable<ExerciseHistory['best']>,
+  mode: Exercise['trackingMode'],
+  distanceUnit: DistanceUnit,
+): string {
   if (mode === 'weight_reps') {
     return `${best.estimatedOneRepMax}kg e1RM (${best.reps}×${best.weightKg}kg)`;
   }
@@ -157,12 +224,12 @@ function formatBest(best: NonNullable<ExerciseHistory['best']>, mode: Exercise['
   if (mode === 'time') return `${best.seconds}s`;
   if (mode === 'cardio') {
     const parts = [
-      ...(best.distanceM ? [formatDistance(best.distanceM)] : []),
-      ...(best.seconds ? [formatSeconds(best.seconds)] : []),
+      ...(best.distanceM ? [formatDistance(best.distanceM, distanceUnit)] : []),
+      ...(best.seconds ? [formatDuration(best.seconds)] : []),
     ];
     return parts.join(' · ');
   }
-  return formatDistance(best.distanceM ?? 0);
+  return formatPlainDistance(best.distanceM ?? 0);
 }
 
 // Active workout session (wireframe 1v): exercise blocks with set tables, the
@@ -191,6 +258,16 @@ export default function WorkoutSessionScreen() {
   const blocksRef = useRef<SessionBlock[]>([]);
 
   const weightUnit: 'kg' | 'lb' = user?.units === 'imperial' ? 'lb' : 'kg';
+  // Distance/speed default from the Settings units preference, but are
+  // independently switchable per session by tapping the column header —
+  // useful mid-workout without going into Settings (e.g. checking pace in
+  // mph while everything else stays metric).
+  const [distanceUnitOverride, setDistanceUnitOverride] = useState<DistanceUnit | null>(null);
+  const [speedUnitOverride, setSpeedUnitOverride] = useState<SpeedUnit | null>(null);
+  const distanceUnit: DistanceUnit = distanceUnitOverride ?? distanceUnitFor(user?.units);
+  const speedUnit: SpeedUnit = speedUnitOverride ?? speedUnitFor(user?.units);
+  const toggleDistanceUnit = () => setDistanceUnitOverride(distanceUnit === 'km' ? 'mi' : 'km');
+  const toggleSpeedUnit = () => setSpeedUnitOverride(speedUnit === 'km/h' ? 'mph' : 'km/h');
 
   // Fetch history for any exercise in the session we haven't asked about yet
   // (covers picker adds, resumed sessions, and repeat-last in one place).
@@ -334,12 +411,73 @@ export default function WorkoutSessionScreen() {
     }
   };
 
+  const applySetValue = (value: number | null) => {
+    if (!selection) return;
+    const { block, set, field } = selection;
+    const next = blocks.map((b, bi) =>
+      bi === block
+        ? {
+            ...b,
+            sets: b.sets.map((s, si) =>
+              si === set ? { ...s, [field]: value !== null && Number.isFinite(value) ? value : null } : s,
+            ),
+          }
+        : b,
+    );
+    setSelection({ ...selection, fresh: false });
+    update(next);
+  };
+
   const onKey = (key: KeypadKey) => {
     if (!selection) return;
     const { block, set, field, fresh } = selection;
-    const current = blocks[block]?.sets[set]?.[field];
-    const currentText = fresh || current === null || current === undefined ? '' : String(current);
+    const column = columnsFor(blocks[block]).find((c) => c.field === field);
+    const current = blocks[block]?.sets[set]?.[field] ?? null;
 
+    // mm:ss digit-shift entry: each digit shifts the buffer left and the last
+    // two digits are always seconds (a stopwatch/currency-style entry — no
+    // decimal point, values self-correct on the next render via formatDuration).
+    if (column?.kind === 'time') {
+      if (key === '.') return;
+      const digits = fresh || current === null ? '' : digitsFromSeconds(current);
+      const nextDigits = key === 'backspace' ? digits.slice(0, -1) : digits + key;
+      applySetValue(nextDigits === '' ? null : parseSecondsFromDigits(nextDigits));
+      return;
+    }
+
+    // Distance/speed: typed in the user's display unit, converted to the
+    // canonical metric value (metres / km/h) for storage.
+    if (column?.kind === 'distance' || column?.kind === 'speed') {
+      const displayed =
+        column.kind === 'distance'
+          ? current === null
+            ? null
+            : metresToDisplay(current, distanceUnit)
+          : current === null
+            ? null
+            : kmhToDisplay(current, speedUnit);
+      const currentText = fresh || displayed === null ? '' : String(displayed);
+      let nextText: string;
+      if (key === 'backspace') {
+        nextText = fresh ? '' : currentText.slice(0, -1);
+      } else if (key === '.') {
+        if (currentText.includes('.')) return;
+        nextText = currentText === '' ? '0.' : `${currentText}.`;
+      } else {
+        nextText = currentText + key;
+      }
+      const displayValue = nextText === '' || nextText === '0.' ? null : Number(nextText);
+      const canonical =
+        displayValue === null || !Number.isFinite(displayValue)
+          ? null
+          : column.kind === 'distance'
+            ? displayToMetres(displayValue, distanceUnit)
+            : displayToKmh(displayValue, speedUnit);
+      applySetValue(canonical);
+      return;
+    }
+
+    const currentText = fresh || current === null ? '' : String(current);
     let nextText: string;
     if (key === 'backspace') {
       nextText = fresh ? '' : currentText.slice(0, -1);
@@ -349,20 +487,8 @@ export default function WorkoutSessionScreen() {
     } else {
       nextText = currentText + key;
     }
-
     const value = nextText === '' || nextText === '0.' ? null : Number(nextText);
-    const next = blocks.map((b, bi) =>
-      bi === block
-        ? {
-            ...b,
-            sets: b.sets.map((s, si) =>
-              si === set ? { ...s, [field]: Number.isFinite(value) ? value : null } : s,
-            ),
-          }
-        : b,
-    );
-    setSelection({ ...selection, fresh: false });
-    update(next);
+    applySetValue(value);
   };
 
   const finish = async () => {
@@ -533,7 +659,7 @@ export default function WorkoutSessionScreen() {
                         <View style={styles.historyWrap}>
                           <View style={styles.historyRow}>
                             <ThemedText style={[styles.historyText, { color: theme.textSecondary }]} numberOfLines={1}>
-                              Last: {formatLast(history.last, block.trackingMode)} ·{' '}
+                              Last: {formatLast(history.last, block.trackingMode, distanceUnit)} ·{' '}
                               {formatDayKey(history.last.date)}
                             </ThemedText>
                             {history.best && (
@@ -558,7 +684,7 @@ export default function WorkoutSessionScreen() {
                           {expanded && history.best && (
                             <View style={styles.pbPanel}>
                               <ThemedText style={[styles.historyText, { color: theme.textSecondary }]}>
-                                Best: {formatBest(history.best, block.trackingMode)} ·{' '}
+                                Best: {formatBest(history.best, block.trackingMode, distanceUnit)} ·{' '}
                                 {formatDayKey(history.best.date)}
                               </ThemedText>
                               {block.trackingMode === 'weight_reps' && (
@@ -592,14 +718,41 @@ export default function WorkoutSessionScreen() {
                       <ThemedText style={[styles.setHeaderCell, styles.setIndexCell, { color: theme.textMuted }]}>
                         Set
                       </ThemedText>
-                      {columns.map((column) => (
-                        <ThemedText
-                          key={column.field}
-                          style={[styles.setHeaderCell, styles.setValueCell, { color: theme.textMuted }]}>
-                          {column.label}
-                        </ThemedText>
-                      ))}
-                      {block.trackingMode === 'weight_reps' && <View style={styles.e1rmCell} />}
+                      <View style={styles.valuesWrap}>
+                        {columns.map((column) => {
+                          const label = columnLabel(column, distanceUnit, speedUnit);
+                          const toggleUnit =
+                            column.kind === 'distance'
+                              ? toggleDistanceUnit
+                              : column.kind === 'speed'
+                                ? toggleSpeedUnit
+                                : null;
+                          return toggleUnit ? (
+                            <Pressable
+                              key={column.field}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Switch ${label} units`}
+                              onPress={toggleUnit}
+                              style={({ pressed }) => [
+                                styles.setValueCell,
+                                styles.unitHeaderCell,
+                                pressed && styles.pressed,
+                              ]}>
+                              <ThemedText style={[styles.setHeaderCell, { color: theme.textMuted }]}>
+                                {label}
+                              </ThemedText>
+                              <Ionicons name="swap-horizontal" size={11} color={theme.textMuted} />
+                            </Pressable>
+                          ) : (
+                            <ThemedText
+                              key={column.field}
+                              style={[styles.setHeaderCell, styles.setValueCell, { color: theme.textMuted }]}>
+                              {label}
+                            </ThemedText>
+                          );
+                        })}
+                        {block.trackingMode === 'weight_reps' && <View style={styles.e1rmCell} />}
+                      </View>
                     </View>
 
                     {block.sets.map((set, setIndex) => (
@@ -607,51 +760,53 @@ export default function WorkoutSessionScreen() {
                         <ThemedText style={[styles.setIndexCell, styles.setIndexText]}>
                           {setIndex + 1}
                         </ThemedText>
-                        {columns.map((column) => {
-                          const selected =
-                            selection?.block === blockIndex &&
-                            selection?.set === setIndex &&
-                            selection?.field === column.field;
-                          const value = set[column.field];
-                          return (
-                            <Pressable
-                              key={column.field}
-                              accessibilityRole="button"
-                              disabled={readOnly}
-                              onPress={() =>
-                                setSelection({
-                                  block: blockIndex,
-                                  set: setIndex,
-                                  field: column.field,
-                                  fresh: true,
-                                })
-                              }
-                              style={[
-                                styles.setValueCell,
-                                styles.valueBox,
-                                {
-                                  backgroundColor: theme.background,
-                                  borderColor: selected ? theme.tint : theme.surfaceBorder,
-                                  borderWidth: selected ? 1.5 : 1,
-                                },
-                              ]}>
-                              <ThemedText
+                        <View style={styles.valuesWrap}>
+                          {columns.map((column) => {
+                            const selected =
+                              selection?.block === blockIndex &&
+                              selection?.set === setIndex &&
+                              selection?.field === column.field;
+                            const value = set[column.field];
+                            return (
+                              <Pressable
+                                key={column.field}
+                                accessibilityRole="button"
+                                disabled={readOnly}
+                                onPress={() =>
+                                  setSelection({
+                                    block: blockIndex,
+                                    set: setIndex,
+                                    field: column.field,
+                                    fresh: true,
+                                  })
+                                }
                                 style={[
-                                  styles.valueText,
-                                  { color: value === null ? theme.textMuted : theme.text },
+                                  styles.setValueCell,
+                                  styles.valueBox,
+                                  {
+                                    backgroundColor: theme.background,
+                                    borderColor: selected ? theme.tint : theme.surfaceBorder,
+                                    borderWidth: selected ? 1.5 : 1,
+                                  },
                                 ]}>
-                                {value === null ? '—' : String(value)}
-                              </ThemedText>
-                            </Pressable>
-                          );
-                        })}
-                        {block.trackingMode === 'weight_reps' && (
-                          <ThemedText style={[styles.e1rmCell, styles.e1rmText, { color: theme.textMuted }]}>
-                            {set.weightKg !== null && set.reps !== null && set.reps > 0
-                              ? `≈${estimateOneRepMax(set.weightKg, set.reps)}kg`
-                              : ''}
-                          </ThemedText>
-                        )}
+                                <ThemedText
+                                  style={[
+                                    styles.valueText,
+                                    { color: value === null ? theme.textMuted : theme.text },
+                                  ]}>
+                                  {displayCellValue(value, column, distanceUnit, speedUnit)}
+                                </ThemedText>
+                              </Pressable>
+                            );
+                          })}
+                          {block.trackingMode === 'weight_reps' && (
+                            <ThemedText style={[styles.e1rmCell, styles.e1rmText, { color: theme.textMuted }]}>
+                              {set.weightKg !== null && set.reps !== null && set.reps > 0
+                                ? `≈${estimateOneRepMax(set.weightKg, set.reps)}kg`
+                                : ''}
+                            </ThemedText>
+                          )}
+                        </View>
                       </View>
                     ))}
 
@@ -869,7 +1024,7 @@ const styles = StyleSheet.create({
   },
   setRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 6,
   },
   setHeaderCell: {
@@ -884,14 +1039,35 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
     fontSize: 13,
     lineHeight: 18,
+    // Nudge down to align with the value box's internal padding (the plain
+    // set-number text otherwise sits above the boxed values next to it).
+    paddingTop: 7,
+  },
+  // Value cells wrap onto extra lines on narrow phones once a block has more
+  // than ~2-3 columns (e.g. treadmill: time, distance, incline, speed) — the
+  // fixed 2-column layout got visibly cramped on smaller/narrower devices.
+  valuesWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    rowGap: 8,
   },
   setValueCell: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: 64,
+    minWidth: 58,
   },
   valueBox: {
     borderRadius: 9,
     paddingVertical: 7,
     alignItems: 'center',
+  },
+  unitHeaderCell: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
   },
   valueText: {
     fontFamily: Fonts.bodyBold,

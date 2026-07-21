@@ -86,8 +86,11 @@ describe('PUT /workouts/:id', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         exercises: [
-          // Planned by time, distance + incline filled in at the end.
-          { exerciseId: treadmill.id, sets: [{ seconds: 2400, distanceM: 6200, inclinePct: 2.5 }] },
+          // Planned by time, distance + incline + speed filled in at the end.
+          {
+            exerciseId: treadmill.id,
+            sets: [{ seconds: 2400, distanceM: 6200, inclinePct: 2.5, speedKmh: 9.3 }],
+          },
         ],
       });
 
@@ -95,13 +98,24 @@ describe('PUT /workouts/:id', () => {
     const block = res.body.workout.exercises[0];
     expect(block.trackingMode).toBe('cardio');
     expect(block.cardioMachine).toBe('treadmill');
-    expect(block.sets[0]).toMatchObject({ seconds: 2400, distanceM: 6200, inclinePct: 2.5 });
+    expect(block.sets[0]).toMatchObject({
+      seconds: 2400,
+      distanceM: 6200,
+      inclinePct: 2.5,
+      speedKmh: 9.3,
+    });
 
     const badLevel = await request(app)
       .put(`/workouts/${started.body.workout.id}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ exercises: [{ exerciseId: treadmill.id, sets: [{ level: 4.5 }] }] });
     expect(badLevel.status).toBe(400);
+
+    const badSpeed = await request(app)
+      .put(`/workouts/${started.body.workout.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exercises: [{ exerciseId: treadmill.id, sets: [{ speedKmh: -5 }] }] });
+    expect(badSpeed.status).toBe(400);
   });
 
   it('rejects invalid sets and unknown exercises', async () => {

@@ -61,9 +61,36 @@ made load-bearing. Decisions:
   (incline % / level / lengths); create-exercise form defaults to the combined mode when
   muscle group is set to cardio; history strip/PB formats cardio as "15.0km · 40min" from
   whatever was logged.
-- Deferred, deliberately: **miles/lengths-to-distance display conversion** (entry is metres;
-  display shows m/km — imperial distance display wants a units pass of its own) and
-  **pace-based cardio PBs** (still longest-distance-wins).
+- Deferred, deliberately: **pace-based cardio PBs** (best still means longest distance/time, not
+  fastest pace).
+
+**F16-4 (added after on-device testing found the entry UX itself needed work, 2026-07-21):**
+the km/miles deferral above was resolved immediately rather than left open — distance display
+now **does** follow the user's Settings units, it just wasn't wired into set entry yet:
+- [x] **F16-4 (app)** — `WorkoutSet.speedKmh` (+migration `add_workout_set_speed`), a **speed**
+  column on treadmill only (bike/rower keep just their resistance `level` — easy to extend
+  later). Cardio's time column is now entered as **mm:ss** (stopwatch-style digit entry — type
+  "2534" → 25:34 — rather than raw seconds); distance and the new speed column are entered and
+  displayed in the user's **Settings units** (km/km-h or miles/mph), converted to/from the
+  canonical metres/km-h stored on the set. New `app/src/lib/cardioUnits.ts` holds the pure
+  conversions. Scope is deliberately **cardio-mode only** — the stand-alone "time" mode (Plank)
+  and "distance" mode (Farmer's carry) are short/gym-scale and keep raw seconds/metres, since
+  reformatting those wasn't asked for and would change unrelated exercises.
+- Deferred: **lengths→distance conversion** for swim (lengths are a raw count; no pool-length
+  setting yet to convert to km/miles) and **pace-based cardio PBs** (still longest-wins).
+
+**F16-5 (feedback from first on-device pass, 2026-07-21):** distance/speed following only the
+global Settings unit wasn't enough — wanted independently switchable during logging — and the
+treadmill row (4 columns: time, distance, incline, speed) was cramped on a smaller/narrower
+device (tested: Honor Magic 7 Pro).
+- [x] **F16-5 (app)** — Distance and speed units are now **tappable per session**: the column
+  header itself (e.g. "km", "km/h") doubles as a toggle (with a small swap icon) that flips to
+  the other unit (mi / mph), independent of the Settings-wide preference, defaulting from it.
+  Local screen state only — not persisted, resets next session.
+- [x] **F16-6 (app)** — Set rows now **wrap onto extra lines** instead of squeezing every
+  column into one row: value cells sit in a flex-wrap container (`flexGrow`/`flexBasis`, not a
+  fixed one-row split), so a 4-column treadmill row becomes a natural 2×2 grid on narrower
+  phones while 2-column blocks (weight_reps etc.) are visually unchanged.
 
 **Next up:** **F15-3** (curating `videoId`s for top exercises) is content work, not engineering —
 do only when ready. Otherwise: on-device verification sweep of F13–F16 in Expo Go, then pick

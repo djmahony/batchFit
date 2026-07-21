@@ -190,7 +190,7 @@ exercisesRouter.get('/:id/history', async (req, res) => {
     ? {
         date: dayKeyOf(lastBlock.workout.startedAt),
         sets: lastBlock.sets.map(
-          ({ weightKg, reps, seconds, distanceM, inclinePct, level, lengths }) => ({
+          ({ weightKg, reps, seconds, distanceM, inclinePct, level, lengths, speedKmh }) => ({
             weightKg,
             reps,
             seconds,
@@ -198,6 +198,7 @@ exercisesRouter.get('/:id/history', async (req, res) => {
             inclinePct,
             level,
             lengths,
+            speedKmh,
           }),
         ),
       }

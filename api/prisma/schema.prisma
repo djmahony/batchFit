@@ -268,8 +268,10 @@ model WorkoutExercise {
 ///   weight_reps → weightKg + reps · bodyweight_reps → reps
 ///   time → seconds · distance → distanceM (+ optional seconds)
 ///   cardio → seconds and/or distanceM (log either, fill the other in at the
-///   end), plus per-machine extras: inclinePct (treadmill), level (bike /
-///   elliptical / stair climber / rower resistance), lengths (swim).
+///   end), plus per-machine extras: inclinePct + speedKmh (treadmill), level
+///   (bike / elliptical / stair climber / rower resistance), lengths (swim).
+/// Canonical units are metric (metres, km/h) regardless of the user's display
+/// units — the app converts for km/mile and km/h/mph display.
 model WorkoutSet {
   id                String          @id @default(cuid())
   workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
@@ -282,6 +284,7 @@ model WorkoutSet {
   inclinePct        Float?
   level             Int?
   lengths           Int?
+  speedKmh          Float?
 
   @@index([workoutExerciseId])
 }

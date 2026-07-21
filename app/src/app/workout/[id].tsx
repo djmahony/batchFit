@@ -23,19 +23,25 @@ export type SessionSet = {
   reps: number | null;
   seconds: number | null;
   distanceM: number | null;
+  inclinePct: number | null;
+  level: number | null;
+  lengths: number | null;
 };
 export type SessionBlock = {
   exerciseId: string;
   name: string;
   trackingMode: Exercise['trackingMode'];
+  cardioMachine: string | null;
   sets: SessionSet[];
 };
 
-type SetField = 'weightKg' | 'reps' | 'seconds' | 'distanceM';
+type SetField = 'weightKg' | 'reps' | 'seconds' | 'distanceM' | 'inclinePct' | 'level' | 'lengths';
 type Selection = { block: number; set: number; field: SetField; fresh: boolean };
 
+type Column = { field: SetField; label: string; decimal: boolean };
+
 /** Which value columns a tracking mode shows, with their headers. */
-export const MODE_COLUMNS: Record<Exercise['trackingMode'], { field: SetField; label: string; decimal: boolean }[]> = {
+export const MODE_COLUMNS: Record<Exercise['trackingMode'], Column[]> = {
   weight_reps: [
     { field: 'weightKg', label: 'kg', decimal: true },
     { field: 'reps', label: 'reps', decimal: false },
@@ -43,9 +49,38 @@ export const MODE_COLUMNS: Record<Exercise['trackingMode'], { field: SetField; l
   bodyweight_reps: [{ field: 'reps', label: 'reps', decimal: false }],
   time: [{ field: 'seconds', label: 'seconds', decimal: false }],
   distance: [{ field: 'distanceM', label: 'metres', decimal: true }],
+  // Combined cardio: log time or distance (or both — fill the other in at the
+  // end); machine-specific extras are appended per block by columnsFor().
+  cardio: [
+    { field: 'seconds', label: 'seconds', decimal: false },
+    { field: 'distanceM', label: 'metres', decimal: true },
+  ],
 };
 
-const EMPTY_SET: SessionSet = { weightKg: null, reps: null, seconds: null, distanceM: null };
+/** Extra per-machine columns for combined-cardio blocks. */
+const MACHINE_COLUMNS: Record<string, Column[]> = {
+  treadmill: [{ field: 'inclinePct', label: 'incline %', decimal: true }],
+  bike: [{ field: 'level', label: 'level', decimal: false }],
+  elliptical: [{ field: 'level', label: 'level', decimal: false }],
+  stair_climber: [{ field: 'level', label: 'level', decimal: false }],
+  rower: [{ field: 'level', label: 'level', decimal: false }],
+  swim: [{ field: 'lengths', label: 'lengths', decimal: false }],
+};
+
+const columnsFor = (block: Pick<SessionBlock, 'trackingMode' | 'cardioMachine'>): Column[] =>
+  block.trackingMode === 'cardio'
+    ? [...MODE_COLUMNS.cardio, ...(MACHINE_COLUMNS[block.cardioMachine ?? ''] ?? [])]
+    : MODE_COLUMNS[block.trackingMode];
+
+const EMPTY_SET: SessionSet = {
+  weightKg: null,
+  reps: null,
+  seconds: null,
+  distanceM: null,
+  inclinePct: null,
+  level: null,
+  lengths: null,
+};
 
 const toBlocks = (workout: Workout): SessionBlock[] =>
   workout.exercises
@@ -56,11 +91,15 @@ const toBlocks = (workout: Workout): SessionBlock[] =>
       exerciseId: block.exerciseId!,
       name: block.name,
       trackingMode: block.trackingMode,
+      cardioMachine: block.cardioMachine,
       sets: block.sets.map((set) => ({
         weightKg: set.weightKg,
         reps: set.reps,
         seconds: set.seconds,
         distanceM: set.distanceM,
+        inclinePct: set.inclinePct,
+        level: set.level,
+        lengths: set.lengths,
       })),
     }));
 
@@ -72,6 +111,8 @@ function formatElapsed(startedAt: string, now: number): string {
 }
 
 const formatDistance = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`);
+
+const formatSeconds = (s: number) => (s >= 120 ? `${Math.round(s / 60)}min` : `${s}s`);
 
 /** "3×8 @ 60kg" when the sets are uniform, "3 sets · best 60kg×8" when not. */
 function formatLast(last: NonNullable<ExerciseHistory['last']>, mode: Exercise['trackingMode']): string {
@@ -95,6 +136,16 @@ function formatLast(last: NonNullable<ExerciseHistory['last']>, mode: Exercise['
     if (uniform) return `${sets.length}×${sets[0].seconds ?? '—'}s`;
     return `${sets.length} sets · best ${Math.max(...sets.map((s) => s.seconds ?? 0))}s`;
   }
+  if (mode === 'cardio') {
+    // Whatever was actually logged: "15.0km · 40min", or just one of the two.
+    const distance = Math.max(...sets.map((s) => s.distanceM ?? 0));
+    const seconds = Math.max(...sets.map((s) => s.seconds ?? 0));
+    const parts = [
+      ...(distance > 0 ? [formatDistance(distance)] : []),
+      ...(seconds > 0 ? [formatSeconds(seconds)] : []),
+    ];
+    return parts.length > 0 ? parts.join(' · ') : 'no numbers';
+  }
   return formatDistance(Math.max(...sets.map((s) => s.distanceM ?? 0)));
 }
 
@@ -104,6 +155,13 @@ function formatBest(best: NonNullable<ExerciseHistory['best']>, mode: Exercise['
   }
   if (mode === 'bodyweight_reps') return `${best.reps} reps`;
   if (mode === 'time') return `${best.seconds}s`;
+  if (mode === 'cardio') {
+    const parts = [
+      ...(best.distanceM ? [formatDistance(best.distanceM)] : []),
+      ...(best.seconds ? [formatSeconds(best.seconds)] : []),
+    ];
+    return parts.join(' · ');
+  }
   return formatDistance(best.distanceM ?? 0);
 }
 
@@ -255,6 +313,7 @@ export default function WorkoutSessionScreen() {
         exerciseId: exercise.id,
         name: exercise.name,
         trackingMode: exercise.trackingMode,
+        cardioMachine: exercise.cardioMachine,
         sets: [{ ...EMPTY_SET }],
       },
     ]);
@@ -345,10 +404,11 @@ export default function WorkoutSessionScreen() {
     ]);
   };
 
-  const selectedDecimal = selection
-    ? (MODE_COLUMNS[blocks[selection.block]?.trackingMode]?.find((c) => c.field === selection.field)
-        ?.decimal ?? true)
-    : true;
+  const selectedDecimal =
+    selection && blocks[selection.block]
+      ? (columnsFor(blocks[selection.block]).find((c) => c.field === selection.field)?.decimal ??
+        true)
+      : true;
 
   return (
     <ThemedView style={styles.container}>
@@ -431,7 +491,7 @@ export default function WorkoutSessionScreen() {
               )}
 
               {blocks.map((block, blockIndex) => {
-                const columns = MODE_COLUMNS[block.trackingMode];
+                const columns = columnsFor(block);
                 return (
                   <View
                     key={`${block.exerciseId}-${blockIndex}`}

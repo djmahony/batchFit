@@ -29,13 +29,16 @@ export const EQUIPMENT = [
   'kettlebell',
   'other',
 ];
-export const TRACKING_MODES = ['weight_reps', 'bodyweight_reps', 'time', 'distance'];
+// "cardio" is the combined mode for cardio exercises: time and distance are
+// both loggable per set, plus machine-specific extras (incline/level/lengths).
+export const TRACKING_MODES = ['weight_reps', 'bodyweight_reps', 'time', 'distance', 'cardio'];
 export const CARDIO_MACHINES = [
   'treadmill',
   'bike',
   'rower',
   'elliptical',
   'stair_climber',
+  'swim',
   'outdoor',
   'other',
 ];
@@ -186,12 +189,17 @@ exercisesRouter.get('/:id/history', async (req, res) => {
   const last = lastBlock
     ? {
         date: dayKeyOf(lastBlock.workout.startedAt),
-        sets: lastBlock.sets.map(({ weightKg, reps, seconds, distanceM }) => ({
-          weightKg,
-          reps,
-          seconds,
-          distanceM,
-        })),
+        sets: lastBlock.sets.map(
+          ({ weightKg, reps, seconds, distanceM, inclinePct, level, lengths }) => ({
+            weightKg,
+            reps,
+            seconds,
+            distanceM,
+            inclinePct,
+            level,
+            lengths,
+          }),
+        ),
       }
     : null;
 
@@ -234,8 +242,9 @@ exercisesRouter.get('/:id/history', async (req, res) => {
     const top = pickBest((s) => s.seconds);
     if (top) best = { seconds: top.seconds, date: dayKeyOf(top.workoutExercise.workout.startedAt) };
   } else {
-    // distance — "best" means longest, not fastest pace (deliberate MVP rule).
-    const top = pickBest((s) => s.distanceM);
+    // distance & cardio — "best" means longest, not fastest pace (deliberate
+    // MVP rule). Cardio sets logged by time only fall back to longest time.
+    const top = pickBest((s) => s.distanceM) ?? pickBest((s) => s.seconds);
     if (top) {
       best = {
         distanceM: top.distanceM,

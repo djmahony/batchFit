@@ -23,12 +23,13 @@ const MUSCLE_GROUPS = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'fu
 /** The strength half of the picker hierarchy — every group except cardio. */
 const STRENGTH_GROUPS = MUSCLE_GROUPS.filter((group) => group !== 'cardio');
 const EQUIPMENT = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'kettlebell', 'other'] as const;
-const CARDIO_MACHINES = ['treadmill', 'bike', 'rower', 'elliptical', 'stair_climber', 'outdoor', 'other'] as const;
+const CARDIO_MACHINES = ['treadmill', 'bike', 'rower', 'elliptical', 'stair_climber', 'swim', 'outdoor', 'other'] as const;
 const TRACKING_MODES: { value: Exercise['trackingMode']; label: string }[] = [
   { value: 'weight_reps', label: 'Weight × reps' },
   { value: 'bodyweight_reps', label: 'Bodyweight' },
   { value: 'time', label: 'Time' },
   { value: 'distance', label: 'Distance' },
+  { value: 'cardio', label: 'Cardio (time + distance)' },
 ];
 
 export const prettyLabel = (value: string) =>
@@ -464,7 +465,15 @@ function ExerciseForm({
         </View>
 
         <ThemedText style={styles.sectionHeader}>MUSCLE GROUP</ThemedText>
-        <ChipGrid options={[...MUSCLE_GROUPS]} value={muscleGroup} onChange={setMuscleGroup} />
+        <ChipGrid
+          options={[...MUSCLE_GROUPS]}
+          value={muscleGroup}
+          onChange={(group) => {
+            setMuscleGroup(group);
+            // Cardio almost always wants the combined time+distance mode.
+            if (group === 'cardio') setTrackingMode('cardio');
+          }}
+        />
 
         {muscleGroup === 'cardio' && (
           <>

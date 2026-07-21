@@ -195,11 +195,13 @@ model BatchIngredient {
 ///                  "full_body" | "cardio"
 ///   equipment    — "barbell" | "dumbbell" | "machine" | "cable" | "bodyweight" |
 ///                  "kettlebell" | "other"
-///   trackingMode — "weight_reps" | "bodyweight_reps" | "time" | "distance"
-///   cardioMachine — which machine a cardio exercise uses; only meaningful (and
-///                  only allowed) when muscleGroup is "cardio", null otherwise:
+///   trackingMode — "weight_reps" | "bodyweight_reps" | "time" | "distance" |
+///                  "cardio" (combined: time + distance both loggable per set,
+///                  plus machine-specific extras — see WorkoutSet)
+///   cardioMachine — which machine/activity a cardio exercise uses; only
+///                  meaningful (and only allowed) when muscleGroup is "cardio":
 ///                  "treadmill" | "bike" | "rower" | "elliptical" |
-///                  "stair_climber" | "outdoor" | "other"
+///                  "stair_climber" | "swim" | "outdoor" | "other"
 /// `videoId` is a hand-picked YouTube video ID for a form demo; `videoQuery`
 /// overrides the search phrase the app builds from the name. Both usually null —
 /// the app falls back to a YouTube search on the exercise name.
@@ -252,7 +254,10 @@ model WorkoutExercise {
   name       String
   /// Copied from the exercise at logging time; drives which set fields apply.
   trackingMode String
-  order        Int
+  /// Snapshotted with trackingMode — for "cardio" blocks it decides which
+  /// machine-specific columns (incline / level / lengths) the set rows show.
+  cardioMachine String?
+  order         Int
 
   sets WorkoutSet[]
 
@@ -262,6 +267,9 @@ model WorkoutExercise {
 /// One set. Which fields are filled depends on the block's trackingMode:
 ///   weight_reps → weightKg + reps · bodyweight_reps → reps
 ///   time → seconds · distance → distanceM (+ optional seconds)
+///   cardio → seconds and/or distanceM (log either, fill the other in at the
+///   end), plus per-machine extras: inclinePct (treadmill), level (bike /
+///   elliptical / stair climber / rower resistance), lengths (swim).
 model WorkoutSet {
   id                String          @id @default(cuid())
   workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
@@ -271,6 +279,9 @@ model WorkoutSet {
   reps              Int?
   seconds           Int?
   distanceM         Float?
+  inclinePct        Float?
+  level             Int?
+  lengths           Int?
 
   @@index([workoutExerciseId])
 }

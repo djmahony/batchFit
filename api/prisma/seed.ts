@@ -200,13 +200,21 @@ const LIBRARY_EXERCISES: [string, string, string, string, string?][] = [
   ['Battle ropes', 'full_body', 'other', 'time'],
   ['Sled push', 'full_body', 'other', 'distance'],
   ['Burpee', 'full_body', 'bodyweight', 'bodyweight_reps'],
-  ['Rowing machine', 'cardio', 'machine', 'distance', 'rower'],
-  ['Treadmill run', 'cardio', 'machine', 'distance', 'treadmill'],
-  ['Outdoor run', 'cardio', 'bodyweight', 'distance', 'outdoor'],
-  ['Cycling', 'cardio', 'machine', 'time', 'bike'],
-  ['Assault bike', 'cardio', 'machine', 'time', 'bike'],
-  ['Elliptical', 'cardio', 'machine', 'time', 'elliptical'],
-  ['Stair climber', 'cardio', 'machine', 'time', 'stair_climber'],
+  // All cardio uses the combined "cardio" tracking mode: time + distance per
+  // set, plus the machine's own extras (incline / level / lengths).
+  ['Rowing machine', 'cardio', 'machine', 'cardio', 'rower'],
+  ['Treadmill run', 'cardio', 'machine', 'cardio', 'treadmill'],
+  ['Treadmill walk', 'cardio', 'machine', 'cardio', 'treadmill'],
+  ['Cycling', 'cardio', 'machine', 'cardio', 'bike'],
+  ['Assault bike', 'cardio', 'machine', 'cardio', 'bike'],
+  ['Elliptical', 'cardio', 'machine', 'cardio', 'elliptical'],
+  ['Stair climber', 'cardio', 'machine', 'cardio', 'stair_climber'],
+  ['Pool swim', 'cardio', 'bodyweight', 'cardio', 'swim'],
+  ['Open water swim', 'cardio', 'bodyweight', 'cardio', 'swim'],
+  ['Outdoor run', 'cardio', 'bodyweight', 'cardio', 'outdoor'],
+  ['Outdoor walk', 'cardio', 'bodyweight', 'cardio', 'outdoor'],
+  ['Hike', 'cardio', 'bodyweight', 'cardio', 'outdoor'],
+  ['Outdoor cycle', 'cardio', 'other', 'cardio', 'outdoor'],
 ];
 
 async function seedExercises() {
@@ -245,6 +253,14 @@ async function seedExercises() {
       data: { cardioMachine },
     });
   }
+
+  // Migrate library cardio rows seeded with the old single-column time/distance
+  // modes to the combined "cardio" mode. (Workout history is unaffected — the
+  // mode is snapshotted onto WorkoutExercise at logging time.)
+  await prisma.exercise.updateMany({
+    where: { ownerId: null, muscleGroup: 'cardio', trackingMode: { in: ['time', 'distance'] } },
+    data: { trackingMode: 'cardio' },
+  });
 }
 
 async function main() {

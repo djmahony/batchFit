@@ -145,7 +145,7 @@ export type Exercise = {
   name: string;
   muscleGroup: string;
   equipment: string;
-  trackingMode: 'weight_reps' | 'bodyweight_reps' | 'time' | 'distance';
+  trackingMode: 'weight_reps' | 'bodyweight_reps' | 'time' | 'distance' | 'cardio';
   cardioMachine: string | null;
   videoId: string | null;
   videoQuery: string | null;
@@ -158,7 +158,15 @@ export type Exercise = {
 export type ExerciseHistory = {
   last: {
     date: string;
-    sets: { weightKg: number | null; reps: number | null; seconds: number | null; distanceM: number | null }[];
+    sets: {
+      weightKg: number | null;
+      reps: number | null;
+      seconds: number | null;
+      distanceM: number | null;
+      inclinePct: number | null;
+      level: number | null;
+      lengths: number | null;
+    }[];
   } | null;
   best: {
     weightKg?: number;
@@ -180,14 +188,19 @@ export type WorkoutSet = {
   reps: number | null;
   seconds: number | null;
   distanceM: number | null;
+  inclinePct: number | null;
+  level: number | null;
+  lengths: number | null;
 };
 
-/** One exercise block in a session; name + trackingMode are snapshots. */
+/** One exercise block in a session; name, trackingMode and cardioMachine are
+ *  snapshots taken from the exercise at logging time. */
 export type WorkoutExercise = {
   id: string;
   exerciseId: string | null;
   name: string;
   trackingMode: Exercise['trackingMode'];
+  cardioMachine: string | null;
   order: number;
   sets: WorkoutSet[];
 };
@@ -416,7 +429,15 @@ export const api = {
     id: string,
     exercises: {
       exerciseId: string;
-      sets: { weightKg?: number | null; reps?: number | null; seconds?: number | null; distanceM?: number | null }[];
+      sets: {
+        weightKg?: number | null;
+        reps?: number | null;
+        seconds?: number | null;
+        distanceM?: number | null;
+        inclinePct?: number | null;
+        level?: number | null;
+        lengths?: number | null;
+      }[];
     }[],
   ) => request<{ workout: Workout }>(`/workouts/${id}`, { method: 'PUT', body: { exercises }, token }),
   finishWorkout: (token: string, id: string) =>

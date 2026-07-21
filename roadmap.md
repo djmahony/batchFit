@@ -42,8 +42,31 @@ the plan as written, chosen at implementation time:
   which hosts the PB panel — only renders once there's a last session). Acceptable edge:
   testing a 1RM on a lift you've never logged a session for.
 
+**F16 (added mid-review of PR #73, 2026-07-21):** the machine layer questioned, then kept and
+made load-bearing. Decisions:
+- **`cardioMachine` stays** — `muscleGroup === "cardio"` alone was enough for the
+  Strength/Cardio split, but the machine now drives **machine-specific set metrics**, which is
+  what makes it worth its column.
+- [x] **F16-1 (api)** — New combined `"cardio"` tracking mode: every cardio set can log
+  **time and/or distance** (plan by one, fill the other in at the end). `WorkoutSet` gains
+  `inclinePct` (treadmill), `level` (bike / elliptical / stair climber / rower resistance),
+  `lengths` (swim); `WorkoutExercise` snapshots `cardioMachine` (drives which columns a
+  restored block shows). Migration `add_cardio_machine_metrics`. Set validation covers the new
+  fields; history's "best" for cardio = longest distance, falling back to longest time.
+- [x] **F16-2 (api)** — `swim` added to `CARDIO_MACHINES`; seed adds Pool swim, Open water
+  swim, Outdoor walk, Hike, Outdoor cycle, Treadmill walk, and migrates all library cardio
+  rows to the combined mode (idempotent backfill; logged history untouched — modes are
+  snapshotted per session).
+- [x] **F16-3 (app)** — Cardio set rows show seconds + metres plus the machine's extra column
+  (incline % / level / lengths); create-exercise form defaults to the combined mode when
+  muscle group is set to cardio; history strip/PB formats cardio as "15.0km · 40min" from
+  whatever was logged.
+- Deferred, deliberately: **miles/lengths-to-distance display conversion** (entry is metres;
+  display shows m/km — imperial distance display wants a units pass of its own) and
+  **pace-based cardio PBs** (still longest-distance-wins).
+
 **Next up:** **F15-3** (curating `videoId`s for top exercises) is content work, not engineering —
-do only when ready. Otherwise: on-device verification sweep of F13–F15 in Expo Go, then pick
+do only when ready. Otherwise: on-device verification sweep of F13–F16 in Expo Go, then pick
 from "Proposed enhancements" below.
 
 ---

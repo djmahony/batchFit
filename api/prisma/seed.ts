@@ -71,11 +71,12 @@ const REFERENCE_FOODS: [string, number, number, number, number, number][] = [
   ['Sugar', 387, 0, 0, 100, 0],
 ];
 
-// [name, muscleGroup, equipment, trackingMode]
-// muscleGroup  — see MUSCLE_GROUPS in src/routes/exercises.ts
-// equipment    — see EQUIPMENT in src/routes/exercises.ts
-// trackingMode — see TRACKING_MODES in src/routes/exercises.ts
-const LIBRARY_EXERCISES: [string, string, string, string][] = [
+// [name, muscleGroup, equipment, trackingMode, cardioMachine?]
+// muscleGroup   — see MUSCLE_GROUPS in src/routes/exercises.ts
+// equipment     — see EQUIPMENT in src/routes/exercises.ts
+// trackingMode  — see TRACKING_MODES in src/routes/exercises.ts
+// cardioMachine — see CARDIO_MACHINES in src/routes/exercises.ts; cardio rows only
+const LIBRARY_EXERCISES: [string, string, string, string, string?][] = [
   // Chest — free weights, cables and machines.
   ['Bench press', 'chest', 'barbell', 'weight_reps'],
   ['Incline bench press', 'chest', 'barbell', 'weight_reps'],
@@ -199,13 +200,13 @@ const LIBRARY_EXERCISES: [string, string, string, string][] = [
   ['Battle ropes', 'full_body', 'other', 'time'],
   ['Sled push', 'full_body', 'other', 'distance'],
   ['Burpee', 'full_body', 'bodyweight', 'bodyweight_reps'],
-  ['Rowing machine', 'cardio', 'machine', 'distance'],
-  ['Treadmill run', 'cardio', 'machine', 'distance'],
-  ['Outdoor run', 'cardio', 'bodyweight', 'distance'],
-  ['Cycling', 'cardio', 'machine', 'time'],
-  ['Assault bike', 'cardio', 'machine', 'time'],
-  ['Elliptical', 'cardio', 'machine', 'time'],
-  ['Stair climber', 'cardio', 'machine', 'time'],
+  ['Rowing machine', 'cardio', 'machine', 'distance', 'rower'],
+  ['Treadmill run', 'cardio', 'machine', 'distance', 'treadmill'],
+  ['Outdoor run', 'cardio', 'bodyweight', 'distance', 'outdoor'],
+  ['Cycling', 'cardio', 'machine', 'time', 'bike'],
+  ['Assault bike', 'cardio', 'machine', 'time', 'bike'],
+  ['Elliptical', 'cardio', 'machine', 'time', 'elliptical'],
+  ['Stair climber', 'cardio', 'machine', 'time', 'stair_climber'],
 ];
 
 async function seedExercises() {
@@ -218,19 +219,32 @@ async function seedExercises() {
     ),
   );
   const toCreate = LIBRARY_EXERCISES.filter(([name]) => !existingNames.has(name));
-  if (toCreate.length === 0) {
+  if (toCreate.length > 0) {
+    await prisma.exercise.createMany({
+      data: toCreate.map(([name, muscleGroup, equipment, trackingMode, cardioMachine]) => ({
+        name,
+        muscleGroup,
+        equipment,
+        trackingMode,
+        cardioMachine: cardioMachine ?? null,
+      })),
+    });
+    console.log(
+      `Seeded ${toCreate.length} new library exercises (${existingNames.size} already present).`,
+    );
+  } else {
     console.log(`Library exercises already seeded (${existingNames.size} present) — skipping.`);
-    return;
   }
-  await prisma.exercise.createMany({
-    data: toCreate.map(([name, muscleGroup, equipment, trackingMode]) => ({
-      name,
-      muscleGroup,
-      equipment,
-      trackingMode,
-    })),
-  });
-  console.log(`Seeded ${toCreate.length} new library exercises (${existingNames.size} already present).`);
+
+  // Backfill cardioMachine onto cardio rows seeded before the column existed.
+  // No-op once every seeded cardio exercise is tagged.
+  for (const [name, , , , cardioMachine] of LIBRARY_EXERCISES) {
+    if (!cardioMachine) continue;
+    await prisma.exercise.updateMany({
+      where: { name, ownerId: null, cardioMachine: null },
+      data: { cardioMachine },
+    });
+  }
 }
 
 async function main() {

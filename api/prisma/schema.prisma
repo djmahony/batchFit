@@ -56,6 +56,7 @@ model User {
   exercises  Exercise[]
   workouts   Workout[]
   weights    WeightEntry[]
+  oneRepMaxes OneRepMaxEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -195,16 +196,27 @@ model BatchIngredient {
 ///   equipment    — "barbell" | "dumbbell" | "machine" | "cable" | "bodyweight" |
 ///                  "kettlebell" | "other"
 ///   trackingMode — "weight_reps" | "bodyweight_reps" | "time" | "distance"
+///   cardioMachine — which machine a cardio exercise uses; only meaningful (and
+///                  only allowed) when muscleGroup is "cardio", null otherwise:
+///                  "treadmill" | "bike" | "rower" | "elliptical" |
+///                  "stair_climber" | "outdoor" | "other"
+/// `videoId` is a hand-picked YouTube video ID for a form demo; `videoQuery`
+/// overrides the search phrase the app builds from the name. Both usually null —
+/// the app falls back to a YouTube search on the exercise name.
 model Exercise {
-  id           String  @id @default(cuid())
-  name         String
-  muscleGroup  String
-  equipment    String
-  trackingMode String
-  owner        User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId      String?
+  id            String  @id @default(cuid())
+  name          String
+  muscleGroup   String
+  equipment     String
+  trackingMode  String
+  cardioMachine String?
+  videoId       String?
+  videoQuery    String?
+  owner         User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId       String?
 
   workoutExercises WorkoutExercise[]
+  oneRepMaxEntries OneRepMaxEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -261,6 +273,24 @@ model WorkoutSet {
   distanceM         Float?
 
   @@index([workoutExerciseId])
+}
+
+/// A manually recorded, actually-tested one-rep max for a weight_reps exercise
+/// (distinct from the Epley estimate derived from working sets). `date` is a
+/// day key ("YYYY-MM-DD").
+model OneRepMaxEntry {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exerciseId String
+  weightKg   Float
+  date       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, exerciseId, date])
 }
 
 /// One bodyweight reading. `date` is a day key ("YYYY-MM-DD"); one entry per

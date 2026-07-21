@@ -24,7 +24,9 @@ export default function BatchAddIngredientScreen() {
   const { addIngredient } = useBatchDraft();
 
   const [query, setQuery] = useState('');
-  const [foods, setFoods] = useState<Food[] | null>(null);
+  // null = loading. Starts as [] (not null) so an empty query shows the
+  // "search for..." empty state immediately rather than a spinner flash.
+  const [foods, setFoods] = useState<Food[] | null>([]);
   const [error, setError] = useState<string | null>(null);
 
   const trimmed = query.trim();
@@ -32,6 +34,7 @@ export default function BatchAddIngredientScreen() {
   const load = useCallback(async () => {
     if (!token || trimmed === '') return;
     setError(null);
+    setFoods(null);
     try {
       const res = await api.searchFoods(token, trimmed);
       setFoods(res.foods);

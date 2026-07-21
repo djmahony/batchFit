@@ -20,7 +20,10 @@ import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, type Exercise } from '@/lib/api';
 
 const MUSCLE_GROUPS = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'full_body', 'cardio'] as const;
+/** The strength half of the picker hierarchy — every group except cardio. */
+const STRENGTH_GROUPS = MUSCLE_GROUPS.filter((group) => group !== 'cardio');
 const EQUIPMENT = ['barbell', 'dumbbell', 'machine', 'cable', 'bodyweight', 'kettlebell', 'other'] as const;
+const CARDIO_MACHINES = ['treadmill', 'bike', 'rower', 'elliptical', 'stair_climber', 'outdoor', 'other'] as const;
 const TRACKING_MODES: { value: Exercise['trackingMode']; label: string }[] = [
   { value: 'weight_reps', label: 'Weight × reps' },
   { value: 'bodyweight_reps', label: 'Bodyweight' },
@@ -31,6 +34,15 @@ const TRACKING_MODES: { value: Exercise['trackingMode']; label: string }[] = [
 export const prettyLabel = (value: string) =>
   value.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
+/** Where the browse hierarchy currently is. Search is *not* a step — it's an
+ *  overlay driven by the query being non-empty, so clearing the query lands
+ *  you back on whichever step you were browsing. */
+type Step =
+  | { kind: 'category' }
+  | { kind: 'bodyPart' }
+  | { kind: 'machine' }
+  | { kind: 'exercises'; muscleGroup: string; cardioMachine?: string };
+
 type Props = {
   visible: boolean;
   onClose: () => void;
@@ -39,44 +51,141 @@ type Props = {
 
 /**
  * Exercise picker + library (wireframes 1w/1x), shown as a full-screen modal
- * inside the active session. Searchable list of library + own exercises; the
- * form view creates a new one or edits one of the user's own.
+ * inside the active session. Browse hierarchy: Recent chips → Strength
+ * (body part) / Cardio (machine) → exercise list; typing in the ever-present
+ * search field bypasses the hierarchy with a flat name search. The form view
+ * creates a new exercise or edits one of the user's own.
  */
 export function ExercisePicker({ visible, onClose, onPick }: Props) {
   const theme = useTheme();
   const { token } = useAuth();
 
   const [query, setQuery] = useState('');
+  const [step, setStep] = useState<Step>({ kind: 'category' });
   const [exercises, setExercises] = useState<Exercise[] | null>(null);
+  const [recent, setRecent] = useState<Exercise[]>([]);
   const [error, setError] = useState<string | null>(null);
   // null = list view; 'new' = create form; an Exercise = edit form.
   const [editing, setEditing] = useState<'new' | Exercise | null>(null);
 
   const trimmed = query.trim();
+  const searching = trimmed !== '';
+  // Only the search overlay and the leaf exercise list fetch anything.
+  const needsFetch = searching || step.kind === 'exercises';
 
   const load = useCallback(async () => {
     if (!token) return;
     setError(null);
     try {
-      const res = await api.exercises(token, trimmed);
+      const res = searching
+        ? await api.exercises(token, trimmed)
+        : step.kind === 'exercises'
+          ? await api.exercises(token, '', {
+              muscleGroup: step.muscleGroup,
+              cardioMachine: step.cardioMachine,
+            })
+          : { exercises: [] };
       setExercises(res.exercises);
     } catch (e) {
       setExercises(null);
       setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
     }
-  }, [token, trimmed]);
+  }, [token, searching, trimmed, step]);
 
   useEffect(() => {
-    if (!visible) return;
-    const timer = setTimeout(() => void load(), trimmed === '' ? 0 : 250);
+    if (!visible || !needsFetch) return;
+    setExercises(null);
+    const timer = setTimeout(() => void load(), searching ? 250 : 0);
     return () => clearTimeout(timer);
-  }, [visible, load, trimmed]);
+  }, [visible, needsFetch, load, searching]);
+
+  // Recent-exercise quick picks, refreshed each time the picker opens.
+  useEffect(() => {
+    if (!visible || !token) return;
+    api
+      .recentExercises(token)
+      .then((res) => setRecent(res.exercises))
+      .catch(() => setRecent([]));
+  }, [visible, token]);
 
   const close = () => {
     setEditing(null);
     setQuery('');
+    setStep({ kind: 'category' });
     onClose();
   };
+
+  const pick = (exercise: Exercise) => {
+    onPick(exercise);
+    close();
+  };
+
+  const goBack = () => {
+    if (step.kind === 'exercises') {
+      setStep(step.muscleGroup === 'cardio' ? { kind: 'machine' } : { kind: 'bodyPart' });
+    } else {
+      setStep({ kind: 'category' });
+    }
+  };
+
+  const atRoot = step.kind === 'category';
+
+  const stepTitle = searching
+    ? 'Add exercise'
+    : step.kind === 'category'
+      ? 'Add exercise'
+      : step.kind === 'bodyPart'
+        ? 'Strength'
+        : step.kind === 'machine'
+          ? 'Cardio'
+          : step.muscleGroup === 'cardio'
+            ? prettyLabel(step.cardioMachine ?? 'other')
+            : prettyLabel(step.muscleGroup);
+
+  const renderRow = (item: Exercise) => (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => pick(item)}
+      style={({ pressed }) => [
+        styles.row,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <ThemedText style={styles.rowName} numberOfLines={1}>
+        {item.name}
+      </ThemedText>
+      <View style={styles.rowRight}>
+        <ThemedText style={[styles.rowMeta, { color: theme.textMuted }]}>
+          {prettyLabel(item.muscleGroup)} · {prettyLabel(item.equipment)}
+        </ThemedText>
+        {item.ownerId !== null && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Edit ${item.name}`}
+            onPress={() => setEditing(item)}
+            hitSlop={8}
+            style={({ pressed }) => [pressed && styles.pressed]}>
+            <Ionicons name="pencil" size={14} color={theme.tint} />
+          </Pressable>
+        )}
+      </View>
+    </Pressable>
+  );
+
+  const navChip = (label: string, onPress: () => void) => (
+    <Pressable
+      key={label}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.navChip,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <ThemedText style={[styles.navChipLabel, { color: theme.text }]}>{label}</ThemedText>
+      <Ionicons name="chevron-forward" size={13} color={theme.textMuted} />
+    </Pressable>
+  );
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={close}>
@@ -95,16 +204,20 @@ export function ExercisePicker({ visible, onClose, onPick }: Props) {
               <View style={styles.header}>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Close"
-                  onPress={close}
+                  accessibilityLabel={atRoot || searching ? 'Close' : 'Back'}
+                  onPress={atRoot || searching ? close : goBack}
                   style={({ pressed }) => [
                     styles.headerButton,
                     { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
                     pressed && styles.pressed,
                   ]}>
-                  <Ionicons name="close" size={17} color={theme.text} />
+                  <Ionicons
+                    name={atRoot || searching ? 'close' : 'chevron-back'}
+                    size={17}
+                    color={theme.text}
+                  />
                 </Pressable>
-                <ThemedText style={styles.headerTitle}>Add exercise</ThemedText>
+                <ThemedText style={styles.headerTitle}>{stepTitle}</ThemedText>
                 <View style={styles.headerButton} />
               </View>
 
@@ -122,61 +235,101 @@ export function ExercisePicker({ visible, onClose, onPick }: Props) {
                 </View>
               </View>
 
-              {error ? (
-                <View style={styles.centered}>
-                  <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
-                    {error}
-                  </ThemedText>
-                  <Button label="Try again" onPress={() => void load()} />
-                </View>
-              ) : exercises === null ? (
-                <View style={styles.centered}>
-                  <ActivityIndicator color={theme.tint} />
-                </View>
-              ) : (
-                <FlatList
-                  data={exercises}
-                  keyExtractor={(exercise) => exercise.id}
-                  contentContainerStyle={styles.list}
-                  keyboardShouldPersistTaps="handled"
-                  renderItem={({ item }) => (
-                    <Pressable
-                      accessibilityRole="button"
-                      onPress={() => {
-                        onPick(item);
-                        close();
-                      }}
-                      style={({ pressed }) => [
-                        styles.row,
-                        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
-                        pressed && styles.pressed,
-                      ]}>
-                      <ThemedText style={styles.rowName} numberOfLines={1}>
-                        {item.name}
-                      </ThemedText>
-                      <View style={styles.rowRight}>
-                        <ThemedText style={[styles.rowMeta, { color: theme.textMuted }]}>
-                          {prettyLabel(item.muscleGroup)} · {prettyLabel(item.equipment)}
-                        </ThemedText>
-                        {item.ownerId !== null && (
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={`Edit ${item.name}`}
-                            onPress={() => setEditing(item)}
-                            hitSlop={8}
-                            style={({ pressed }) => [pressed && styles.pressed]}>
-                            <Ionicons name="pencil" size={14} color={theme.tint} />
-                          </Pressable>
-                        )}
-                      </View>
-                    </Pressable>
-                  )}
-                  ListEmptyComponent={
+              {searching || step.kind === 'exercises' ? (
+                error ? (
+                  <View style={styles.centered}>
                     <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
-                      Nothing matched that — create it below.
+                      {error}
                     </ThemedText>
-                  }
-                />
+                    <Button label="Try again" onPress={() => void load()} />
+                  </View>
+                ) : exercises === null ? (
+                  <View style={styles.centered}>
+                    <ActivityIndicator color={theme.tint} />
+                  </View>
+                ) : (
+                  <FlatList
+                    data={exercises}
+                    keyExtractor={(exercise) => exercise.id}
+                    contentContainerStyle={styles.list}
+                    keyboardShouldPersistTaps="handled"
+                    renderItem={({ item }) => renderRow(item)}
+                    ListEmptyComponent={
+                      <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
+                        Nothing matched that — create it below.
+                      </ThemedText>
+                    }
+                  />
+                )
+              ) : (
+                <ScrollView
+                  contentContainerStyle={styles.browse}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}>
+                  {step.kind === 'category' && (
+                    <>
+                      {recent.length > 0 && (
+                        <>
+                          <ThemedText style={styles.sectionHeader}>RECENT</ThemedText>
+                          <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            keyboardShouldPersistTaps="handled"
+                            contentContainerStyle={styles.recentRow}>
+                            {recent.map((exercise) => (
+                              <Pressable
+                                key={exercise.id}
+                                accessibilityRole="button"
+                                onPress={() => pick(exercise)}
+                                style={({ pressed }) => [
+                                  styles.recentChip,
+                                  { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+                                  pressed && styles.pressed,
+                                ]}>
+                                <ThemedText style={[styles.recentChipLabel, { color: theme.text }]} numberOfLines={1}>
+                                  {exercise.name}
+                                </ThemedText>
+                              </Pressable>
+                            ))}
+                          </ScrollView>
+                        </>
+                      )}
+
+                      <CategoryCard
+                        title="Strength"
+                        description="Weights, machines and bodyweight — by body part"
+                        icon="barbell-outline"
+                        onPress={() => setStep({ kind: 'bodyPart' })}
+                      />
+                      <CategoryCard
+                        title="Cardio"
+                        description="Treadmill, bike, rower and more — by machine"
+                        icon="heart-outline"
+                        onPress={() => setStep({ kind: 'machine' })}
+                      />
+                    </>
+                  )}
+
+                  {step.kind === 'bodyPart' && (
+                    <View style={styles.navChips}>
+                      {STRENGTH_GROUPS.map((group) =>
+                        navChip(prettyLabel(group), () =>
+                          setStep({ kind: 'exercises', muscleGroup: group }),
+                        ),
+                      )}
+                    </View>
+                  )}
+
+                  {step.kind === 'machine' && (
+                    <View style={styles.navChips}>
+                      {CARDIO_MACHINES.map((machine) =>
+                        navChip(prettyLabel(machine), () =>
+                          setStep({ kind: 'exercises', muscleGroup: 'cardio', cardioMachine: machine }),
+                        ),
+                      )}
+                    </View>
+                  )}
+                </ScrollView>
               )}
 
               <View style={styles.footer}>
@@ -187,6 +340,43 @@ export function ExercisePicker({ visible, onClose, onPick }: Props) {
         </SafeAreaView>
       </View>
     </Modal>
+  );
+}
+
+/** Large tappable category card — the ChoiceCard visual language (surface,
+ *  border, radius) without radio-select semantics, since tapping navigates. */
+function CategoryCard({
+  title,
+  description,
+  icon,
+  onPress,
+}: {
+  title: string;
+  description: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.categoryCard,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <View style={[styles.categoryIcon, { backgroundColor: theme.background }]}>
+        <Ionicons name={icon} size={20} color={theme.tint} />
+      </View>
+      <View style={styles.categoryText}>
+        <ThemedText style={styles.categoryTitle}>{title}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          {description}
+        </ThemedText>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
+    </Pressable>
   );
 }
 
@@ -206,6 +396,7 @@ function ExerciseForm({
   const [trackingMode, setTrackingMode] = useState<Exercise['trackingMode']>(
     exercise?.trackingMode ?? 'weight_reps',
   );
+  const [cardioMachine, setCardioMachine] = useState<string | null>(exercise?.cardioMachine ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -217,7 +408,13 @@ function ExerciseForm({
     }
     setError(null);
     setSaving(true);
-    const input = { name: name.trim(), muscleGroup, equipment, trackingMode };
+    const input = {
+      name: name.trim(),
+      muscleGroup,
+      equipment,
+      trackingMode,
+      cardioMachine: muscleGroup === 'cardio' ? cardioMachine : null,
+    };
     try {
       if (exercise) {
         await api.updateExercise(token, exercise.id, input);
@@ -268,6 +465,17 @@ function ExerciseForm({
 
         <ThemedText style={styles.sectionHeader}>MUSCLE GROUP</ThemedText>
         <ChipGrid options={[...MUSCLE_GROUPS]} value={muscleGroup} onChange={setMuscleGroup} />
+
+        {muscleGroup === 'cardio' && (
+          <>
+            <ThemedText style={styles.sectionHeader}>MACHINE</ThemedText>
+            <ChipGrid
+              options={[...CARDIO_MACHINES]}
+              value={cardioMachine ?? ''}
+              onChange={setCardioMachine}
+            />
+          </>
+        )}
 
         <ThemedText style={styles.sectionHeader}>EQUIPMENT</ThemedText>
         <ChipGrid options={[...EQUIPMENT]} value={equipment} onChange={setEquipment} />
@@ -409,6 +617,69 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingBottom: Spacing.three,
     gap: 8,
+  },
+  browse: {
+    paddingHorizontal: 22,
+    paddingBottom: Spacing.three,
+    gap: 10,
+  },
+  recentRow: {
+    gap: 7,
+    paddingBottom: 4,
+  },
+  recentChip: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 13,
+    maxWidth: 180,
+  },
+  recentChipLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 12.5,
+    lineHeight: 16,
+  },
+  categoryCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 15,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryText: {
+    flex: 1,
+    gap: 1,
+  },
+  categoryTitle: {
+    fontFamily: Fonts.display,
+    fontSize: 15.5,
+    lineHeight: 20,
+  },
+  navChips: {
+    gap: 8,
+  },
+  navChip: {
+    borderRadius: 13,
+    borderWidth: 1,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  navChipLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 13.5,
+    lineHeight: 18,
   },
   row: {
     borderRadius: 13,

@@ -1,18 +1,21 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { ExercisePicker } from '@/components/exercise-picker';
+import { LogOneRepMaxSheet } from '@/components/log-one-rep-max-sheet';
 import { NumericKeypad, type KeypadKey } from '@/components/numeric-keypad';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type Exercise, type Workout } from '@/lib/api';
+import { api, ApiError, type Exercise, type ExerciseHistory, type Workout } from '@/lib/api';
+import { formatDayKey } from '@/lib/dates';
+import { estimateOneRepMax } from '@/lib/oneRepMax';
 
 // The session state the screen edits; PUT /workouts/:id takes the same shape.
 export type SessionSet = {
@@ -68,12 +71,48 @@ function formatElapsed(startedAt: string, now: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
+const formatDistance = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`);
+
+/** "3×8 @ 60kg" when the sets are uniform, "3 sets · best 60kg×8" when not. */
+function formatLast(last: NonNullable<ExerciseHistory['last']>, mode: Exercise['trackingMode']): string {
+  const sets = last.sets;
+  if (sets.length === 0) return 'no sets';
+  if (mode === 'weight_reps') {
+    const uniform = sets.every((s) => s.weightKg === sets[0].weightKg && s.reps === sets[0].reps);
+    if (uniform) return `${sets.length}×${sets[0].reps ?? '—'} @ ${sets[0].weightKg ?? '—'}kg`;
+    const top = sets.reduce((a, b) =>
+      estimateOneRepMax(b.weightKg ?? 0, b.reps ?? 0) > estimateOneRepMax(a.weightKg ?? 0, a.reps ?? 0) ? b : a,
+    );
+    return `${sets.length} sets · best ${top.weightKg ?? '—'}kg×${top.reps ?? '—'}`;
+  }
+  if (mode === 'bodyweight_reps') {
+    const uniform = sets.every((s) => s.reps === sets[0].reps);
+    if (uniform) return `${sets.length}×${sets[0].reps ?? '—'}`;
+    return `${sets.length} sets · best ${Math.max(...sets.map((s) => s.reps ?? 0))} reps`;
+  }
+  if (mode === 'time') {
+    const uniform = sets.every((s) => s.seconds === sets[0].seconds);
+    if (uniform) return `${sets.length}×${sets[0].seconds ?? '—'}s`;
+    return `${sets.length} sets · best ${Math.max(...sets.map((s) => s.seconds ?? 0))}s`;
+  }
+  return formatDistance(Math.max(...sets.map((s) => s.distanceM ?? 0)));
+}
+
+function formatBest(best: NonNullable<ExerciseHistory['best']>, mode: Exercise['trackingMode']): string {
+  if (mode === 'weight_reps') {
+    return `${best.estimatedOneRepMax}kg e1RM (${best.reps}×${best.weightKg}kg)`;
+  }
+  if (mode === 'bodyweight_reps') return `${best.reps} reps`;
+  if (mode === 'time') return `${best.seconds}s`;
+  return formatDistance(best.distanceM ?? 0);
+}
+
 // Active workout session (wireframe 1v): exercise blocks with set tables, the
 // in-screen keypad, add-set pre-fill, repeat-last, finish/discard. Finished
 // sessions open read-only.
 export default function WorkoutSessionScreen() {
   const theme = useTheme();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const params = useLocalSearchParams<{ id: string }>();
 
   const [workout, setWorkout] = useState<Workout | null>(null);
@@ -84,8 +123,51 @@ export default function WorkoutSessionScreen() {
   const [finishing, setFinishing] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [now, setNow] = useState(Date.now());
+  // Last-time/best/tested-max per exercise, fetched once per exercise per
+  // session (F14). Missing key = not loaded yet; strips render nothing then.
+  const [histories, setHistories] = useState<Record<string, ExerciseHistory>>({});
+  const [pbOpen, setPbOpen] = useState<Record<string, boolean>>({});
+  const [oneRmTarget, setOneRmTarget] = useState<{ exerciseId: string; name: string } | null>(null);
+  const historyFetched = useRef<Set<string>>(new Set());
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const blocksRef = useRef<SessionBlock[]>([]);
+
+  const weightUnit: 'kg' | 'lb' = user?.units === 'imperial' ? 'lb' : 'kg';
+
+  // Fetch history for any exercise in the session we haven't asked about yet
+  // (covers picker adds, resumed sessions, and repeat-last in one place).
+  useEffect(() => {
+    if (!token) return;
+    for (const block of blocks) {
+      if (historyFetched.current.has(block.exerciseId)) continue;
+      historyFetched.current.add(block.exerciseId);
+      api
+        .exerciseHistory(token, block.exerciseId)
+        .then((history) => setHistories((prev) => ({ ...prev, [block.exerciseId]: history })))
+        .catch(() => {
+          // Non-essential context — allow a retry if the block is re-added.
+          historyFetched.current.delete(block.exerciseId);
+        });
+    }
+  }, [token, blocks]);
+
+  const refreshHistory = (exerciseId: string) => {
+    if (!token) return;
+    api
+      .exerciseHistory(token, exerciseId)
+      .then((history) => setHistories((prev) => ({ ...prev, [exerciseId]: history })))
+      .catch(() => {});
+  };
+
+  const openVideo = (block: SessionBlock) => {
+    const history = histories[block.exerciseId];
+    const url = history?.videoId
+      ? `https://www.youtube.com/watch?v=${history.videoId}`
+      : `https://www.youtube.com/results?search_query=${encodeURIComponent(
+          `${history?.videoQuery ?? block.name} exercise form`,
+        )}`;
+    void Linking.openURL(url);
+  };
 
   const readOnly = workout?.finishedAt !== null && workout !== null;
 
@@ -358,17 +440,93 @@ export default function WorkoutSessionScreen() {
                       <ThemedText style={styles.blockName} numberOfLines={1}>
                         {block.name}
                       </ThemedText>
-                      {!readOnly && (
+                      <View style={styles.blockHeaderActions}>
                         <Pressable
                           accessibilityRole="button"
-                          accessibilityLabel={`Remove ${block.name}`}
-                          onPress={() => removeBlock(blockIndex)}
+                          accessibilityLabel={`Watch a form video for ${block.name}`}
+                          onPress={() => openVideo(block)}
                           hitSlop={8}
                           style={({ pressed }) => [pressed && styles.pressed]}>
-                          <Ionicons name="close-circle" size={18} color={theme.textMuted} />
+                          <Ionicons name="logo-youtube" size={16} color={theme.textMuted} />
                         </Pressable>
-                      )}
+                        {!readOnly && (
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Remove ${block.name}`}
+                            onPress={() => removeBlock(blockIndex)}
+                            hitSlop={8}
+                            style={({ pressed }) => [pressed && styles.pressed]}>
+                            <Ionicons name="close-circle" size={18} color={theme.textMuted} />
+                          </Pressable>
+                        )}
+                      </View>
                     </View>
+
+                    {(() => {
+                      // Last-time strip + tap-to-reveal PB (F14). Renders
+                      // nothing until history arrives; nothing at all for a
+                      // first-ever exercise.
+                      const history = histories[block.exerciseId];
+                      if (!history?.last) return null;
+                      const expanded = pbOpen[block.exerciseId] === true;
+                      return (
+                        <View style={styles.historyWrap}>
+                          <View style={styles.historyRow}>
+                            <ThemedText style={[styles.historyText, { color: theme.textSecondary }]} numberOfLines={1}>
+                              Last: {formatLast(history.last, block.trackingMode)} ·{' '}
+                              {formatDayKey(history.last.date)}
+                            </ThemedText>
+                            {history.best && (
+                              <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={`${expanded ? 'Hide' : 'Show'} personal best for ${block.name}`}
+                                onPress={() =>
+                                  setPbOpen((prev) => ({ ...prev, [block.exerciseId]: !expanded }))
+                                }
+                                hitSlop={6}
+                                style={({ pressed }) => [
+                                  styles.pbChip,
+                                  { backgroundColor: theme.background, borderColor: theme.surfaceBorder },
+                                  pressed && styles.pressed,
+                                ]}>
+                                <ThemedText style={[styles.pbChipLabel, { color: theme.tint }]}>
+                                  PB {expanded ? '▴' : '▾'}
+                                </ThemedText>
+                              </Pressable>
+                            )}
+                          </View>
+                          {expanded && history.best && (
+                            <View style={styles.pbPanel}>
+                              <ThemedText style={[styles.historyText, { color: theme.textSecondary }]}>
+                                Best: {formatBest(history.best, block.trackingMode)} ·{' '}
+                                {formatDayKey(history.best.date)}
+                              </ThemedText>
+                              {block.trackingMode === 'weight_reps' && (
+                                <View style={styles.historyRow}>
+                                  <ThemedText style={[styles.historyText, { color: theme.textSecondary }]}>
+                                    {history.testedMax
+                                      ? `Tested max: ${history.testedMax.weightKg}kg · ${formatDayKey(history.testedMax.date)}`
+                                      : 'No tested max yet'}
+                                  </ThemedText>
+                                  {!readOnly && (
+                                    <Pressable
+                                      accessibilityRole="button"
+                                      onPress={() =>
+                                        setOneRmTarget({ exerciseId: block.exerciseId, name: block.name })
+                                      }
+                                      style={({ pressed }) => [pressed && styles.pressed]}>
+                                      <ThemedText style={[styles.pbChipLabel, { color: theme.tint }]}>
+                                        Log 1RM test
+                                      </ThemedText>
+                                    </Pressable>
+                                  )}
+                                </View>
+                              )}
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })()}
 
                     <View style={styles.setRow}>
                       <ThemedText style={[styles.setHeaderCell, styles.setIndexCell, { color: theme.textMuted }]}>
@@ -381,6 +539,7 @@ export default function WorkoutSessionScreen() {
                           {column.label}
                         </ThemedText>
                       ))}
+                      {block.trackingMode === 'weight_reps' && <View style={styles.e1rmCell} />}
                     </View>
 
                     {block.sets.map((set, setIndex) => (
@@ -426,6 +585,13 @@ export default function WorkoutSessionScreen() {
                             </Pressable>
                           );
                         })}
+                        {block.trackingMode === 'weight_reps' && (
+                          <ThemedText style={[styles.e1rmCell, styles.e1rmText, { color: theme.textMuted }]}>
+                            {set.weightKg !== null && set.reps !== null && set.reps > 0
+                              ? `≈${estimateOneRepMax(set.weightKg, set.reps)}kg`
+                              : ''}
+                          </ThemedText>
+                        )}
                       </View>
                     ))}
 
@@ -472,6 +638,20 @@ export default function WorkoutSessionScreen() {
               onClose={() => setPickerOpen(false)}
               onPick={addExercise}
             />
+
+            {oneRmTarget && (
+              <LogOneRepMaxSheet
+                visible
+                exerciseId={oneRmTarget.exerciseId}
+                exerciseName={oneRmTarget.name}
+                currentMaxKg={histories[oneRmTarget.exerciseId]?.testedMax?.weightKg ?? null}
+                defaultUnit={weightUnit}
+                onClose={(changed) => {
+                  if (changed) refreshHistory(oneRmTarget.exerciseId);
+                  setOneRmTarget(null);
+                }}
+              />
+            )}
 
             {!readOnly && (
               <View style={styles.footer}>
@@ -582,6 +762,50 @@ const styles = StyleSheet.create({
     fontSize: 14.5,
     lineHeight: 19,
     flexShrink: 1,
+  },
+  blockHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  historyWrap: {
+    gap: 4,
+  },
+  historyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  historyText: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 11.5,
+    lineHeight: 15,
+    flexShrink: 1,
+  },
+  pbChip: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: 3,
+    paddingHorizontal: 9,
+  },
+  pbChipLabel: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  pbPanel: {
+    gap: 3,
+  },
+  e1rmCell: {
+    width: 64,
+  },
+  e1rmText: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 10.5,
+    lineHeight: 14,
+    textAlign: 'right',
+    fontVariant: ['tabular-nums'],
   },
   setRow: {
     flexDirection: 'row',

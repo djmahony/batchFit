@@ -281,7 +281,13 @@ describe('GET /exercises/:id/history', () => {
       .get(`/exercises/${squatEx.id}/history`)
       .set('Authorization', `Bearer ${token}`);
     expect(empty.status).toBe(200);
-    expect(empty.body).toEqual({ last: null, best: null, testedMax: null });
+    expect(empty.body).toEqual({
+      last: null,
+      best: null,
+      testedMax: null,
+      videoId: null,
+      videoQuery: null,
+    });
 
     // Bigger lift in the OLDER session — best must find it, last must not.
     await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 120, reps: 5 }], new Date('2026-06-01T10:00:00Z'));

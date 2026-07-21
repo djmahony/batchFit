@@ -137,14 +137,40 @@ export type Recipe = {
   perPortionMacros: Macros;
 };
 
-/** A movement from the Train library (ownerId null) or the user's own. */
+/** A movement from the Train library (ownerId null) or the user's own.
+ *  `cardioMachine` is set only on cardio exercises; `videoId`/`videoQuery`
+ *  optionally point the "watch form video" link at a curated video/search. */
 export type Exercise = {
   id: string;
   name: string;
   muscleGroup: string;
   equipment: string;
   trackingMode: 'weight_reps' | 'bodyweight_reps' | 'time' | 'distance';
+  cardioMachine: string | null;
+  videoId: string | null;
+  videoQuery: string | null;
   ownerId: string | null;
+};
+
+/** `GET /exercises/:id/history` — the user's last finished session for an
+ *  exercise, their all-time best for its tracking mode, and (weights only)
+ *  their heaviest manually tested 1RM. */
+export type ExerciseHistory = {
+  last: {
+    date: string;
+    sets: { weightKg: number | null; reps: number | null; seconds: number | null; distanceM: number | null }[];
+  } | null;
+  best: {
+    weightKg?: number;
+    reps?: number;
+    seconds?: number;
+    distanceM?: number;
+    estimatedOneRepMax?: number;
+    date: string;
+  } | null;
+  testedMax: { weightKg: number; date: string } | null;
+  videoId: string | null;
+  videoQuery: string | null;
 };
 
 export type WorkoutSet = {
@@ -346,16 +372,37 @@ export const api = {
     request<{ entry: WeightEntry }>('/weights', { method: 'POST', body: input, token }),
   deleteWeight: (token: string, id: string) =>
     request<null>(`/weights/${id}`, { method: 'DELETE', token }),
-  exercises: (token: string, query = '') =>
-    request<{ exercises: Exercise[] }>(`/exercises?query=${encodeURIComponent(query)}`, { token }),
+  exercises: (
+    token: string,
+    query = '',
+    filters: { muscleGroup?: string; cardioMachine?: string } = {},
+  ) => {
+    const params = new URLSearchParams({ query });
+    if (filters.muscleGroup) params.set('muscleGroup', filters.muscleGroup);
+    if (filters.cardioMachine) params.set('cardioMachine', filters.cardioMachine);
+    return request<{ exercises: Exercise[] }>(`/exercises?${params}`, { token });
+  },
+  recentExercises: (token: string) =>
+    request<{ exercises: Exercise[] }>('/exercises/recent', { token }),
+  exerciseHistory: (token: string, id: string) =>
+    request<ExerciseHistory>(`/exercises/${id}/history`, { token }),
+  logOneRepMax: (token: string, id: string, input: { weightKg: number; date?: string }) =>
+    request<{ entry: { id: string; weightKg: number; date: string } }>(
+      `/exercises/${id}/one-rep-max`,
+      { method: 'POST', body: input, token },
+    ),
   createExercise: (
     token: string,
-    input: Pick<Exercise, 'name' | 'muscleGroup' | 'equipment' | 'trackingMode'>,
+    input: Pick<Exercise, 'name' | 'muscleGroup' | 'equipment' | 'trackingMode'> & {
+      cardioMachine?: string | null;
+    },
   ) => request<{ exercise: Exercise }>('/exercises', { method: 'POST', body: input, token }),
   updateExercise: (
     token: string,
     id: string,
-    input: Pick<Exercise, 'name' | 'muscleGroup' | 'equipment' | 'trackingMode'>,
+    input: Pick<Exercise, 'name' | 'muscleGroup' | 'equipment' | 'trackingMode'> & {
+      cardioMachine?: string | null;
+    },
   ) => request<{ exercise: Exercise }>(`/exercises/${id}`, { method: 'PATCH', body: input, token }),
   workouts: (token: string, status?: 'unfinished' | 'finished') =>
     request<{ workouts: Workout[] }>(`/workouts${status ? `?status=${status}` : ''}`, { token }),

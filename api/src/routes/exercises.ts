@@ -254,7 +254,9 @@ exercisesRouter.get('/:id/history', async (req, res) => {
     if (top) testedMax = { weightKg: top.weightKg, date: top.date };
   }
 
-  res.json({ last, best, testedMax });
+  // Video fields ride along so the session screen's "watch form video" link
+  // works for blocks restored on resume (which only carry the exercise id).
+  res.json({ last, best, testedMax, videoId: exercise.videoId, videoQuery: exercise.videoQuery });
 });
 
 // POST /exercises/:id/one-rep-max — record an actually-tested 1RM for a

@@ -17,7 +17,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type Food, type Meal } from '@/lib/api';
+import { api, ApiError, type Batch, type Food, type Meal } from '@/lib/api';
 import { todayKey } from '@/lib/dates';
 
 const MEAL_LABELS: Record<Meal, string> = {
@@ -27,12 +27,13 @@ const MEAL_LABELS: Record<Meal, string> = {
   snacks: 'Snacks',
 };
 
-type SourceTab = 'recents' | 'mine';
+type SourceTab = 'recents' | 'mine' | 'prepped';
 
 // The Add Food flow's search screen (mockup 1h/2h), opened as a modal from a
 // meal's "Add food" row. Typing searches all visible foods; while the field is
-// empty the chips switch between Recents and My foods. Favourites are deferred
-// (no favourite flag in the data model yet).
+// empty the chips switch between Recents, My foods, and Prepped (the batch
+// inventory — the fastest path for a prepper). Favourites are deferred (no
+// favourite flag in the data model yet).
 export default function AddFoodScreen() {
   const theme = useTheme();
   const { token } = useAuth();
@@ -43,6 +44,7 @@ export default function AddFoodScreen() {
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<SourceTab>('recents');
   const [foods, setFoods] = useState<Food[] | null>(null);
+  const [batches, setBatches] = useState<Batch[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const trimmed = query.trim();
@@ -54,6 +56,9 @@ export default function AddFoodScreen() {
       if (trimmed !== '') {
         const res = await api.searchFoods(token, trimmed);
         setFoods(res.foods);
+      } else if (tab === 'prepped') {
+        const res = await api.batches(token, 'active');
+        setBatches(res.batches);
       } else if (tab === 'recents') {
         const res = await api.recentFoods(token);
         setFoods(res.foods);
@@ -63,6 +68,7 @@ export default function AddFoodScreen() {
       }
     } catch (e) {
       setFoods(null);
+      setBatches(null);
       setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
     }
   }, [token, trimmed, tab]);
@@ -77,12 +83,20 @@ export default function AddFoodScreen() {
     router.push({ pathname: '/food/[id]', params: { id: food.id, meal, date } });
   };
 
+  const openBatch = (batch: Batch) => {
+    router.push({ pathname: '/log-portion/[id]', params: { id: batch.id, meal, date } });
+  };
+
+  const showingPrepped = trimmed === '' && tab === 'prepped';
+
   const emptyCopy =
     trimmed !== ''
       ? 'Nothing matched that.'
       : tab === 'recents'
         ? 'Foods you log will show up here for quick re-adding.'
-        : 'Your custom foods will live here.';
+        : tab === 'prepped'
+          ? 'Cook a batch in Prep and it’ll show up here to eat from your inventory.'
+          : 'Your custom foods will live here.';
 
   return (
     <ThemedView style={styles.container}>
@@ -135,6 +149,7 @@ export default function AddFoodScreen() {
               [
                 { value: 'recents', label: 'Recents' },
                 { value: 'mine', label: 'My foods' },
+                { value: 'prepped', label: 'Prepped' },
               ] as const
             ).map(({ value, label }) => {
               const selected = tab === value;
@@ -170,6 +185,25 @@ export default function AddFoodScreen() {
             </ThemedText>
             <Button label="Try again" onPress={() => void load()} />
           </View>
+        ) : showingPrepped ? (
+          batches === null ? (
+            <View style={styles.centered}>
+              <ActivityIndicator color={theme.tint} />
+            </View>
+          ) : (
+            <FlatList
+              data={batches}
+              keyExtractor={(batch) => batch.id}
+              contentContainerStyle={styles.list}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => <BatchRow batch={item} onPress={() => openBatch(item)} />}
+              ListEmptyComponent={
+                <ThemedText type="small" themeColor="textSecondary" style={styles.centeredText}>
+                  {emptyCopy}
+                </ThemedText>
+              }
+            />
+          )
         ) : foods === null ? (
           <View style={styles.centered}>
             <ActivityIndicator color={theme.tint} />
@@ -203,6 +237,44 @@ export default function AddFoodScreen() {
         )}
       </SafeAreaView>
     </ThemedView>
+  );
+}
+
+function BatchRow({ batch, onPress }: { batch: Batch; onPress: () => void }) {
+  const theme = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.foodRow,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <View style={styles.foodText}>
+        <View style={styles.batchNameRow}>
+          <ThemedText style={styles.foodName} numberOfLines={1}>
+            {batch.name}
+          </ThemedText>
+          <View style={[styles.batchTag, { backgroundColor: theme.accent }]}>
+            <ThemedText style={styles.batchTagText}>BATCH</ThemedText>
+          </View>
+        </View>
+        <ThemedText style={[styles.foodMeta, { color: theme.textMuted }]} numberOfLines={1}>
+          {batch.portionsRemaining} portion{batch.portionsRemaining === 1 ? '' : 's'} left ·{' '}
+          {Math.round(batch.perPortionMacros.protein)}g protein
+        </ThemedText>
+      </View>
+      <View style={styles.foodRight}>
+        <ThemedText style={[styles.foodKcal, { color: theme.textSecondary }]}>
+          {Math.round(batch.perPortionMacros.kcal)}
+        </ThemedText>
+        <View style={[styles.addBubble, { backgroundColor: theme.tintSoft }]}>
+          <Ionicons name="add" size={14} color={theme.tint} />
+        </View>
+      </View>
+    </Pressable>
   );
 }
 
@@ -340,6 +412,24 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemibold,
     fontSize: 13.5,
     lineHeight: 18,
+    flexShrink: 1,
+  },
+  batchNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  batchTag: {
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+  },
+  batchTagText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 8.5,
+    lineHeight: 11,
+    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
   foodMeta: {
     fontFamily: Fonts.body,

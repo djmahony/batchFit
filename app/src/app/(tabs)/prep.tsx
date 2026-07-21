@@ -13,7 +13,7 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, type Batch, type Recipe } from '@/lib/api';
-import { cookedAgo, mealForNow, todayKey } from '@/lib/dates';
+import { cookedAgo } from '@/lib/dates';
 
 const LOW_STOCK_AT = 2;
 const MEALS_PER_DAY = 3; // "~N days stocked" assumes three prepped meals a day.
@@ -21,8 +21,9 @@ const MEALS_PER_DAY = 3; // "~N days stocked" assumes three prepped meals a day.
 type SubView = 'inventory' | 'recipes';
 
 // Tab 3 — Prep ⭐ (mockup 1k/2k): the batch inventory. Meals-ready hero, "New
-// batch", active batch cards with portion pips + one-tap "Eat one"; the clock
-// icon flips to depleted history. Recipes sub-view arrives in F6-4.
+// batch", active batch cards with portion pips; the clock icon flips to
+// depleted history. Recipes sub-view arrives in F6-4. Eating from a batch now
+// happens through Diary's Add food → Prepped, not from here.
 export default function PrepScreen() {
   const theme = useTheme();
   const { token } = useAuth();
@@ -34,7 +35,6 @@ export default function PrepScreen() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [eatingId, setEatingId] = useState<string | null>(null);
 
   const load = useCallback(
     async (mode: 'initial' | 'refresh' = 'initial') => {
@@ -65,19 +65,6 @@ export default function PrepScreen() {
       void load();
     }, [load]),
   );
-
-  const eatOne = async (batch: Batch) => {
-    if (!token || eatingId) return;
-    setEatingId(batch.id);
-    try {
-      await api.eatPortion(token, batch.id, { date: todayKey(), meal: mealForNow() });
-      await load('refresh');
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
-    } finally {
-      setEatingId(null);
-    }
-  };
 
   const active = batches?.filter((b) => b.portionsRemaining > 0) ?? [];
   const depleted = batches?.filter((b) => b.portionsRemaining === 0) ?? [];
@@ -180,9 +167,7 @@ export default function PrepScreen() {
                 Nothing finished yet. History fills up as you eat through your cooks.
               </ThemedText>
             ) : (
-              depleted.map((batch) => (
-                <BatchCard key={batch.id} batch={batch} onEat={undefined} eating={false} />
-              ))
+              depleted.map((batch) => <BatchCard key={batch.id} batch={batch} />)
             )}
           </ScrollView>
         ) : active.length === 0 ? (
@@ -249,12 +234,7 @@ export default function PrepScreen() {
             )}
 
             {active.map((batch) => (
-              <BatchCard
-                key={batch.id}
-                batch={batch}
-                onEat={() => void eatOne(batch)}
-                eating={eatingId === batch.id}
-              />
+              <BatchCard key={batch.id} batch={batch} />
             ))}
           </ScrollView>
         )}
@@ -307,15 +287,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
   );
 }
 
-function BatchCard({
-  batch,
-  onEat,
-  eating,
-}: {
-  batch: Batch;
-  onEat: (() => void) | undefined;
-  eating: boolean;
-}) {
+function BatchCard({ batch }: { batch: Batch }) {
   const theme = useTheme();
   const low = batch.portionsRemaining > 0 && batch.portionsRemaining <= LOW_STOCK_AT;
   const depleted = batch.portionsRemaining === 0;
@@ -363,26 +335,6 @@ function BatchCard({
         <ThemedText style={[styles.cardMacros, { color: theme.textSecondary }]}>
           {Math.round(batch.perPortionMacros.kcal)} kcal · {Math.round(batch.perPortionMacros.protein)}g protein
         </ThemedText>
-        {onEat && !depleted && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Eat one portion of ${batch.name}`}
-            onPress={onEat}
-            disabled={eating}
-            style={({ pressed }) => [
-              styles.eatButton,
-              low ? { backgroundColor: theme.accentSoft } : { backgroundColor: theme.tint },
-              (pressed || eating) && styles.pressed,
-            ]}>
-            {eating ? (
-              <ActivityIndicator size="small" color={low ? theme.accent : theme.onTint} />
-            ) : (
-              <ThemedText style={[styles.eatLabel, { color: low ? theme.accent : theme.onTint }]}>
-                Eat one
-              </ThemedText>
-            )}
-          </Pressable>
-        )}
       </View>
     </Pressable>
   );
@@ -595,18 +547,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemibold,
     fontSize: 12,
     lineHeight: 16,
-  },
-  eatButton: {
-    paddingVertical: 7,
-    paddingHorizontal: 13,
-    borderRadius: 9,
-    minWidth: 72,
-    alignItems: 'center',
-  },
-  eatLabel: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: 12.5,
-    lineHeight: 17,
   },
   emptyWrap: {
     flex: 1,

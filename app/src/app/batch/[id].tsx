@@ -13,13 +13,14 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, type Batch } from '@/lib/api';
-import { cookedAgo, mealForNow, todayKey } from '@/lib/dates';
+import { cookedAgo } from '@/lib/dates';
 
 const formatGrams = (grams: number) =>
   grams >= 1000 ? `${(grams / 1000).toFixed(1).replace(/\.0$/, '')} kg` : `${Math.round(grams)} g`;
 
 // Batch detail (mockup 1l/2l): per-portion macros, whole-batch totals, the
-// ingredient snapshot, and eat / adjust / duplicate / delete.
+// ingredient snapshot, and adjust / duplicate / delete. Eating a portion now
+// happens through Diary's Add food → Prepped, not from here.
 export default function BatchDetailScreen() {
   const theme = useTheme();
   const { token } = useAuth();
@@ -58,15 +59,6 @@ export default function BatchDetailScreen() {
       setBusy(false);
     }
   };
-
-  const eatOne = () =>
-    run(async () => {
-      const res = await api.eatPortion(token!, batch!.id, {
-        date: todayKey(),
-        meal: mealForNow(),
-      });
-      setBatch(res.batch);
-    });
 
   const adjustTo = (portionsRemaining: number) =>
     run(async () => {
@@ -289,11 +281,7 @@ export default function BatchDetailScreen() {
             </ScrollView>
 
             <View style={styles.footer}>
-              {batch.portionsRemaining > 0 ? (
-                <Button label="Eat a portion" onPress={() => void eatOne()} loading={busy} />
-              ) : (
-                <Button label="Cook this again" onPress={() => void duplicate()} loading={busy} />
-              )}
+              <Button label="Cook this again" onPress={() => void duplicate()} loading={busy} />
             </View>
           </>
         )}

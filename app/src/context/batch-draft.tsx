@@ -15,7 +15,7 @@ type BatchDraftState = {
   ingredients: DraftIngredient[];
   recipeId: string | null;
   saveAsRecipe: boolean;
-  /** Set after a successful save so the confirmation screen can offer "Eat one now". */
+  /** Set after a successful save so the confirmation screen can show its stats. */
   createdBatch: Batch | null;
 };
 

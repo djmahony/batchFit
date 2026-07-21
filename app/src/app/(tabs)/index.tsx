@@ -41,7 +41,7 @@ export default function TodayScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [weightSheetOpen, setWeightSheetOpen] = useState(false);
-  const [busyAction, setBusyAction] = useState<'eat' | 'workout' | null>(null);
+  const [busyAction, setBusyAction] = useState<'workout' | null>(null);
 
   const load = useCallback(
     async (day: string, mode: 'initial' | 'refresh' = 'initial') => {
@@ -73,25 +73,6 @@ export default function TodayScreen() {
   // Quick actions (F12-2): the four fastest paths in the app.
   const logFood = () =>
     router.push({ pathname: '/add-food', params: { meal: mealForNow(), date } });
-
-  const eatPrepped = async () => {
-    if (!token || busyAction) return;
-    const top = data?.inventory.topBatch;
-    if (!top) {
-      // Nothing in the fridge — head to Prep to cook something.
-      router.push('/prep');
-      return;
-    }
-    setBusyAction('eat');
-    try {
-      await api.eatPortion(token, top.id, { date, meal: mealForNow() });
-      await load(date, 'refresh');
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
-    } finally {
-      setBusyAction(null);
-    }
-  };
 
   const startWorkout = async () => {
     if (!token || busyAction) return;
@@ -156,14 +137,6 @@ export default function TodayScreen() {
                 color={theme.onTint}
                 onPress={logFood}
               />
-              <QuickAction
-                label="Eat prepped"
-                icon="restaurant-outline"
-                background={theme.accent}
-                color="#FFFFFF"
-                onPress={() => void eatPrepped()}
-                busy={busyAction === 'eat'}
-              />
             </View>
             <View style={styles.actionRow}>
               <QuickAction
@@ -181,8 +154,8 @@ export default function TodayScreen() {
               />
             </View>
 
-            {/* Inventory snapshot — F12-4: meals ready, tap through to Prep, "Eat one" inline. */}
-            <InventoryCard data={data} onEatOne={() => void eatPrepped()} busy={busyAction === 'eat'} />
+            {/* Inventory snapshot — F12-4: meals ready, tap through to Prep. */}
+            <InventoryCard data={data} />
 
             {/* Meals strip — F12-3: subtotals per meal, tap through to the Diary. */}
             <View style={styles.mealsRow}>
@@ -253,17 +226,9 @@ function MealChip({ meal, kcal }: { meal: Meal; kcal: number }) {
   );
 }
 
-/** Inventory snapshot (F12-4): meals-ready count + "Eat one", or a cook-something
- * prompt when the fridge is empty. Tapping the card opens Prep; the pill acts inline. */
-function InventoryCard({
-  data,
-  onEatOne,
-  busy,
-}: {
-  data: TodayData;
-  onEatOne: () => void;
-  busy: boolean;
-}) {
+/** Inventory snapshot (F12-4): meals-ready count, or a cook-something prompt
+ * when the fridge is empty. Tapping the card opens Prep. */
+function InventoryCard({ data }: { data: TodayData }) {
   const theme = useTheme();
   const { mealsReady } = data.inventory;
 
@@ -314,22 +279,6 @@ function InventoryCard({
           Fridge stocked for ~{daysStocked} day{daysStocked === 1 ? '' : 's'}
         </ThemedText>
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Eat one"
-        disabled={busy}
-        onPress={onEatOne}
-        style={({ pressed }) => [
-          styles.eatOnePill,
-          { backgroundColor: theme.tint },
-          (pressed || busy) && styles.pressed,
-        ]}>
-        {busy ? (
-          <ActivityIndicator size="small" color={theme.onTint} />
-        ) : (
-          <ThemedText style={[styles.eatOnePillLabel, { color: theme.onTint }]}>Eat one</ThemedText>
-        )}
-      </Pressable>
     </Pressable>
   );
 }
@@ -704,19 +653,6 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     lineHeight: 16,
     marginTop: 1,
-  },
-  eatOnePill: {
-    paddingVertical: 8,
-    paddingHorizontal: 13,
-    borderRadius: 10,
-    minWidth: 66,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eatOnePillLabel: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: 12.5,
-    lineHeight: 16,
   },
   weightCard: {
     borderRadius: 16,

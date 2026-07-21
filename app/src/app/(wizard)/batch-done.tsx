@@ -1,37 +1,20 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Fonts, Spacing } from '@/constants/theme';
-import { useAuth } from '@/context/auth';
 import { useBatchDraft } from '@/context/batch-draft';
-import { api } from '@/lib/api';
-import { mealForNow, todayKey } from '@/lib/dates';
 
 // The prep-success moment (mockup 1q/2q): full Prep Green, big check, and the
 // brand line. This is where the personality shows — celebrate the cook-up.
 export default function BatchDoneScreen() {
-  const { token } = useAuth();
   const { draft } = useBatchDraft();
-  const [eating, setEating] = useState(false);
 
   const batch = draft.createdBatch;
   const portions = batch?.portionsTotal ?? draft.portions;
   const daysStocked = Math.max(1, Math.round(portions / 3));
-
-  const eatOneNow = async () => {
-    if (!token || !batch || eating) return;
-    setEating(true);
-    try {
-      await api.eatPortion(token, batch.id, { date: todayKey(), meal: mealForNow() });
-    } catch {
-      // The batch is saved either way — don't block leaving the celebration.
-    }
-    router.dismiss();
-  };
 
   return (
     <View style={styles.container}>
@@ -55,17 +38,6 @@ export default function BatchDoneScreen() {
             onPress={() => router.dismiss()}
             style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
             <ThemedText style={styles.primaryLabel}>Back to inventory</ThemedText>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => void eatOneNow()}
-            disabled={eating || !batch}
-            style={({ pressed }) => [styles.ghostButton, pressed && styles.pressed]}>
-            {eating ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
-            ) : (
-              <ThemedText style={styles.ghostLabel}>Eat one now</ThemedText>
-            )}
           </Pressable>
         </View>
       </SafeAreaView>
@@ -133,15 +105,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
     fontSize: 16,
     color: '#16201A',
-  },
-  ghostButton: {
-    paddingVertical: 6,
-    alignItems: 'center',
-  },
-  ghostLabel: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
   },
   pressed: {
     opacity: 0.7,

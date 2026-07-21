@@ -456,7 +456,7 @@ export const api = {
       ingredients?: { foodId: string; grams: number }[];
     } = {},
   ) => request<{ batch: Batch }>(`/recipes/${id}/cook`, { method: 'POST', body: overrides, token }),
-  eatPortion: (token: string, id: string, input: { date: string; meal: Meal }) =>
+  eatPortion: (token: string, id: string, input: { date: string; meal: Meal; portions?: number }) =>
     request<{ batch: Batch; entry: LogEntry }>(`/batches/${id}/eat`, {
       method: 'POST',
       body: input,

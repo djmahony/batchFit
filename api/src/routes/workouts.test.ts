@@ -68,6 +68,56 @@ describe('PUT /workouts/:id', () => {
     // (Library exercise here, but the SetNull + snapshot rule is the same.)
   });
 
+  it('snapshots cardioMachine and round-trips the cardio set metrics', async () => {
+    const token = await registerAndGetToken();
+    const treadmill = await prisma.exercise.create({
+      data: {
+        name: 'Treadmill run',
+        muscleGroup: 'cardio',
+        equipment: 'machine',
+        trackingMode: 'cardio',
+        cardioMachine: 'treadmill',
+      },
+    });
+    const started = await request(app).post('/workouts').set('Authorization', `Bearer ${token}`);
+
+    const res = await request(app)
+      .put(`/workouts/${started.body.workout.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        exercises: [
+          // Planned by time, distance + incline + speed filled in at the end.
+          {
+            exerciseId: treadmill.id,
+            sets: [{ seconds: 2400, distanceM: 6200, inclinePct: 2.5, speedKmh: 9.3 }],
+          },
+        ],
+      });
+
+    expect(res.status).toBe(200);
+    const block = res.body.workout.exercises[0];
+    expect(block.trackingMode).toBe('cardio');
+    expect(block.cardioMachine).toBe('treadmill');
+    expect(block.sets[0]).toMatchObject({
+      seconds: 2400,
+      distanceM: 6200,
+      inclinePct: 2.5,
+      speedKmh: 9.3,
+    });
+
+    const badLevel = await request(app)
+      .put(`/workouts/${started.body.workout.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exercises: [{ exerciseId: treadmill.id, sets: [{ level: 4.5 }] }] });
+    expect(badLevel.status).toBe(400);
+
+    const badSpeed = await request(app)
+      .put(`/workouts/${started.body.workout.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exercises: [{ exerciseId: treadmill.id, sets: [{ speedKmh: -5 }] }] });
+    expect(badSpeed.status).toBe(400);
+  });
+
   it('rejects invalid sets and unknown exercises', async () => {
     const token = await registerAndGetToken();
     const squat = await seedSquat();

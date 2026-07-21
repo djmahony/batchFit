@@ -28,10 +28,73 @@ onboarding, Diary, Prep, Train, Progress, Today. Train already has: `Exercise` m
 searchable `ExercisePicker` with inline create/edit, active-session logging with a numeric
 keypad, and repeat-last-workout.
 
-**Completed roadmap tasks:** none yet on this roadmap.
+**Completed roadmap tasks:** all of F13 (grouped picker + recents), F14 (history, PBs,
+estimated + tested 1RM), and F15-1/F15-2 (video fields + watch-form-video link) — built in one
+branch/PR (2026-07-21) at the user's request, deviating from one-PR-per-task. Deviations from
+the plan as written, chosen at implementation time:
+- The Epley helper lives at `api/src/oneRepMax.ts` (not `src/lib/`) matching where the API's
+  other pure modules (`macros.ts`, `tdee.ts`) live; mirrored at `app/src/lib/oneRepMax.ts`.
+- The tested-max delete route is `DELETE /exercises/one-rep-max/:entryId` (nested under the
+  exercises router rather than a top-level `/one-rep-max`).
+- `GET /exercises/:id/history` also returns the exercise's `videoId`/`videoQuery`, so the
+  session screen's video link works for blocks restored on resume without an extra endpoint.
+- No "Log 1RM test" affordance exists for an exercise with no session history yet (the strip —
+  which hosts the PB panel — only renders once there's a last session). Acceptable edge:
+  testing a 1RM on a lift you've never logged a session for.
 
-**Next up:** **F13-1** (below) — add the `cardioMachine` field and picker-hierarchy query params
-to the Exercise API.
+**F16 (added mid-review of PR #73, 2026-07-21):** the machine layer questioned, then kept and
+made load-bearing. Decisions:
+- **`cardioMachine` stays** — `muscleGroup === "cardio"` alone was enough for the
+  Strength/Cardio split, but the machine now drives **machine-specific set metrics**, which is
+  what makes it worth its column.
+- [x] **F16-1 (api)** — New combined `"cardio"` tracking mode: every cardio set can log
+  **time and/or distance** (plan by one, fill the other in at the end). `WorkoutSet` gains
+  `inclinePct` (treadmill), `level` (bike / elliptical / stair climber / rower resistance),
+  `lengths` (swim); `WorkoutExercise` snapshots `cardioMachine` (drives which columns a
+  restored block shows). Migration `add_cardio_machine_metrics`. Set validation covers the new
+  fields; history's "best" for cardio = longest distance, falling back to longest time.
+- [x] **F16-2 (api)** — `swim` added to `CARDIO_MACHINES`; seed adds Pool swim, Open water
+  swim, Outdoor walk, Hike, Outdoor cycle, Treadmill walk, and migrates all library cardio
+  rows to the combined mode (idempotent backfill; logged history untouched — modes are
+  snapshotted per session).
+- [x] **F16-3 (app)** — Cardio set rows show seconds + metres plus the machine's extra column
+  (incline % / level / lengths); create-exercise form defaults to the combined mode when
+  muscle group is set to cardio; history strip/PB formats cardio as "15.0km · 40min" from
+  whatever was logged.
+- Deferred, deliberately: **pace-based cardio PBs** (best still means longest distance/time, not
+  fastest pace).
+
+**F16-4 (added after on-device testing found the entry UX itself needed work, 2026-07-21):**
+the km/miles deferral above was resolved immediately rather than left open — distance display
+now **does** follow the user's Settings units, it just wasn't wired into set entry yet:
+- [x] **F16-4 (app)** — `WorkoutSet.speedKmh` (+migration `add_workout_set_speed`), a **speed**
+  column on treadmill only (bike/rower keep just their resistance `level` — easy to extend
+  later). Cardio's time column is now entered as **mm:ss** (stopwatch-style digit entry — type
+  "2534" → 25:34 — rather than raw seconds); distance and the new speed column are entered and
+  displayed in the user's **Settings units** (km/km-h or miles/mph), converted to/from the
+  canonical metres/km-h stored on the set. New `app/src/lib/cardioUnits.ts` holds the pure
+  conversions. Scope is deliberately **cardio-mode only** — the stand-alone "time" mode (Plank)
+  and "distance" mode (Farmer's carry) are short/gym-scale and keep raw seconds/metres, since
+  reformatting those wasn't asked for and would change unrelated exercises.
+- Deferred: **lengths→distance conversion** for swim (lengths are a raw count; no pool-length
+  setting yet to convert to km/miles) and **pace-based cardio PBs** (still longest-wins).
+
+**F16-5 (feedback from first on-device pass, 2026-07-21):** distance/speed following only the
+global Settings unit wasn't enough — wanted independently switchable during logging — and the
+treadmill row (4 columns: time, distance, incline, speed) was cramped on a smaller/narrower
+device (tested: Honor Magic 7 Pro).
+- [x] **F16-5 (app)** — Distance and speed units are now **tappable per session**: the column
+  header itself (e.g. "km", "km/h") doubles as a toggle (with a small swap icon) that flips to
+  the other unit (mi / mph), independent of the Settings-wide preference, defaulting from it.
+  Local screen state only — not persisted, resets next session.
+- [x] **F16-6 (app)** — Set rows now **wrap onto extra lines** instead of squeezing every
+  column into one row: value cells sit in a flex-wrap container (`flexGrow`/`flexBasis`, not a
+  fixed one-row split), so a 4-column treadmill row becomes a natural 2×2 grid on narrower
+  phones while 2-column blocks (weight_reps etc.) are visually unchanged.
+
+**Next up:** **F15-3** (curating `videoId`s for top exercises) is content work, not engineering —
+do only when ready. Otherwise: on-device verification sweep of F13–F16 in Expo Go, then pick
+from "Proposed enhancements" below.
 
 ---
 
@@ -91,7 +154,7 @@ being bounced to the root would lose your place).
 > the strength bucket contains bodyweight work like planks and burpees. Data-model-wise it's
 > simply `muscleGroup === "cardio"` vs everything else; no new field needed for the split.
 
-- [ ] **F13-1 (api)** — Schema: add `cardioMachine String?` to `Exercise` in
+- [x] **F13-1 (api)** — Schema: add `cardioMachine String?` to `Exercise` in
   `api/prisma/schema.prisma`, migration `add_exercise_cardio_machine`. Document the fixed value
   set in the model comment, same pattern as `muscleGroup`/`equipment`:
   `"treadmill" | "bike" | "rower" | "elliptical" | "stair_climber" | "outdoor" | "other"`.
@@ -111,7 +174,7 @@ being bounced to the root would lose your place).
     value; reject a non-null machine value on a non-cardio exercise; PATCH a cardio exercise
     with a machine set to `muscleGroup: "chest"` → succeeds and `cardioMachine` comes back null.
 
-- [ ] **F13-2 (api)** — Backfill: extend `api/prisma/seed.ts`'s `LIBRARY_EXERCISES`/cardio rows
+- [x] **F13-2 (api)** — Backfill: extend `api/prisma/seed.ts`'s `LIBRARY_EXERCISES`/cardio rows
   with a `cardioMachine` value per existing seeded cardio exercise (idempotent — this seed script
   already add-misses by name, so re-running fills in the new column for anyone who already
   seeded):
@@ -124,13 +187,13 @@ being bounced to the root would lose your place).
     small one-off backfill step: for any existing cardio row with `cardioMachine === null`, set
     it from the same mapping. Safe to run repeatedly (no-op once backfilled).
 
-- [ ] **F13-3 (api)** — `GET /exercises`: accept optional `muscleGroup` and `cardioMachine` query
+- [x] **F13-3 (api)** — `GET /exercises`: accept optional `muscleGroup` and `cardioMachine` query
   params (ANDed with the existing `query` name-filter and the existing owner-visibility filter).
   Used by the hierarchy's body-part and machine list steps to fetch only the exercises in that
   bucket. Endpoint-tested (filter by muscle group alone; by cardio + machine; combined with a
   name query; invalid muscle group returns 400).
 
-- [ ] **F13-4 (app)** — Build the hierarchy step components in `exercise-picker.tsx` (or split
+- [x] **F13-4 (app)** — Build the hierarchy step components in `exercise-picker.tsx` (or split
   into `components/exercise-picker/` if the file gets unwieldy — use judgement at implementation
   time, don't split pre-emptively):
   - **Category step** — two large `ChoiceCard`-style buttons, "Strength" and "Cardio" (reuse the
@@ -158,12 +221,12 @@ being bounced to the root would lose your place).
     "trimmed query is non-empty", so the step state survives a search untouched and clearing
     the query naturally lands you back where you were.
 
-- [ ] **F13-5 (app)** — `ExerciseForm` (create/edit own exercise): show a `cardioMachine` chip
+- [x] **F13-5 (app)** — `ExerciseForm` (create/edit own exercise): show a `cardioMachine` chip
   row (same `ChipGrid` pattern) **only when** the selected muscle group is `"cardio"`; hidden and
   cleared otherwise. Defaults to unset (no machine pre-selected) — pushes the user to pick one
   but doesn't hard-block save if they skip it (matches the non-required validation in F13-1).
 
-- [ ] **F13-6 (api)** — `GET /exercises/recent`: the caller's most recently logged exercises,
+- [x] **F13-6 (api)** — `GET /exercises/recent`: the caller's most recently logged exercises,
   newest first, de-duplicated, capped at ~8. Mirror the existing `GET /foods/recent`
   implementation (`foods.ts:35`): query the caller's `WorkoutExercise` rows (via their
   `Workout`s) ordered by workout `startedAt` desc, keep the first occurrence of each
@@ -172,7 +235,7 @@ being bounced to the root would lose your place).
   minutes ago" is exactly what recents is for. Endpoint-tested: order is by most recent use;
   duplicates collapse; another user's workouts don't leak in.
 
-- [ ] **F13-7 (app)** — Recent exercises quick-pick row on the picker's category step (above the
+- [x] **F13-7 (app)** — Recent exercises quick-pick row on the picker's category step (above the
   Strength/Cardio cards): a compact horizontal strip of chips (exercise names, existing chip
   visual language), fetched from `GET /exercises/recent` when the picker opens. Tapping a chip
   picks that exercise immediately — same `onPick` path as a list row. No history yet → render
@@ -194,13 +257,13 @@ without asking for it, with your all-time best one tap away — and give every w
 live estimated 1-rep-max as you type, plus a separate manually-recorded **tested max** for
 weight exercises. Glanceable, never blocks logging if there's no history yet.
 
-- [ ] **F14-1 (api)** — `src/lib/oneRepMax.ts`: pure `estimateOneRepMax(weightKg: number, reps:
+- [x] **F14-1 (api)** — `src/lib/oneRepMax.ts`: pure `estimateOneRepMax(weightKg: number, reps:
   number): number` using the Epley formula (`weight × (1 + reps / 30)`), rounded to 1 decimal.
   `reps <= 1` returns `weightKg` unchanged (no extrapolation off a single rep); guard
   `weightKg <= 0 || reps <= 0` → `0`. Unit-tested (reps=1, reps=0, typical case, e.g. verify
   100kg×5 ≈ 116.7kg).
 
-- [ ] **F14-2 (api)** — `GET /exercises/:id/history` (auth-protected): scoped to the caller's own
+- [x] **F14-2 (api)** — `GET /exercises/:id/history` (auth-protected): scoped to the caller's own
   `Workout`s only (join `WorkoutExercise.exerciseId = :id` → `Workout.userId = req.userId`).
   Returns:
   - `last` — the most recent **finished** workout's block for this exercise: `{ date, sets: [...]
@@ -222,7 +285,7 @@ weight exercises. Glanceable, never blocks logging if there's no history yet.
     sessions with a bigger lift in the older one → `best` still finds the max, not just the most
     recent; an in-progress (unfinished) session's sets are excluded from both.
 
-- [ ] **F14-3 (app)** — On adding an exercise to the active session (`addExercise` in
+- [x] **F14-3 (app)** — On adding an exercise to the active session (`addExercise` in
   `workout/[id].tsx`), fetch `GET /exercises/:id/history` once and cache it in the block's local
   state for the session's lifetime (no re-fetch on every render/set-add). Render a compact
   one-line strip under the exercise block header showing **last time only**, with a small
@@ -241,14 +304,14 @@ weight exercises. Glanceable, never blocks logging if there's no history yet.
   - Loading: render nothing until it resolves rather than a spinner — the strip should just pop
     in a moment after the block appears, no layout jank from a placeholder.
 
-- [ ] **F14-4 (app)** — Per-set live estimated 1RM for `weight_reps` blocks only: as soon as a set
+- [x] **F14-4 (app)** — Per-set live estimated 1RM for `weight_reps` blocks only: as soon as a set
   row has both a weight and a rep count entered, show a small muted `"≈ e1RM 72.5kg"` next to
   that set, computed client-side with the same Epley formula (mirror `oneRepMax.ts`'s logic
   inline or extract a tiny shared constant/helper — don't duplicate the formula's magic number
   in two places without a comment tying them together). Purely derived from what's already
   typed — no network round-trip, updates instantly on every keystroke.
 
-- [ ] **F14-5 (api)** — Manual tested 1RM (decided 2026-07-21: kept separate from the
+- [x] **F14-5 (api)** — Manual tested 1RM (decided 2026-07-21: kept separate from the
   estimate). New Prisma model `OneRepMaxEntry`: `id`, `userId` (FK → User, cascade),
   `exerciseId` (FK → Exercise, cascade — a tested max is meaningless without its exercise),
   `weightKg Float`, `date String` (day key, same convention as `WeightEntry`), `createdAt` /
@@ -264,7 +327,7 @@ weight exercises. Glanceable, never blocks logging if there's no history yet.
     entries invisible; rejected on a non-weight exercise; delete works and 404s on others'
     entries.
 
-- [ ] **F14-6 (app)** — "Log 1RM test" flow inside the F14-3 PB reveal panel (`weight_reps`
+- [x] **F14-6 (app)** — "Log 1RM test" flow inside the F14-3 PB reveal panel (`weight_reps`
   blocks only): the panel shows `"Tested max: 100kg · 15 May"` (or `"No tested max yet"`) and a
   small "Log 1RM test" action. Tapping it opens a minimal sheet — weight in kg/lb per the
   user's Settings units (convert on save like the Log weight sheet does), defaulting the field
@@ -286,7 +349,7 @@ most-recent; log a tested 1RM → it shows in the panel, separate from the estim
 **Goal:** a way to watch a demonstration of the movement, without building any video
 infrastructure or taking on curation debt to ship it.
 
-- [ ] **F15-1 (api)** — Add two nullable columns to `Exercise`: `videoId String?` (a specific
+- [x] **F15-1 (api)** — Add two nullable columns to `Exercise`: `videoId String?` (a specific
   YouTube video ID, hand-picked) and `videoQuery String?` (a custom search phrase override,
   rarely needed). Neither is required — when both are null, the app computes a sensible default
   search phrase itself (see F15-2), so this ships with **zero data entry**. Migration
@@ -294,7 +357,7 @@ infrastructure or taking on curation debt to ship it.
   custom exercises, though the create/edit UI won't expose them yet (F15-3 is the curation pass —
   no UI needed for a field almost nothing will set for a while).
 
-- [ ] **F15-2 (app)** — "Watch form video" row (small icon + label, e.g. a YouTube glyph) on the
+- [x] **F15-2 (app)** — "Watch form video" row (small icon + label, e.g. a YouTube glyph) on the
   exercise block header in the active session. On tap:
   - If `videoId` is set → `Linking.openURL('https://www.youtube.com/watch?v=' + videoId)`.
   - Else → `Linking.openURL('https://www.youtube.com/results?search_query=' + encodeURIComponent((videoQuery ?? name) + ' exercise form'))`.

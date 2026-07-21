@@ -71,11 +71,12 @@ const REFERENCE_FOODS: [string, number, number, number, number, number][] = [
   ['Sugar', 387, 0, 0, 100, 0],
 ];
 
-// [name, muscleGroup, equipment, trackingMode]
-// muscleGroup  — see MUSCLE_GROUPS in src/routes/exercises.ts
-// equipment    — see EQUIPMENT in src/routes/exercises.ts
-// trackingMode — see TRACKING_MODES in src/routes/exercises.ts
-const LIBRARY_EXERCISES: [string, string, string, string][] = [
+// [name, muscleGroup, equipment, trackingMode, cardioMachine?]
+// muscleGroup   — see MUSCLE_GROUPS in src/routes/exercises.ts
+// equipment     — see EQUIPMENT in src/routes/exercises.ts
+// trackingMode  — see TRACKING_MODES in src/routes/exercises.ts
+// cardioMachine — see CARDIO_MACHINES in src/routes/exercises.ts; cardio rows only
+const LIBRARY_EXERCISES: [string, string, string, string, string?][] = [
   // Chest — free weights, cables and machines.
   ['Bench press', 'chest', 'barbell', 'weight_reps'],
   ['Incline bench press', 'chest', 'barbell', 'weight_reps'],
@@ -199,13 +200,21 @@ const LIBRARY_EXERCISES: [string, string, string, string][] = [
   ['Battle ropes', 'full_body', 'other', 'time'],
   ['Sled push', 'full_body', 'other', 'distance'],
   ['Burpee', 'full_body', 'bodyweight', 'bodyweight_reps'],
-  ['Rowing machine', 'cardio', 'machine', 'distance'],
-  ['Treadmill run', 'cardio', 'machine', 'distance'],
-  ['Outdoor run', 'cardio', 'bodyweight', 'distance'],
-  ['Cycling', 'cardio', 'machine', 'time'],
-  ['Assault bike', 'cardio', 'machine', 'time'],
-  ['Elliptical', 'cardio', 'machine', 'time'],
-  ['Stair climber', 'cardio', 'machine', 'time'],
+  // All cardio uses the combined "cardio" tracking mode: time + distance per
+  // set, plus the machine's own extras (incline / level / lengths).
+  ['Rowing machine', 'cardio', 'machine', 'cardio', 'rower'],
+  ['Treadmill run', 'cardio', 'machine', 'cardio', 'treadmill'],
+  ['Treadmill walk', 'cardio', 'machine', 'cardio', 'treadmill'],
+  ['Cycling', 'cardio', 'machine', 'cardio', 'bike'],
+  ['Assault bike', 'cardio', 'machine', 'cardio', 'bike'],
+  ['Elliptical', 'cardio', 'machine', 'cardio', 'elliptical'],
+  ['Stair climber', 'cardio', 'machine', 'cardio', 'stair_climber'],
+  ['Pool swim', 'cardio', 'bodyweight', 'cardio', 'swim'],
+  ['Open water swim', 'cardio', 'bodyweight', 'cardio', 'swim'],
+  ['Outdoor run', 'cardio', 'bodyweight', 'cardio', 'outdoor'],
+  ['Outdoor walk', 'cardio', 'bodyweight', 'cardio', 'outdoor'],
+  ['Hike', 'cardio', 'bodyweight', 'cardio', 'outdoor'],
+  ['Outdoor cycle', 'cardio', 'other', 'cardio', 'outdoor'],
 ];
 
 async function seedExercises() {
@@ -218,19 +227,40 @@ async function seedExercises() {
     ),
   );
   const toCreate = LIBRARY_EXERCISES.filter(([name]) => !existingNames.has(name));
-  if (toCreate.length === 0) {
+  if (toCreate.length > 0) {
+    await prisma.exercise.createMany({
+      data: toCreate.map(([name, muscleGroup, equipment, trackingMode, cardioMachine]) => ({
+        name,
+        muscleGroup,
+        equipment,
+        trackingMode,
+        cardioMachine: cardioMachine ?? null,
+      })),
+    });
+    console.log(
+      `Seeded ${toCreate.length} new library exercises (${existingNames.size} already present).`,
+    );
+  } else {
     console.log(`Library exercises already seeded (${existingNames.size} present) — skipping.`);
-    return;
   }
-  await prisma.exercise.createMany({
-    data: toCreate.map(([name, muscleGroup, equipment, trackingMode]) => ({
-      name,
-      muscleGroup,
-      equipment,
-      trackingMode,
-    })),
+
+  // Backfill cardioMachine onto cardio rows seeded before the column existed.
+  // No-op once every seeded cardio exercise is tagged.
+  for (const [name, , , , cardioMachine] of LIBRARY_EXERCISES) {
+    if (!cardioMachine) continue;
+    await prisma.exercise.updateMany({
+      where: { name, ownerId: null, cardioMachine: null },
+      data: { cardioMachine },
+    });
+  }
+
+  // Migrate library cardio rows seeded with the old single-column time/distance
+  // modes to the combined "cardio" mode. (Workout history is unaffected — the
+  // mode is snapshotted onto WorkoutExercise at logging time.)
+  await prisma.exercise.updateMany({
+    where: { ownerId: null, muscleGroup: 'cardio', trackingMode: { in: ['time', 'distance'] } },
+    data: { trackingMode: 'cardio' },
   });
-  console.log(`Seeded ${toCreate.length} new library exercises (${existingNames.size} already present).`);
 }
 
 async function main() {

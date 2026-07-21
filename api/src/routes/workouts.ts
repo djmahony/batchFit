@@ -19,19 +19,23 @@ type SetInput = {
   reps?: number | null;
   seconds?: number | null;
   distanceM?: number | null;
+  inclinePct?: number | null;
+  level?: number | null;
+  lengths?: number | null;
+  speedKmh?: number | null;
 };
 type ExerciseInput = { exerciseId: string; sets: SetInput[] };
 
 const isNonNegative = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0;
 
 function validateSet(set: SetInput): string | null {
-  for (const key of ['weightKg', 'distanceM'] as const) {
+  for (const key of ['weightKg', 'distanceM', 'inclinePct', 'speedKmh'] as const) {
     const value = set?.[key];
     if (value !== undefined && value !== null && !isNonNegative(value)) {
       return `${key} must be a non-negative number`;
     }
   }
-  for (const key of ['reps', 'seconds'] as const) {
+  for (const key of ['reps', 'seconds', 'level', 'lengths'] as const) {
     const value = set?.[key];
     if (value !== undefined && value !== null && (!isNonNegative(value) || !Number.isInteger(value))) {
       return `${key} must be a non-negative integer`;
@@ -146,6 +150,7 @@ workoutsRouter.put('/:id', async (req, res) => {
               exerciseId: exercise.id,
               name: exercise.name,
               trackingMode: exercise.trackingMode,
+              cardioMachine: exercise.cardioMachine,
               order: blockIndex,
               sets: {
                 create: block.sets.map((set, setIndex) => ({
@@ -154,6 +159,10 @@ workoutsRouter.put('/:id', async (req, res) => {
                   reps: set.reps ?? null,
                   seconds: set.seconds ?? null,
                   distanceM: set.distanceM ?? null,
+                  inclinePct: set.inclinePct ?? null,
+                  level: set.level ?? null,
+                  lengths: set.lengths ?? null,
+                  speedKmh: set.speedKmh ?? null,
                 })),
               },
             };

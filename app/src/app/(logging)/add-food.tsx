@@ -129,11 +129,10 @@ export default function AddFoodScreen() {
               style={[styles.searchInput, { color: theme.text }]}
             />
           </View>
-          {/* Phase-2 hook: barcode scan slot (mockup); opens a "coming soon" screen for now. */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Scan barcode"
-            onPress={() => router.push('/barcode-scan')}
+            onPress={() => router.push({ pathname: '/barcode-scan', params: { meal, date } })}
             style={({ pressed }) => [
               styles.barcodeSlot,
               { backgroundColor: theme.tintSoft, borderColor: theme.surfaceBorder },

@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker, { type DateTimePickerChangeEvent } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
@@ -25,9 +25,11 @@ export function DateSelector({ value, onChange }: Props) {
   const theme = useTheme();
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const onPick = (event: DateTimePickerEvent, selected?: Date) => {
+  const onValueChange = (_event: DateTimePickerChangeEvent, selected: Date) => {
+    // Android's dialog is one-shot — close after a pick. iOS's inline picker
+    // stays open (further scrolling keeps firing this) until "Done".
     if (Platform.OS === 'android') setPickerOpen(false);
-    if (event.type === 'set' && selected) onChange(toDayKey(selected));
+    onChange(toDayKey(selected));
   };
 
   return (
@@ -62,7 +64,13 @@ export function DateSelector({ value, onChange }: Props) {
         // pill's own flex row (which it would otherwise stretch/squash) in
         // an absolutely positioned wrap below instead.
         <View style={styles.overlay}>
-          <DateTimePicker value={fromDayKey(value)} mode="date" display="default" onChange={onPick} />
+          <DateTimePicker
+            value={fromDayKey(value)}
+            mode="date"
+            display="default"
+            onValueChange={onValueChange}
+            onDismiss={() => setPickerOpen(false)}
+          />
           {Platform.OS === 'ios' && (
             <Button label="Done" variant="link" onPress={() => setPickerOpen(false)} />
           )}

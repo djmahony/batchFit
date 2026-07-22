@@ -13,7 +13,7 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, type Batch, type ProgressData, type WeightEntry, type Workout } from '@/lib/api';
-import { formatDayKey } from '@/lib/dates';
+import { formatDayKey, shiftDayKey, todayKey } from '@/lib/dates';
 
 const KG_PER_LB = 0.45359237;
 
@@ -54,10 +54,9 @@ export default function ProgressScreen() {
       ]);
       setData(progress);
 
-      const weekAgo = Date.now() - 7 * 86400000;
+      const weekAgo = shiftDayKey(todayKey(), -7);
       setThisWeek({
-        workouts: workoutsRes.workouts.filter((w: Workout) => new Date(w.startedAt).getTime() >= weekAgo)
-          .length,
+        workouts: workoutsRes.workouts.filter((w: Workout) => w.date >= weekAgo).length,
         mealsStocked: batchesRes.batches.reduce((sum: number, b: Batch) => sum + b.portionsRemaining, 0),
       });
     } catch (e) {

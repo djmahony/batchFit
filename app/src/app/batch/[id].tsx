@@ -1,7 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -12,11 +21,19 @@ import { ThemedView } from '@/components/themed-view';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type Batch } from '@/lib/api';
+import { api, ApiError, type Batch, type BatchAdjustmentReason } from '@/lib/api';
 import { cookedAgo } from '@/lib/dates';
 
 const formatGrams = (grams: number) =>
   grams >= 1000 ? `${(grams / 1000).toFixed(1).replace(/\.0$/, '')} kg` : `${Math.round(grams)} g`;
+
+const REASONS: BatchAdjustmentReason[] = ['given_away', 'spoiled', 'damaged', 'other'];
+const REASON_LABELS: Record<BatchAdjustmentReason, string> = {
+  given_away: 'Given away',
+  spoiled: 'Spoiled',
+  damaged: 'Damaged',
+  other: 'Other',
+};
 
 // Batch detail (mockup 1l/2l): per-portion macros, whole-batch totals, the
 // ingredient snapshot, and adjust / duplicate / delete. Eating a portion now
@@ -30,7 +47,15 @@ export default function BatchDetailScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [adjusting, setAdjusting] = useState(false);
+
+  // Reducing stock: `staged` is the pending count while the stepper is mid-use
+  // (null = at rest, matching the committed portionsRemaining). It can only
+  // move down from the committed value and back up to it, never past it —
+  // going up is just undoing your own pending taps, not a way to add stock.
+  const [staged, setStaged] = useState<number | null>(null);
+  const [reasonOpen, setReasonOpen] = useState(false);
+  const [reason, setReason] = useState<BatchAdjustmentReason | null>(null);
+  const [note, setNote] = useState('');
 
   const load = useCallback(async () => {
     if (!token || !params.id) return;
@@ -60,10 +85,43 @@ export default function BatchDetailScreen() {
     }
   };
 
-  const adjustTo = (portionsRemaining: number) =>
+  const resetAdjust = () => {
+    setStaged(null);
+    setReasonOpen(false);
+    setReason(null);
+    setNote('');
+  };
+
+  const stepDown = () => {
+    if (!batch) return;
+    setStaged((s) => Math.max(0, (s ?? batch.portionsRemaining) - 1));
+    setReasonOpen(false);
+    setReason(null);
+    setNote('');
+  };
+
+  const stepUp = () => {
+    if (!batch) return;
+    setStaged((s) => {
+      if (s === null) return null;
+      const next = s + 1;
+      return next >= batch.portionsRemaining ? null : next;
+    });
+    setReasonOpen(false);
+    setReason(null);
+    setNote('');
+  };
+
+  const submitAdjustment = () =>
     run(async () => {
-      const res = await api.adjustBatch(token!, batch!.id, portionsRemaining);
+      if (staged === null || !reason) return;
+      const res = await api.adjustBatchPortions(token!, batch!.id, {
+        portions: batch!.portionsRemaining - staged,
+        reason,
+        note: reason === 'other' && note.trim() !== '' ? note.trim() : undefined,
+      });
       setBatch(res.batch);
+      resetAdjust();
     });
 
   const duplicate = () =>
@@ -96,14 +154,29 @@ export default function BatchDetailScreen() {
   const openMenu = () => {
     if (!batch) return;
     Alert.alert(batch.name, undefined, [
-      { text: 'Adjust portions left', onPress: () => setAdjusting(true) },
       { text: 'Cook this again (duplicate)', onPress: () => void duplicate() },
       { text: 'Delete batch', style: 'destructive', onPress: confirmDelete },
       { text: 'Cancel', style: 'cancel' },
     ]);
   };
 
-  const low = !!batch && batch.portionsRemaining > 0 && batch.portionsRemaining <= 2;
+  const pending = staged ?? batch?.portionsRemaining ?? 0;
+  const hasPendingChange = staged !== null;
+  const low = !!batch && pending > 0 && pending <= 2;
+
+  const consumption = batch?.consumption;
+  const consumptionParts = consumption
+    ? ([
+        [consumption.eaten, 'eaten'],
+        [consumption.given_away, 'given away'],
+        [consumption.spoiled, 'spoiled'],
+        [consumption.damaged, 'damaged'],
+        [consumption.other, 'other'],
+      ] as const)
+        .filter(([count]) => count > 0)
+        .map(([count, label]) => `${count} ${label}`)
+    : [];
+  const otherNotes = batch?.adjustments.filter((a) => a.reason === 'other' && a.note) ?? [];
 
   return (
     <ThemedView style={styles.container}>
@@ -152,66 +225,169 @@ export default function BatchDetailScreen() {
             <ScrollView
               style={styles.scroll}
               contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}>
+              {/* Tapping anywhere that isn't itself a touchable dismisses the
+                  keyboard — inner touchables still claim their own taps first. */}
+              <Pressable style={styles.scrollGap} onPress={Keyboard.dismiss}>
               <View style={styles.statusRow}>
                 <ThemedText style={[styles.cookedAgo, { color: theme.textMuted }]}>
                   {cookedAgo(batch.cookedAt)}
                 </ThemedText>
                 <ThemedText style={[styles.remaining, { color: low ? theme.accent : theme.tint }]}>
-                  {batch.portionsRemaining}{' '}
+                  {pending}{' '}
                   <ThemedText style={[styles.remainingLabel, { color: theme.textMuted }]}>
                     of {batch.portionsTotal} left
                   </ThemedText>
                 </ThemedText>
               </View>
 
-              <PortionPips
-                total={batch.portionsTotal}
-                remaining={batch.portionsRemaining}
-                low={low}
-                height={7}
-              />
+              <PortionPips total={batch.portionsTotal} remaining={pending} low={low} height={7} />
 
-              {adjusting && (
-                <View style={[styles.adjustRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
-                  <ThemedText style={[styles.adjustLabel, { color: theme.textSecondary }]}>
-                    Portions left
-                  </ThemedText>
-                  <View style={styles.adjustControls}>
+              {/* Reduce stock: always visible, not tucked in a menu. "+" only
+                  undoes a pending "-" — it can never rise above what was
+                  committed, since increasing isn't "consumption". Confirming
+                  a reduction always asks why. */}
+              <View style={[styles.adjustCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+                <View style={styles.adjustStepperRow}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="One fewer portion"
+                    disabled={busy || pending <= 0}
+                    onPress={stepDown}
+                    style={({ pressed }) => [
+                      styles.stepButton,
+                      { backgroundColor: theme.track },
+                      (pressed || busy || pending <= 0) && styles.pressed,
+                    ]}>
+                    <ThemedText style={{ color: theme.textSecondary }}>–</ThemedText>
+                  </Pressable>
+                  <ThemedText style={styles.stepValue}>{pending}</ThemedText>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="One more portion"
+                    disabled={busy || !hasPendingChange}
+                    onPress={stepUp}
+                    style={({ pressed }) => [
+                      styles.stepButton,
+                      hasPendingChange ? { backgroundColor: theme.tint } : { backgroundColor: theme.track },
+                      (pressed || busy || !hasPendingChange) && styles.pressed,
+                    ]}>
+                    <ThemedText style={{ color: hasPendingChange ? theme.onTint : theme.textMuted }}>+</ThemedText>
+                  </Pressable>
+                </View>
+
+                {hasPendingChange && !reasonOpen && (
+                  <View style={styles.adjustActionsRow}>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="One fewer portion"
-                      disabled={busy || batch.portionsRemaining <= 0}
-                      onPress={() => void adjustTo(batch.portionsRemaining - 1)}
-                      style={({ pressed }) => [
-                        styles.adjustButton,
-                        { backgroundColor: theme.track },
-                        (pressed || batch.portionsRemaining <= 0) && styles.pressed,
-                      ]}>
-                      <ThemedText style={{ color: theme.textSecondary }}>–</ThemedText>
-                    </Pressable>
-                    <ThemedText style={styles.adjustValue}>{batch.portionsRemaining}</ThemedText>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="One more portion"
-                      disabled={busy || batch.portionsRemaining >= batch.portionsTotal}
-                      onPress={() => void adjustTo(batch.portionsRemaining + 1)}
-                      style={({ pressed }) => [
-                        styles.adjustButton,
-                        { backgroundColor: theme.tint },
-                        (pressed || batch.portionsRemaining >= batch.portionsTotal) && styles.pressed,
-                      ]}>
-                      <ThemedText style={{ color: theme.onTint }}>+</ThemedText>
-                    </Pressable>
-                    <Pressable
-                      accessibilityRole="button"
-                      onPress={() => setAdjusting(false)}
+                      disabled={busy}
+                      onPress={resetAdjust}
                       hitSlop={10}
-                      style={({ pressed }) => [pressed && styles.pressed]}>
-                      <ThemedText style={[styles.adjustDone, { color: theme.tint }]}>Done</ThemedText>
+                      style={({ pressed }) => [styles.actionLinkHit, pressed && styles.pressed]}>
+                      <ThemedText style={[styles.actionLink, { color: theme.textMuted }]}>Cancel</ThemedText>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={busy}
+                      onPress={() => setReasonOpen(true)}
+                      hitSlop={10}
+                      style={({ pressed }) => [styles.actionLinkHit, pressed && styles.pressed]}>
+                      <ThemedText style={[styles.actionLink, styles.actionLinkPrimary, { color: theme.tint }]}>
+                        Confirm
+                      </ThemedText>
                     </Pressable>
                   </View>
-                </View>
+                )}
+
+                {hasPendingChange && reasonOpen && batch && (
+                  <View style={styles.reasonPanel}>
+                    <ThemedText style={[styles.reasonPrompt, { color: theme.textSecondary }]}>
+                      Why remove {batch.portionsRemaining - (staged ?? 0)} portion
+                      {batch.portionsRemaining - (staged ?? 0) === 1 ? '' : 's'}?
+                    </ThemedText>
+                    <View style={styles.reasonChips}>
+                      {REASONS.map((r) => {
+                        const selected = reason === r;
+                        return (
+                          <Pressable
+                            key={r}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected }}
+                            onPress={() => setReason(r)}
+                            style={[
+                              styles.reasonChip,
+                              selected
+                                ? { backgroundColor: theme.ink }
+                                : { backgroundColor: theme.surface, borderColor: theme.surfaceBorder, borderWidth: 1 },
+                            ]}>
+                            <ThemedText
+                              style={[
+                                styles.reasonChipLabel,
+                                { color: selected ? theme.onInk : theme.textSecondary },
+                              ]}>
+                              {REASON_LABELS[r]}
+                            </ThemedText>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                    {reason === 'other' && (
+                      <TextInput
+                        value={note}
+                        onChangeText={setNote}
+                        placeholder="Add a note (optional)"
+                        placeholderTextColor={theme.textMuted}
+                        style={[
+                          styles.noteInput,
+                          { color: theme.text, backgroundColor: theme.track, borderColor: theme.surfaceBorder },
+                        ]}
+                      />
+                    )}
+                    <View style={styles.adjustActionsRow}>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={busy}
+                        onPress={resetAdjust}
+                        hitSlop={10}
+                        style={({ pressed }) => [styles.actionLinkHit, pressed && styles.pressed]}>
+                        <ThemedText style={[styles.actionLink, { color: theme.textMuted }]}>Cancel</ThemedText>
+                      </Pressable>
+                    </View>
+                    <Button
+                      label={`Remove ${batch.portionsRemaining - (staged ?? 0)} portion${
+                        batch.portionsRemaining - (staged ?? 0) === 1 ? '' : 's'
+                      }`}
+                      onPress={() => void submitAdjustment()}
+                      disabled={!reason}
+                      loading={busy}
+                    />
+                  </View>
+                )}
+              </View>
+
+              {consumptionParts.length > 0 && (
+                <>
+                  <ThemedText style={styles.sectionHeader}>CONSUMED</ThemedText>
+                  <View style={[styles.infoRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+                    <ThemedText style={[styles.infoLabel, { color: theme.textSecondary }]}>Breakdown</ThemedText>
+                    <ThemedText style={styles.infoValue}>{consumptionParts.join(' · ')}</ThemedText>
+                  </View>
+                  {otherNotes.map((a) => (
+                    <View
+                      key={a.id}
+                      style={[styles.infoRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+                      <ThemedText style={[styles.ingredientName, { color: theme.textSecondary }]} numberOfLines={1}>
+                        Other · {cookedAgo(a.createdAt)}
+                      </ThemedText>
+                      <ThemedText
+                        style={[styles.ingredientGrams, { color: theme.textMuted }]}
+                        numberOfLines={1}>
+                        {a.note}
+                      </ThemedText>
+                    </View>
+                  ))}
+                </>
               )}
 
               {/* Per-portion macro hero. */}
@@ -279,6 +455,7 @@ export default function BatchDetailScreen() {
                   {error}
                 </ThemedText>
               )}
+              </Pressable>
             </ScrollView>
 
             <View style={styles.footer}>
@@ -332,6 +509,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingBottom: Spacing.three,
+  },
+  scrollGap: {
     gap: 10,
   },
   statusRow: {
@@ -354,44 +533,83 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 20,
   },
-  adjustRow: {
+  adjustCard: {
     borderRadius: 13,
     borderWidth: 1,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 14,
+    gap: 10,
+  },
+  adjustStepperRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    gap: 14,
   },
-  adjustLabel: {
+  stepButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepValue: {
+    fontFamily: Fonts.display,
+    fontSize: 19,
+    lineHeight: 24,
+    minWidth: 28,
+    textAlign: 'center',
+  },
+  adjustActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 18,
+  },
+  actionLinkHit: {
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
+  actionLink: {
     fontFamily: Fonts.bodySemibold,
     fontSize: 13,
     lineHeight: 18,
   },
-  adjustControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  actionLinkPrimary: {
+    fontFamily: Fonts.bodyBold,
+  },
+  reasonPanel: {
     gap: 10,
   },
-  adjustButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  adjustValue: {
-    fontFamily: Fonts.display,
-    fontSize: 17,
-    lineHeight: 22,
-    minWidth: 24,
+  reasonPrompt: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 12.5,
+    lineHeight: 17,
     textAlign: 'center',
   },
-  adjustDone: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: 13,
-    lineHeight: 18,
-    marginLeft: 4,
+  reasonChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 7,
+    justifyContent: 'center',
+  },
+  reasonChip: {
+    paddingVertical: 7,
+    paddingHorizontal: 13,
+    borderRadius: 9,
+  },
+  reasonChipLabel: {
+    fontFamily: Fonts.bodySemibold,
+    fontSize: 12.5,
+    lineHeight: 17,
+  },
+  noteInput: {
+    borderRadius: 11,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 13,
+    fontFamily: Fonts.body,
+    fontSize: 13.5,
   },
   macroCard: {
     borderRadius: 20,

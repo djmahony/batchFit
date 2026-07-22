@@ -114,7 +114,20 @@ export type BatchIngredient = {
   food: Food;
 };
 
-/** One actual cook, living in the inventory with a remaining count. */
+/** A reasoned reduction of a batch's stock that isn't an "eat" — given away,
+ *  spoiled, damaged, or another reason. `note` is only ever set for "other". */
+export type BatchAdjustmentReason = 'given_away' | 'spoiled' | 'damaged' | 'other';
+export type BatchAdjustment = {
+  id: string;
+  portions: number;
+  reason: BatchAdjustmentReason;
+  note: string | null;
+  createdAt: string;
+};
+
+/** One actual cook, living in the inventory with a remaining count.
+ *  `consumption.eaten` is derived server-side (total - remaining - adjustments),
+ *  not stored directly. */
 export type Batch = {
   id: string;
   name: string;
@@ -123,8 +136,16 @@ export type Batch = {
   portionsRemaining: number;
   cookedAt: string;
   ingredients: BatchIngredient[];
+  adjustments: BatchAdjustment[];
   totalMacros: Macros;
   perPortionMacros: Macros;
+  consumption: {
+    eaten: number;
+    given_away: number;
+    spoiled: number;
+    damaged: number;
+    other: number;
+  };
 };
 
 /** A reusable template; cooking one produces a Batch. */
@@ -365,10 +386,14 @@ export const api = {
       ingredients: { foodId: string; grams: number }[];
     },
   ) => request<{ batch: Batch }>('/batches', { method: 'POST', body: input, token }),
-  adjustBatch: (token: string, id: string, portionsRemaining: number) =>
-    request<{ batch: Batch }>(`/batches/${id}`, {
-      method: 'PATCH',
-      body: { portionsRemaining },
+  adjustBatchPortions: (
+    token: string,
+    id: string,
+    input: { portions: number; reason: BatchAdjustmentReason; note?: string },
+  ) =>
+    request<{ batch: Batch; adjustment: BatchAdjustment }>(`/batches/${id}/adjustments`, {
+      method: 'POST',
+      body: input,
       token,
     }),
   deleteBatch: (token: string, id: string) =>

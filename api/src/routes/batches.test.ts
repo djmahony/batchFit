@@ -370,3 +370,98 @@ describe('POST /batches/:id/eat', () => {
     expect(tooMany.status).toBe(409);
   });
 });
+
+describe('POST /batches/:id/adjustments', () => {
+  it('records a reasoned reduction and decrements the count without touching the diary', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 4 });
+    const id = created.body.batch.id;
+
+    const res = await request(app)
+      .post(`/batches/${id}/adjustments`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 1, reason: 'spoiled' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.batch.portionsRemaining).toBe(3);
+    expect(res.body.adjustment.portions).toBe(1);
+    expect(res.body.adjustment.reason).toBe('spoiled');
+    expect(res.body.adjustment.note).toBeNull();
+
+    const day = await request(app)
+      .get('/diary')
+      .query({ date: new Date().toISOString().slice(0, 10) })
+      .set('Authorization', `Bearer ${token}`);
+    expect(day.body.entries).toHaveLength(0);
+  });
+
+  it('keeps a note for "other" and derives the eaten count around adjustments', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 10 });
+    const id = created.body.batch.id;
+
+    await request(app)
+      .post(`/batches/${id}/eat`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 2 });
+    await request(app)
+      .post(`/batches/${id}/adjustments`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 1, reason: 'given_away' });
+    const other = await request(app)
+      .post(`/batches/${id}/adjustments`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 1, reason: 'other', note: '  left out overnight  ' });
+
+    expect(other.status).toBe(200);
+    expect(other.body.adjustment.note).toBe('left out overnight');
+    expect(other.body.batch.portionsRemaining).toBe(6);
+    // 10 total - 6 remaining - (1 given away + 1 other) = 2 eaten.
+    expect(other.body.batch.consumption).toEqual({
+      eaten: 2,
+      given_away: 1,
+      spoiled: 0,
+      damaged: 0,
+      other: 1,
+    });
+  });
+
+  it('rejects a bad reason, a bad portions count, or too many portions', async () => {
+    const token = await registerAndGetToken();
+    const created = await createBatch(token, { portions: 2 });
+    const id = created.body.batch.id;
+
+    const badReason = await request(app)
+      .post(`/batches/${id}/adjustments`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 1, reason: 'eaten' });
+    expect(badReason.status).toBe(400);
+
+    for (const bad of [0, -1, 1.5]) {
+      const res = await request(app)
+        .post(`/batches/${id}/adjustments`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ portions: bad, reason: 'spoiled' });
+      expect(res.status).toBe(400);
+    }
+
+    const tooMany = await request(app)
+      .post(`/batches/${id}/adjustments`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ portions: 3, reason: 'spoiled' });
+    expect(tooMany.status).toBe(409);
+  });
+
+  it("404s for another user's batch", async () => {
+    const token = await registerAndGetToken();
+    const otherToken = await registerAndGetToken('other@example.com');
+    const created = await createBatch(token);
+
+    const res = await request(app)
+      .post(`/batches/${created.body.batch.id}/adjustments`)
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ portions: 1, reason: 'spoiled' });
+
+    expect(res.status).toBe(404);
+  });
+});

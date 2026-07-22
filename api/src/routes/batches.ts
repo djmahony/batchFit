@@ -8,20 +8,44 @@ export const batchesRouter = Router();
 
 batchesRouter.use(requireAuth);
 
-// Shape a batch for the client: attach whole-batch totals and per-portion macros.
+const ADJUSTMENT_REASONS = ['given_away', 'spoiled', 'damaged', 'other'] as const;
+
+// Shape a batch for the client: attach whole-batch totals, per-portion macros,
+// and the consumption breakdown. "Eaten" is derived, not stored — it's
+// whatever isn't accounted for by portionsRemaining or a reasoned adjustment.
 function withMacros(batch: {
   portionsTotal: number;
+  portionsRemaining: number;
   ingredients: { grams: number; food: { kcal: number; protein: number; fat: number; carbs: number; fibre: number } }[];
+  adjustments: { portions: number; reason: string }[];
 }) {
   const total = totalMacros(batch.ingredients);
+  const removed = batch.adjustments.reduce((sum, a) => sum + a.portions, 0);
+  const consumption = {
+    eaten: batch.portionsTotal - batch.portionsRemaining - removed,
+    given_away: 0,
+    spoiled: 0,
+    damaged: 0,
+    other: 0,
+  };
+  for (const a of batch.adjustments) {
+    if (a.reason === 'given_away' || a.reason === 'spoiled' || a.reason === 'damaged' || a.reason === 'other') {
+      consumption[a.reason] += a.portions;
+    }
+  }
   return {
     ...batch,
     totalMacros: total,
     perPortionMacros: perPortion(total, batch.portionsTotal),
+    consumption,
   };
 }
 
-const batchInclude = { ingredients: { include: { food: true } }, recipe: true } as const;
+const batchInclude = {
+  ingredients: { include: { food: true } },
+  recipe: true,
+  adjustments: { orderBy: { createdAt: 'desc' } },
+} as const;
 
 // GET /batches — the caller's cooks, newest first. `?status=active` keeps only
 // batches with portions remaining (the live inventory); `?status=depleted` is
@@ -202,4 +226,50 @@ batchesRouter.post('/:id/eat', async (req, res) => {
     }),
   ]);
   res.json({ batch: withMacros(updated), entry });
+});
+
+// POST /batches/:id/adjustments — reduce stock for a reason other than eating
+// (given away, spoiled, damaged, other). Covers the whole reduction in one
+// record, decrementing portionsRemaining atomically. Never touches the diary.
+// Body: { portions, reason, note? } — note is only meaningful for "other" but
+// isn't enforced either way.
+batchesRouter.post('/:id/adjustments', async (req, res) => {
+  const { portions, reason, note } = req.body ?? {};
+  if (!Number.isInteger(portions) || portions < 1) {
+    return res.status(400).json({ error: 'portions must be a positive integer' });
+  }
+  if (!ADJUSTMENT_REASONS.includes(reason)) {
+    return res.status(400).json({ error: `reason must be one of ${ADJUSTMENT_REASONS.join(', ')}` });
+  }
+  if (note !== undefined && typeof note !== 'string') {
+    return res.status(400).json({ error: 'note must be a string' });
+  }
+
+  const batch = await prisma.batch.findFirst({
+    where: { id: req.params.id, ownerId: req.userId },
+    include: batchInclude,
+  });
+  if (!batch) return res.status(404).json({ error: 'batch not found' });
+  if (batch.portionsRemaining < portions) {
+    return res.status(409).json({ error: 'not enough portions remaining' });
+  }
+
+  // Create the adjustment first — the update's `include: batchInclude` reads
+  // adjustments back, and it must see this one to derive "eaten" correctly.
+  const [adjustment, updated] = await prisma.$transaction([
+    prisma.batchAdjustment.create({
+      data: {
+        batchId: batch.id,
+        portions,
+        reason,
+        note: note?.trim() || null,
+      },
+    }),
+    prisma.batch.update({
+      where: { id: batch.id },
+      data: { portionsRemaining: batch.portionsRemaining - portions },
+      include: batchInclude,
+    }),
+  ]);
+  res.json({ batch: withMacros(updated), adjustment });
 });

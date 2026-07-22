@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { forwardRef, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ChoiceCard } from '@/components/choice-card';
@@ -134,17 +134,12 @@ export default function AboutScreen() {
           unit="cm"
         />
       ) : (
-        <View style={[styles.row, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
-          <ThemedText type="small" themeColor="textSecondary" style={styles.rowLabel}>
-            Height
-          </ThemedText>
-          <View style={styles.rowValue}>
-            <ValueInput value={state.heightFt} onChangeText={(heightFt) => update({ heightFt })} />
-            <ThemedText style={[styles.unit, { color: theme.textMuted }]}>ft</ThemedText>
-            <ValueInput value={state.heightIn} onChangeText={(heightIn) => update({ heightIn })} />
-            <ThemedText style={[styles.unit, { color: theme.textMuted }]}>in</ThemedText>
-          </View>
-        </View>
+        <ImperialHeightRow
+          heightFt={state.heightFt}
+          heightIn={state.heightIn}
+          onChangeFt={(heightFt) => update({ heightFt })}
+          onChangeIn={(heightIn) => update({ heightIn })}
+        />
       )}
       <InputRow
         label="Current weight"
@@ -171,19 +166,22 @@ export default function AboutScreen() {
   );
 }
 
-function ValueInput({ value, onChangeText }: { value: string; onChangeText: (t: string) => void }) {
-  const theme = useTheme();
-  return (
-    <TextInput
-      value={value}
-      onChangeText={onChangeText}
-      keyboardType="decimal-pad"
-      placeholder="—"
-      placeholderTextColor={theme.textMuted}
-      style={[styles.input, { color: theme.text }]}
-    />
-  );
-}
+const ValueInput = forwardRef<TextInput, { value: string; onChangeText: (t: string) => void }>(
+  function ValueInput({ value, onChangeText }, ref) {
+    const theme = useTheme();
+    return (
+      <TextInput
+        ref={ref}
+        value={value}
+        onChangeText={onChangeText}
+        keyboardType="decimal-pad"
+        placeholder="—"
+        placeholderTextColor={theme.textMuted}
+        style={[styles.input, { color: theme.text }]}
+      />
+    );
+  },
+);
 
 function InputRow({
   label,
@@ -197,16 +195,50 @@ function InputRow({
   unit: string;
 }) {
   const theme = useTheme();
+  const inputRef = useRef<TextInput>(null);
   return (
-    <View style={[styles.row, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+    <Pressable
+      style={[styles.row, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+      onPress={() => inputRef.current?.focus()}>
       <ThemedText type="small" themeColor="textSecondary" style={styles.rowLabel}>
         {label}
       </ThemedText>
       <View style={styles.rowValue}>
-        <ValueInput value={value} onChangeText={onChangeText} />
+        <ValueInput ref={inputRef} value={value} onChangeText={onChangeText} />
         <ThemedText style={[styles.unit, { color: theme.textMuted }]}>{unit}</ThemedText>
       </View>
-    </View>
+    </Pressable>
+  );
+}
+
+/** Feet + inches: tapping the label focuses the feet field. */
+function ImperialHeightRow({
+  heightFt,
+  heightIn,
+  onChangeFt,
+  onChangeIn,
+}: {
+  heightFt: string;
+  heightIn: string;
+  onChangeFt: (t: string) => void;
+  onChangeIn: (t: string) => void;
+}) {
+  const theme = useTheme();
+  const ftRef = useRef<TextInput>(null);
+  return (
+    <Pressable
+      style={[styles.row, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+      onPress={() => ftRef.current?.focus()}>
+      <ThemedText type="small" themeColor="textSecondary" style={styles.rowLabel}>
+        Height
+      </ThemedText>
+      <View style={styles.rowValue}>
+        <ValueInput ref={ftRef} value={heightFt} onChangeText={onChangeFt} />
+        <ThemedText style={[styles.unit, { color: theme.textMuted }]}>ft</ThemedText>
+        <ValueInput value={heightIn} onChangeText={onChangeIn} />
+        <ThemedText style={[styles.unit, { color: theme.textMuted }]}>in</ThemedText>
+      </View>
+    </Pressable>
   );
 }
 

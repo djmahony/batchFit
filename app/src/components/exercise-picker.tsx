@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   Modal,
   Pressable,
   ScrollView,
@@ -400,6 +401,7 @@ function ExerciseForm({
   const [cardioMachine, setCardioMachine] = useState<string | null>(exercise?.cardioMachine ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const nameInputRef = useRef<TextInput>(null);
 
   const onSave = async () => {
     if (!token || saving) return;
@@ -453,72 +455,79 @@ function ExerciseForm({
         contentContainerStyle={styles.form}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        <View style={[styles.fieldCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
-          <ThemedText style={[styles.fieldLabel, { color: theme.textMuted }]}>Name</ThemedText>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Incline dumbbell press"
-            placeholderTextColor={theme.textMuted}
-            style={[styles.fieldInput, { color: theme.text }]}
-          />
-        </View>
-
-        <ThemedText style={styles.sectionHeader}>MUSCLE GROUP</ThemedText>
-        <ChipGrid
-          options={[...MUSCLE_GROUPS]}
-          value={muscleGroup}
-          onChange={(group) => {
-            setMuscleGroup(group);
-            // Cardio almost always wants the combined time+distance mode.
-            if (group === 'cardio') setTrackingMode('cardio');
-          }}
-        />
-
-        {muscleGroup === 'cardio' && (
-          <>
-            <ThemedText style={styles.sectionHeader}>MACHINE</ThemedText>
-            <ChipGrid
-              options={[...CARDIO_MACHINES]}
-              value={cardioMachine ?? ''}
-              onChange={setCardioMachine}
+        {/* Tapping anywhere that isn't itself a touchable dismisses the
+            keyboard — inner touchables still claim their own taps first. */}
+        <Pressable style={styles.scrollGap} onPress={Keyboard.dismiss}>
+          <Pressable
+            style={[styles.fieldCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+            onPress={() => nameInputRef.current?.focus()}>
+            <ThemedText style={[styles.fieldLabel, { color: theme.textMuted }]}>Name</ThemedText>
+            <TextInput
+              ref={nameInputRef}
+              value={name}
+              onChangeText={setName}
+              placeholder="Incline dumbbell press"
+              placeholderTextColor={theme.textMuted}
+              style={[styles.fieldInput, { color: theme.text }]}
             />
-          </>
-        )}
+          </Pressable>
 
-        <ThemedText style={styles.sectionHeader}>EQUIPMENT</ThemedText>
-        <ChipGrid options={[...EQUIPMENT]} value={equipment} onChange={setEquipment} />
+          <ThemedText style={styles.sectionHeader}>MUSCLE GROUP</ThemedText>
+          <ChipGrid
+            options={[...MUSCLE_GROUPS]}
+            value={muscleGroup}
+            onChange={(group) => {
+              setMuscleGroup(group);
+              // Cardio almost always wants the combined time+distance mode.
+              if (group === 'cardio') setTrackingMode('cardio');
+            }}
+          />
 
-        <ThemedText style={styles.sectionHeader}>TRACKING MODE</ThemedText>
-        <View style={styles.chips}>
-          {TRACKING_MODES.map((mode) => {
-            const selected = trackingMode === mode.value;
-            return (
-              <Pressable
-                key={mode.value}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                onPress={() => setTrackingMode(mode.value)}
-                style={[
-                  styles.chip,
-                  selected
-                    ? { backgroundColor: theme.ink }
-                    : { backgroundColor: theme.surface, borderColor: theme.surfaceBorder, borderWidth: 1 },
-                ]}>
-                <ThemedText
-                  style={[styles.chipLabel, { color: selected ? theme.onInk : theme.textSecondary }]}>
-                  {mode.label}
-                </ThemedText>
-              </Pressable>
-            );
-          })}
-        </View>
+          {muscleGroup === 'cardio' && (
+            <>
+              <ThemedText style={styles.sectionHeader}>MACHINE</ThemedText>
+              <ChipGrid
+                options={[...CARDIO_MACHINES]}
+                value={cardioMachine ?? ''}
+                onChange={setCardioMachine}
+              />
+            </>
+          )}
 
-        {error && (
-          <ThemedText type="small" themeColor="danger" style={styles.centeredText}>
-            {error}
-          </ThemedText>
-        )}
+          <ThemedText style={styles.sectionHeader}>EQUIPMENT</ThemedText>
+          <ChipGrid options={[...EQUIPMENT]} value={equipment} onChange={setEquipment} />
+
+          <ThemedText style={styles.sectionHeader}>TRACKING MODE</ThemedText>
+          <View style={styles.chips}>
+            {TRACKING_MODES.map((mode) => {
+              const selected = trackingMode === mode.value;
+              return (
+                <Pressable
+                  key={mode.value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => setTrackingMode(mode.value)}
+                  style={[
+                    styles.chip,
+                    selected
+                      ? { backgroundColor: theme.ink }
+                      : { backgroundColor: theme.surface, borderColor: theme.surfaceBorder, borderWidth: 1 },
+                  ]}>
+                  <ThemedText
+                    style={[styles.chipLabel, { color: selected ? theme.onInk : theme.textSecondary }]}>
+                    {mode.label}
+                  </ThemedText>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {error && (
+            <ThemedText type="small" themeColor="danger" style={styles.centeredText}>
+              {error}
+            </ThemedText>
+          )}
+        </Pressable>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -724,6 +733,8 @@ const styles = StyleSheet.create({
   form: {
     paddingHorizontal: 22,
     paddingBottom: Spacing.three,
+  },
+  scrollGap: {
     gap: 10,
   },
   fieldCard: {

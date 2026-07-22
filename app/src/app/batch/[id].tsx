@@ -206,6 +206,7 @@ export default function BatchDetailScreen() {
                     <Pressable
                       accessibilityRole="button"
                       onPress={() => setAdjusting(false)}
+                      hitSlop={10}
                       style={({ pressed }) => [pressed && styles.pressed]}>
                       <ThemedText style={[styles.adjustDone, { color: theme.tint }]}>Done</ThemedText>
                     </Pressable>

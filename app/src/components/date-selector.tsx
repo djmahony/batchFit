@@ -6,6 +6,7 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Button } from '@/components/button';
 import { ThemedText } from '@/components/themed-text';
 import { Fonts, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
 import { formatDayKey, fromDayKey, shiftDayKey, toDayKey } from '@/lib/dates';
 
@@ -23,6 +24,7 @@ type Props = {
  */
 export function DateSelector({ value, onChange }: Props) {
   const theme = useTheme();
+  const scheme = useColorScheme();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const onValueChange = (_event: DateTimePickerChangeEvent, selected: Date) => {
@@ -70,6 +72,12 @@ export function DateSelector({ value, onChange }: Props) {
             display="default"
             onValueChange={onValueChange}
             onDismiss={() => setPickerOpen(false)}
+            // Native OS picker — this is as far as its own props let us tint
+            // it towards the brand rather than the system default blue.
+            accentColor={theme.tint}
+            themeVariant={scheme === 'dark' ? 'dark' : 'light'}
+            positiveButton={{ textColor: theme.tint }}
+            negativeButton={{ textColor: theme.textMuted }}
           />
           {Platform.OS === 'ios' && (
             <Button label="Done" variant="link" onPress={() => setPickerOpen(false)} />

@@ -119,7 +119,7 @@ export function LogWeightSheet({ visible, entry, defaultUnit, onClose }: Props) 
     <Modal visible={visible} transparent animationType="slide" onRequestClose={() => onClose(false)}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <Pressable style={styles.backdrop} onPress={() => onClose(false)} accessibilityLabel="Close" />
         <View style={[styles.sheet, { backgroundColor: theme.background, borderColor: theme.surfaceBorder }]}>
           <SafeAreaView edges={['bottom']}>

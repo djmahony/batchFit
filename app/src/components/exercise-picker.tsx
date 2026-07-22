@@ -195,7 +195,7 @@ export function ExercisePicker({ visible, onClose, onPick }: Props) {
     <Modal visible={visible} animationType="slide" onRequestClose={close}>
       <KeyboardAvoidingView
         style={[styles.container, { backgroundColor: theme.background }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
           {editing ? (
             <ExerciseForm

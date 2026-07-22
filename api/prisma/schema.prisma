@@ -99,10 +99,16 @@ model LogEntry {
 /// A food with macros per 100g. The five tracked nutrients throughout
 /// BatchFit are: calories, protein, fat, carbs, fibre.
 /// `ownerId` is null for shared reference foods; set for a user's custom foods.
+/// `barcode` is set for foods added via barcode scan — a successful Open Food
+/// Facts lookup is shared (ownerId null) so any user's later scan reuses it; a
+/// "not found" manual fallback keeps its usual owner and only carries the
+/// barcode for that user's own re-scans (user-entered macros aren't trusted
+/// enough to share globally).
 model Food {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   name     String
   brand    String?
+  barcode  String? @unique
   owner    User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId  String?
 

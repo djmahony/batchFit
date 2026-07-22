@@ -104,7 +104,7 @@ exercisesRouter.get('/', async (req, res) => {
 exercisesRouter.get('/recent', async (req, res) => {
   const recents = await prisma.workoutExercise.findMany({
     where: { workout: { userId: req.userId }, exerciseId: { not: null } },
-    orderBy: { workout: { startedAt: 'desc' } },
+    orderBy: [{ workout: { date: 'desc' } }, { workout: { createdAt: 'desc' } }],
     distinct: ['exerciseId'],
     take: 8,
     select: { exerciseId: true },
@@ -183,12 +183,12 @@ exercisesRouter.get('/:id/history', async (req, res) => {
 
   const lastBlock = await prisma.workoutExercise.findFirst({
     where: { exerciseId: exercise.id, workout: finished },
-    orderBy: { workout: { startedAt: 'desc' } },
-    include: { sets: { orderBy: { order: 'asc' } }, workout: { select: { startedAt: true } } },
+    orderBy: [{ workout: { date: 'desc' } }, { workout: { createdAt: 'desc' } }],
+    include: { sets: { orderBy: { order: 'asc' } }, workout: { select: { date: true } } },
   });
   const last = lastBlock
     ? {
-        date: dayKeyOf(lastBlock.workout.startedAt),
+        date: lastBlock.workout.date,
         sets: lastBlock.sets.map(
           ({ weightKg, reps, seconds, distanceM, inclinePct, level, lengths, speedKmh }) => ({
             weightKg,
@@ -206,7 +206,7 @@ exercisesRouter.get('/:id/history', async (req, res) => {
 
   const allSets = await prisma.workoutSet.findMany({
     where: { workoutExercise: { exerciseId: exercise.id, workout: finished } },
-    include: { workoutExercise: { select: { workout: { select: { startedAt: true } } } } },
+    include: { workoutExercise: { select: { workout: { select: { date: true } } } } },
   });
 
   type BestSet = (typeof allSets)[number];
@@ -233,15 +233,15 @@ exercisesRouter.get('/:id/history', async (req, res) => {
         weightKg: top.weightKg,
         reps: top.reps,
         estimatedOneRepMax: estimateOneRepMax(top.weightKg!, top.reps!),
-        date: dayKeyOf(top.workoutExercise.workout.startedAt),
+        date: top.workoutExercise.workout.date,
       };
     }
   } else if (exercise.trackingMode === 'bodyweight_reps') {
     const top = pickBest((s) => s.reps);
-    if (top) best = { reps: top.reps, date: dayKeyOf(top.workoutExercise.workout.startedAt) };
+    if (top) best = { reps: top.reps, date: top.workoutExercise.workout.date };
   } else if (exercise.trackingMode === 'time') {
     const top = pickBest((s) => s.seconds);
-    if (top) best = { seconds: top.seconds, date: dayKeyOf(top.workoutExercise.workout.startedAt) };
+    if (top) best = { seconds: top.seconds, date: top.workoutExercise.workout.date };
   } else {
     // distance & cardio — "best" means longest, not fastest pace (deliberate
     // MVP rule). Cardio sets logged by time only fall back to longest time.
@@ -250,7 +250,7 @@ exercisesRouter.get('/:id/history', async (req, res) => {
       best = {
         distanceM: top.distanceM,
         seconds: top.seconds,
-        date: dayKeyOf(top.workoutExercise.workout.startedAt),
+        date: top.workoutExercise.workout.date,
       };
     }
   }

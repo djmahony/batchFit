@@ -10,32 +10,16 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
 import { api, ApiError, type Workout } from '@/lib/api';
+import { formatDayKey } from '@/lib/dates';
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-/** Sessions have no user-set name in MVP; title them by time of day. */
-export function workoutTitle(startedAt: string): string {
-  const hour = new Date(startedAt).getHours();
+/** Sessions aren't timed and have no user-set name — title them by time of
+ *  day, from the hidden `createdAt` bookkeeping field (never the tracked,
+ *  user-editable `date`). Purely cosmetic; never shown as an actual time. */
+export function workoutTitle(createdAt: string): string {
+  const hour = new Date(createdAt).getHours();
   if (hour < 12) return 'Morning workout';
   if (hour < 17) return 'Afternoon workout';
   return 'Evening workout';
-}
-
-function startedAgo(startedAt: string): string {
-  const minutes = Math.max(0, Math.round((Date.now() - new Date(startedAt).getTime()) / 60000));
-  if (minutes < 1) return 'Started just now';
-  if (minutes < 60) return `Started ${minutes} min ago`;
-  const hours = Math.round(minutes / 60);
-  return `Started ${hours} hour${hours === 1 ? '' : 's'} ago`;
-}
-
-function durationLabel(workout: Workout): string {
-  if (!workout.finishedAt) return '';
-  const minutes = Math.max(
-    1,
-    Math.round((new Date(workout.finishedAt).getTime() - new Date(workout.startedAt).getTime()) / 60000),
-  );
-  return `${minutes} min`;
 }
 
 const setCount = (workout: Workout) =>
@@ -151,14 +135,14 @@ export default function TrainScreen() {
                 ]}>
                 <View style={styles.resumeHeader}>
                   <ThemedText style={styles.resumeTitle}>
-                    {workoutTitle(unfinished.startedAt)} — in progress
+                    {workoutTitle(unfinished.createdAt)} — in progress
                   </ThemedText>
                   <View style={[styles.resumeTag, { backgroundColor: theme.accent }]}>
                     <ThemedText style={styles.resumeTagText}>RESUME</ThemedText>
                   </View>
                 </View>
                 <ThemedText style={[styles.resumeMeta, { color: theme.textMuted }]}>
-                  {startedAgo(unfinished.startedAt)} · {unfinished.exercises.length} exercise
+                  {formatDayKey(unfinished.date)} · {unfinished.exercises.length} exercise
                   {unfinished.exercises.length === 1 ? '' : 's'}
                 </ThemedText>
               </Pressable>
@@ -188,10 +172,10 @@ export default function TrainScreen() {
                   ]}>
                   <View style={styles.historyHeader}>
                     <ThemedText style={styles.historyTitle}>
-                      {workoutTitle(workout.startedAt)}
+                      {workoutTitle(workout.createdAt)}
                     </ThemedText>
                     <ThemedText style={[styles.historyWhen, { color: theme.textMuted }]}>
-                      {WEEKDAYS[new Date(workout.startedAt).getDay()]} · {durationLabel(workout)}
+                      {formatDayKey(workout.date)}
                     </ThemedText>
                   </View>
                   <ThemedText style={[styles.historyMeta, { color: theme.textMuted }]}>

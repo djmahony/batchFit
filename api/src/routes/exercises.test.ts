@@ -27,14 +27,14 @@ async function finishedWorkout(
   exerciseId: string,
   name: string,
   sets: { weightKg?: number; reps?: number; seconds?: number; distanceM?: number }[],
-  startedAt: Date,
+  date: string,
   finished = true,
 ) {
   return prisma.workout.create({
     data: {
       userId,
-      startedAt,
-      finishedAt: finished ? new Date(startedAt.getTime() + 3600_000) : null,
+      date,
+      finishedAt: finished ? new Date() : null,
       exercises: {
         create: {
           exerciseId,
@@ -256,12 +256,12 @@ describe('GET /exercises/recent', () => {
       data: { ...squat, name: 'Barbell curl', muscleGroup: 'arms' },
     });
 
-    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 100, reps: 5 }], new Date('2026-07-01T10:00:00Z'));
-    await finishedWorkout(userId, bench.id, bench.name, [{ weightKg: 60, reps: 8 }], new Date('2026-07-10T10:00:00Z'));
+    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 100, reps: 5 }], '2026-07-01');
+    await finishedWorkout(userId, bench.id, bench.name, [{ weightKg: 60, reps: 8 }], '2026-07-10');
     // Squat again, more recently — must appear once, first.
-    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 105, reps: 5 }], new Date('2026-07-15T10:00:00Z'));
+    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 105, reps: 5 }], '2026-07-15');
     // Someone else's workout must not leak in.
-    await finishedWorkout(otherId, curl.id, curl.name, [{ weightKg: 30, reps: 10 }], new Date('2026-07-16T10:00:00Z'));
+    await finishedWorkout(otherId, curl.id, curl.name, [{ weightKg: 30, reps: 10 }], '2026-07-16');
 
     const res = await request(app).get('/exercises/recent').set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);
@@ -290,16 +290,16 @@ describe('GET /exercises/:id/history', () => {
     });
 
     // Bigger lift in the OLDER session — best must find it, last must not.
-    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 120, reps: 5 }], new Date('2026-06-01T10:00:00Z'));
+    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 120, reps: 5 }], '2026-06-01');
     await finishedWorkout(
       userId,
       squatEx.id,
       squatEx.name,
       [{ weightKg: 100, reps: 5 }, { weightKg: 100, reps: 3 }],
-      new Date('2026-07-01T10:00:00Z'),
+      '2026-07-01',
     );
     // An unfinished session with a huge lift must be ignored entirely.
-    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 200, reps: 5 }], new Date('2026-07-10T10:00:00Z'), false);
+    await finishedWorkout(userId, squatEx.id, squatEx.name, [{ weightKg: 200, reps: 5 }], '2026-07-10', false);
 
     const res = await request(app)
       .get(`/exercises/${squatEx.id}/history`)

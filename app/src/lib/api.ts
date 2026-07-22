@@ -228,11 +228,17 @@ export type WorkoutExercise = {
   sets: WorkoutSet[];
 };
 
-/** A training session; `finishedAt` null = still in progress. */
+/** A training session. Not timed — `date` (editable any time) is the day it's
+ *  logged against, not a start/end clock. `finishedAt` null = still in
+ *  progress (only gates the "Finish workout" action and the dedupe on
+ *  starting a new session; it never locks editing — history stays editable).
+ *  `createdAt` is a hidden bookkeeping timestamp, only used to pick a cosmetic
+ *  "Morning/Afternoon/Evening workout" title — never shown or set directly. */
 export type Workout = {
   id: string;
-  startedAt: string;
+  date: string;
   finishedAt: string | null;
+  createdAt: string;
   exercises: WorkoutExercise[];
 };
 
@@ -446,10 +452,12 @@ export const api = {
   ) => request<{ exercise: Exercise }>(`/exercises/${id}`, { method: 'PATCH', body: input, token }),
   workouts: (token: string, status?: 'unfinished' | 'finished') =>
     request<{ workouts: Workout[] }>(`/workouts${status ? `?status=${status}` : ''}`, { token }),
-  startWorkout: (token: string) =>
-    request<{ workout: Workout }>('/workouts', { method: 'POST', token }),
+  startWorkout: (token: string, date?: string) =>
+    request<{ workout: Workout }>('/workouts', { method: 'POST', body: date ? { date } : undefined, token }),
   workout: (token: string, id: string) =>
     request<{ workout: Workout }>(`/workouts/${id}`, { token }),
+  updateWorkoutDate: (token: string, id: string, date: string) =>
+    request<{ workout: Workout }>(`/workouts/${id}`, { method: 'PATCH', body: { date }, token }),
   lastWorkout: (token: string) => request<{ workout: Workout }>('/workouts/last', { token }),
   saveWorkout: (
     token: string,

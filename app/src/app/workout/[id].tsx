@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { DateSelector } from '@/components/date-selector';
 import { ExercisePicker } from '@/components/exercise-picker';
 import { LogOneRepMaxSheet } from '@/components/log-one-rep-max-sheet';
 import { NumericKeypad, type KeypadKey } from '@/components/numeric-keypad';
@@ -162,13 +163,6 @@ const toBlocks = (workout: Workout): SessionBlock[] =>
       })),
     }));
 
-function formatElapsed(startedAt: string, now: number): string {
-  const totalSeconds = Math.max(0, Math.floor((now - new Date(startedAt).getTime()) / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, '0')}`;
-}
-
 /** Raw-metres distance for the stand-alone "distance" mode (e.g. Farmer's
  *  carry) — short, gym-scale distances that don't want km/mile conversion. */
 const formatPlainDistance = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`);
@@ -233,8 +227,10 @@ function formatBest(
 }
 
 // Active workout session (wireframe 1v): exercise blocks with set tables, the
-// in-screen keypad, add-set pre-fill, repeat-last, finish/discard. Finished
-// sessions open read-only.
+// in-screen keypad, add-set pre-fill, repeat-last, finish/discard. Sessions
+// aren't timed — no elapsed clock, just an editable date — and history stays
+// fully editable after finishing; only the "Finish workout" action itself
+// goes away once a session is done.
 export default function WorkoutSessionScreen() {
   const theme = useTheme();
   const { token, user } = useAuth();
@@ -247,7 +243,6 @@ export default function WorkoutSessionScreen() {
   const [error, setError] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [now, setNow] = useState(Date.now());
   // Last-time/best/tested-max per exercise, fetched once per exercise per
   // session (F14). Missing key = not loaded yet; strips render nothing then.
   const [histories, setHistories] = useState<Record<string, ExerciseHistory>>({});
@@ -304,8 +299,6 @@ export default function WorkoutSessionScreen() {
     void Linking.openURL(url);
   };
 
-  const readOnly = workout?.finishedAt !== null && workout !== null;
-
   const load = useCallback(async () => {
     if (!token || !params.id) return;
     setLoadError(null);
@@ -323,12 +316,15 @@ export default function WorkoutSessionScreen() {
     void load();
   }, [load]);
 
-  // Tick the elapsed timer while the session is live.
-  useEffect(() => {
-    if (!workout || workout.finishedAt) return;
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(interval);
-  }, [workout]);
+  const updateDate = async (date: string) => {
+    if (!token || !workout) return;
+    try {
+      const res = await api.updateWorkoutDate(token, workout.id, date);
+      setWorkout(res.workout);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Something went wrong. Please try again.');
+    }
+  };
 
   const scheduleSave = useCallback(
     (next: SessionBlock[]) => {
@@ -552,21 +548,17 @@ export default function WorkoutSessionScreen() {
             <Ionicons name="chevron-back" size={17} color={theme.text} />
           </Pressable>
           <ThemedText style={styles.headerTitle}>Workout</ThemedText>
-          {readOnly ? (
-            <View style={styles.headerButton} />
-          ) : (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Workout actions"
-              onPress={openMenu}
-              style={({ pressed }) => [
-                styles.headerButton,
-                { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
-                pressed && styles.pressed,
-              ]}>
-              <Ionicons name="ellipsis-horizontal" size={17} color={theme.textMuted} />
-            </Pressable>
-          )}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Workout actions"
+            onPress={openMenu}
+            style={({ pressed }) => [
+              styles.headerButton,
+              { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+              pressed && styles.pressed,
+            ]}>
+            <Ionicons name="ellipsis-horizontal" size={17} color={theme.textMuted} />
+          </Pressable>
         </View>
 
         {loadError ? (
@@ -583,16 +575,8 @@ export default function WorkoutSessionScreen() {
         ) : (
           <>
             <View style={styles.metaRow}>
-              <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
-                {workout.finishedAt
-                  ? new Date(workout.startedAt).toLocaleDateString('en-GB', {
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short',
-                    })
-                  : `⏱ ${formatElapsed(workout.startedAt, now)}`}
-              </ThemedText>
-              {!readOnly && blocks.length === 0 && (
+              <DateSelector value={workout.date} onChange={(date) => void updateDate(date)} />
+              {blocks.length === 0 && (
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => void repeatLast()}
@@ -611,9 +595,7 @@ export default function WorkoutSessionScreen() {
               showsVerticalScrollIndicator={false}>
               {blocks.length === 0 && (
                 <ThemedText type="small" themeColor="textSecondary" style={styles.emptyCopy}>
-                  {readOnly
-                    ? 'Nothing was logged in this session.'
-                    : 'Add an exercise to get going — or repeat last time and beat it.'}
+                  Add an exercise to get going — or repeat last time and beat it.
                 </ThemedText>
               )}
 
@@ -636,16 +618,14 @@ export default function WorkoutSessionScreen() {
                           style={({ pressed }) => [pressed && styles.pressed]}>
                           <Ionicons name="logo-youtube" size={16} color={theme.textMuted} />
                         </Pressable>
-                        {!readOnly && (
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={`Remove ${block.name}`}
-                            onPress={() => removeBlock(blockIndex)}
-                            hitSlop={8}
-                            style={({ pressed }) => [pressed && styles.pressed]}>
-                            <Ionicons name="close-circle" size={18} color={theme.textMuted} />
-                          </Pressable>
-                        )}
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Remove ${block.name}`}
+                          onPress={() => removeBlock(blockIndex)}
+                          hitSlop={8}
+                          style={({ pressed }) => [pressed && styles.pressed]}>
+                          <Ionicons name="close-circle" size={18} color={theme.textMuted} />
+                        </Pressable>
                       </View>
                     </View>
 
@@ -695,19 +675,17 @@ export default function WorkoutSessionScreen() {
                                       ? `Tested max: ${history.testedMax.weightKg}kg · ${formatDayKey(history.testedMax.date)}`
                                       : 'No tested max yet'}
                                   </ThemedText>
-                                  {!readOnly && (
-                                    <Pressable
-                                      accessibilityRole="button"
-                                      onPress={() =>
-                                        setOneRmTarget({ exerciseId: block.exerciseId, name: block.name })
-                                      }
-                                      hitSlop={10}
-                                      style={({ pressed }) => [pressed && styles.pressed]}>
-                                      <ThemedText style={[styles.pbChipLabel, { color: theme.tint }]}>
-                                        Log 1RM test
-                                      </ThemedText>
-                                    </Pressable>
-                                  )}
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() =>
+                                      setOneRmTarget({ exerciseId: block.exerciseId, name: block.name })
+                                    }
+                                    hitSlop={10}
+                                    style={({ pressed }) => [pressed && styles.pressed]}>
+                                    <ThemedText style={[styles.pbChipLabel, { color: theme.tint }]}>
+                                      Log 1RM test
+                                    </ThemedText>
+                                  </Pressable>
                                 </View>
                               )}
                             </View>
@@ -773,7 +751,6 @@ export default function WorkoutSessionScreen() {
                               <Pressable
                                 key={column.field}
                                 accessibilityRole="button"
-                                disabled={readOnly}
                                 onPress={() =>
                                   setSelection({
                                     block: blockIndex,
@@ -812,36 +789,32 @@ export default function WorkoutSessionScreen() {
                       </View>
                     ))}
 
-                    {!readOnly && (
-                      <Pressable
-                        accessibilityRole="button"
-                        onPress={() => addSet(blockIndex)}
-                        style={({ pressed }) => [styles.addSetLink, pressed && styles.pressed]}>
-                        <ThemedText style={[styles.addSetText, { color: theme.tint }]}>
-                          + Add set
-                        </ThemedText>
-                      </Pressable>
-                    )}
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => addSet(blockIndex)}
+                      style={({ pressed }) => [styles.addSetLink, pressed && styles.pressed]}>
+                      <ThemedText style={[styles.addSetText, { color: theme.tint }]}>
+                        + Add set
+                      </ThemedText>
+                    </Pressable>
                   </View>
                 );
               })}
 
-              {!readOnly && (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Add exercise"
-                  onPress={() => setPickerOpen(true)}
-                  style={({ pressed }) => [
-                    styles.addExerciseRow,
-                    { borderColor: theme.border },
-                    pressed && styles.pressed,
-                  ]}>
-                  <Ionicons name="add" size={15} color={theme.tint} />
-                  <ThemedText style={[styles.addExerciseLabel, { color: theme.textSecondary }]}>
-                    Add exercise
-                  </ThemedText>
-                </Pressable>
-              )}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Add exercise"
+                onPress={() => setPickerOpen(true)}
+                style={({ pressed }) => [
+                  styles.addExerciseRow,
+                  { borderColor: theme.border },
+                  pressed && styles.pressed,
+                ]}>
+                <Ionicons name="add" size={15} color={theme.tint} />
+                <ThemedText style={[styles.addExerciseLabel, { color: theme.textSecondary }]}>
+                  Add exercise
+                </ThemedText>
+              </Pressable>
 
               {error && (
                 <ThemedText type="small" themeColor="danger" style={styles.centeredText}>
@@ -870,7 +843,10 @@ export default function WorkoutSessionScreen() {
               />
             )}
 
-            {!readOnly && (
+            {/* The keypad shows whenever a cell is selected — editing works on
+                any session, finished or not. "Finish workout" only shows
+                while there's actually something to finish. */}
+            {(selection || !workout.finishedAt) && (
               <View style={styles.footer}>
                 {selection ? (
                   <NumericKeypad onKey={onKey} allowDecimal={selectedDecimal} />
@@ -938,12 +914,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 22,
     paddingBottom: 8,
-  },
-  metaText: {
-    fontFamily: Fonts.bodySemibold,
-    fontSize: 13,
-    lineHeight: 18,
-    fontVariant: ['tabular-nums'],
   },
   repeatLink: {
     fontFamily: Fonts.bodyBold,

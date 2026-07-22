@@ -78,7 +78,7 @@ export default function BatchAddIngredientScreen() {
           <View style={styles.headerButton} />
         </View>
 
-        <View style={styles.searchWrap}>
+        <View style={styles.searchRow}>
           <View style={[styles.searchField, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
             <Ionicons name="search" size={16} color={theme.textMuted} />
             <TextInput
@@ -91,6 +91,17 @@ export default function BatchAddIngredientScreen() {
               style={[styles.searchInput, { color: theme.text }]}
             />
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Scan barcode"
+            onPress={() => router.push('/batch-scan-ingredient')}
+            style={({ pressed }) => [
+              styles.barcodeSlot,
+              { backgroundColor: theme.tintSoft, borderColor: theme.surfaceBorder },
+              pressed && styles.pressed,
+            ]}>
+            <Ionicons name="barcode-outline" size={20} color={theme.tint} />
+          </Pressable>
         </View>
 
         {error ? (
@@ -175,11 +186,14 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 22,
   },
-  searchWrap: {
+  searchRow: {
+    flexDirection: 'row',
+    gap: 9,
     paddingHorizontal: 22,
     paddingBottom: 10,
   },
   searchField: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 9,
@@ -187,6 +201,14 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     paddingHorizontal: 13,
     minHeight: 44,
+  },
+  barcodeSlot: {
+    width: 44,
+    height: 44,
+    borderRadius: 13,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   searchInput: {
     flex: 1,

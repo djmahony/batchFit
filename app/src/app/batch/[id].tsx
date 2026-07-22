@@ -1,7 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -216,7 +225,11 @@ export default function BatchDetailScreen() {
             <ScrollView
               style={styles.scroll}
               contentContainerStyle={styles.scrollContent}
+              keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}>
+              {/* Tapping anywhere that isn't itself a touchable dismisses the
+                  keyboard — inner touchables still claim their own taps first. */}
+              <Pressable style={styles.scrollGap} onPress={Keyboard.dismiss}>
               <View style={styles.statusRow}>
                 <ThemedText style={[styles.cookedAgo, { color: theme.textMuted }]}>
                   {cookedAgo(batch.cookedAt)}
@@ -270,14 +283,16 @@ export default function BatchDetailScreen() {
                       accessibilityRole="button"
                       disabled={busy}
                       onPress={resetAdjust}
-                      style={({ pressed }) => [pressed && styles.pressed]}>
+                      hitSlop={10}
+                      style={({ pressed }) => [styles.actionLinkHit, pressed && styles.pressed]}>
                       <ThemedText style={[styles.actionLink, { color: theme.textMuted }]}>Cancel</ThemedText>
                     </Pressable>
                     <Pressable
                       accessibilityRole="button"
                       disabled={busy}
                       onPress={() => setReasonOpen(true)}
-                      style={({ pressed }) => [pressed && styles.pressed]}>
+                      hitSlop={10}
+                      style={({ pressed }) => [styles.actionLinkHit, pressed && styles.pressed]}>
                       <ThemedText style={[styles.actionLink, styles.actionLinkPrimary, { color: theme.tint }]}>
                         Confirm
                       </ThemedText>
@@ -334,7 +349,8 @@ export default function BatchDetailScreen() {
                         accessibilityRole="button"
                         disabled={busy}
                         onPress={resetAdjust}
-                        style={({ pressed }) => [pressed && styles.pressed]}>
+                        hitSlop={10}
+                        style={({ pressed }) => [styles.actionLinkHit, pressed && styles.pressed]}>
                         <ThemedText style={[styles.actionLink, { color: theme.textMuted }]}>Cancel</ThemedText>
                       </Pressable>
                     </View>
@@ -439,6 +455,7 @@ export default function BatchDetailScreen() {
                   {error}
                 </ThemedText>
               )}
+              </Pressable>
             </ScrollView>
 
             <View style={styles.footer}>
@@ -492,6 +509,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingBottom: Spacing.three,
+  },
+  scrollGap: {
     gap: 10,
   },
   statusRow: {
@@ -546,6 +565,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 18,
+  },
+  actionLinkHit: {
+    paddingVertical: 6,
+    paddingHorizontal: 4,
   },
   actionLink: {
     fontFamily: Fonts.bodySemibold,

@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Keyboard, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -43,6 +43,7 @@ export function LogWeightSheet({ visible, entry, defaultUnit, onClose }: Props) 
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const noteInputRef = useRef<TextInput>(null);
 
   // Reset the form each time the sheet opens.
   useEffect(() => {
@@ -109,6 +110,10 @@ export function LogWeightSheet({ visible, entry, defaultUnit, onClose }: Props) 
       <Pressable style={styles.backdrop} onPress={() => onClose(false)} accessibilityLabel="Close" />
       <View style={[styles.sheet, { backgroundColor: theme.background, borderColor: theme.surfaceBorder }]}>
         <SafeAreaView edges={['bottom']}>
+          {/* Tapping anywhere in the sheet that isn't itself a touchable
+              dismisses the keyboard without closing the sheet — inner
+              touchables still claim their own taps first. */}
+          <Pressable onPress={Keyboard.dismiss}>
           <View style={styles.sheetHeader}>
             <ThemedText style={styles.sheetTitle}>
               {entry ? 'Edit weight' : 'Log weight'}
@@ -166,18 +171,21 @@ export function LogWeightSheet({ visible, entry, defaultUnit, onClose }: Props) 
             </View>
           </View>
 
-          <View style={[styles.row, styles.noteRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+          <Pressable
+            style={[styles.row, styles.noteRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+            onPress={() => noteInputRef.current?.focus()}>
             <ThemedText style={[styles.noteLabel, { color: theme.textMuted }]}>
               Note (optional)
             </ThemedText>
             <TextInput
+              ref={noteInputRef}
               value={note}
               onChangeText={setNote}
               placeholder="Morning, post-run…"
               placeholderTextColor={theme.textMuted}
               style={[styles.noteInput, { color: theme.text }]}
             />
-          </View>
+          </Pressable>
 
           {error && (
             <ThemedText type="small" themeColor="danger" style={styles.errorText}>
@@ -203,6 +211,7 @@ export function LogWeightSheet({ visible, entry, defaultUnit, onClose }: Props) 
               </Pressable>
             )}
           </View>
+          </Pressable>
         </SafeAreaView>
       </View>
     </Modal>

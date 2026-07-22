@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -81,11 +81,16 @@ export function OnboardingStep({
             contentContainerStyle={styles.content}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <ThemedText style={styles.title}>{title}</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
-              {subtitle}
-            </ThemedText>
-            {children}
+            {/* Tapping anywhere that isn't itself a touchable (a field, a
+                button…) dismisses the keyboard — inner touchables still claim
+                their own taps first. */}
+            <Pressable onPress={Keyboard.dismiss}>
+              <ThemedText style={styles.title}>{title}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
+                {subtitle}
+              </ThemedText>
+              {children}
+            </Pressable>
           </ScrollView>
 
           <View style={styles.footer}>

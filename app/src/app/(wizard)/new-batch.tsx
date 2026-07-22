@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -20,6 +20,7 @@ export default function NewBatchScreen() {
   const { token } = useAuth();
   const params = useLocalSearchParams<{ recipeId?: string }>();
   const { draft, setName, loadFromRecipe } = useBatchDraft();
+  const nameInputRef = useRef<TextInput>(null);
 
   const [startFrom, setStartFrom] = useState<StartFrom>('scratch');
   const [recipes, setRecipes] = useState<Recipe[] | null>(null);
@@ -66,16 +67,19 @@ export default function NewBatchScreen() {
       nextDisabled={draft.name.trim() === ''}
       onNext={() => router.push('/batch-ingredients')}>
       <View style={styles.body}>
-        <View style={[styles.nameField, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+        <Pressable
+          style={[styles.nameField, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+          onPress={() => nameInputRef.current?.focus()}>
           <ThemedText style={[styles.nameLabel, { color: theme.textMuted }]}>Batch name</ThemedText>
           <TextInput
+            ref={nameInputRef}
             value={draft.name}
             onChangeText={setName}
             placeholder="Chicken & Rice"
             placeholderTextColor={theme.textMuted}
             style={[styles.nameInput, { color: theme.text }]}
           />
-        </View>
+        </Pressable>
 
         <ThemedText style={styles.sectionHeader}>START FROM</ThemedText>
 

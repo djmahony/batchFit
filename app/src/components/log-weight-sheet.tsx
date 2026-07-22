@@ -1,6 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Keyboard, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -107,9 +117,12 @@ export function LogWeightSheet({ visible, entry, defaultUnit, onClose }: Props) 
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={() => onClose(false)}>
-      <Pressable style={styles.backdrop} onPress={() => onClose(false)} accessibilityLabel="Close" />
-      <View style={[styles.sheet, { backgroundColor: theme.background, borderColor: theme.surfaceBorder }]}>
-        <SafeAreaView edges={['bottom']}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Pressable style={styles.backdrop} onPress={() => onClose(false)} accessibilityLabel="Close" />
+        <View style={[styles.sheet, { backgroundColor: theme.background, borderColor: theme.surfaceBorder }]}>
+          <SafeAreaView edges={['bottom']}>
           {/* Tapping anywhere in the sheet that isn't itself a touchable
               dismisses the keyboard without closing the sheet — inner
               touchables still claim their own taps first. */}
@@ -212,13 +225,17 @@ export function LogWeightSheet({ visible, entry, defaultUnit, onClose }: Props) 
             )}
           </View>
           </Pressable>
-        </SafeAreaView>
-      </View>
+          </SafeAreaView>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(10,18,13,0.45)',

@@ -4,7 +4,9 @@ import {
   ActivityIndicator,
   FlatList,
   Keyboard,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -191,7 +193,9 @@ export function ExercisePicker({ visible, onClose, onPick }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={close}>
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <KeyboardAvoidingView
+        style={[styles.container, { backgroundColor: theme.background }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
           {editing ? (
             <ExerciseForm
@@ -340,7 +344,7 @@ export function ExercisePicker({ visible, onClose, onPick }: Props) {
             </>
           )}
         </SafeAreaView>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

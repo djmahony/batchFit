@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -46,50 +46,54 @@ export function WizardStep({
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={leftAction === 'close' ? 'Close' : 'Back'}
-            onPress={() => (leftAction === 'close' ? router.dismiss() : router.back())}
-            style={({ pressed }) => [
-              styles.headerButton,
-              { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
-              pressed && styles.pressed,
-            ]}>
-            <Ionicons
-              name={leftAction === 'close' ? 'close' : 'chevron-back'}
-              size={17}
-              color={theme.text}
-            />
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+          <View style={styles.header}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={leftAction === 'close' ? 'Close' : 'Back'}
+              onPress={() => (leftAction === 'close' ? router.dismiss() : router.back())}
+              style={({ pressed }) => [
+                styles.headerButton,
+                { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+                pressed && styles.pressed,
+              ]}>
+              <Ionicons
+                name={leftAction === 'close' ? 'close' : 'chevron-back'}
+                size={17}
+                color={theme.text}
+              />
+            </Pressable>
+            <ThemedText style={styles.headerTitle}>{title}</ThemedText>
+            <View style={styles.headerButton} />
+          </View>
+
+          <View style={styles.progress}>
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <View
+                key={i}
+                style={[styles.progressSegment, { backgroundColor: i < step ? fill : theme.barTrack }]}
+              />
+            ))}
+            <ThemedText style={[styles.progressLabel, { color: theme.textMuted }]}>
+              {step}/{TOTAL_STEPS}
+            </ThemedText>
+          </View>
+
+          {/* Tapping anywhere that isn't itself a touchable dismisses the
+              keyboard — inner touchables still claim their own taps first. */}
+          <Pressable style={styles.body} onPress={Keyboard.dismiss}>
+            {children}
           </Pressable>
-          <ThemedText style={styles.headerTitle}>{title}</ThemedText>
-          <View style={styles.headerButton} />
-        </View>
 
-        <View style={styles.progress}>
-          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-            <View
-              key={i}
-              style={[styles.progressSegment, { backgroundColor: i < step ? fill : theme.barTrack }]}
-            />
-          ))}
-          <ThemedText style={[styles.progressLabel, { color: theme.textMuted }]}>
-            {step}/{TOTAL_STEPS}
-          </ThemedText>
-        </View>
-
-        {/* Tapping anywhere that isn't itself a touchable dismisses the
-            keyboard — inner touchables still claim their own taps first. */}
-        <Pressable style={styles.body} onPress={Keyboard.dismiss}>
-          {children}
-        </Pressable>
-
-        <View style={styles.footer}>
-          {footerExtra}
-          <Button label={nextLabel} onPress={onNext} disabled={nextDisabled} loading={nextLoading} />
-        </View>
-      </SafeAreaView>
+          <View style={styles.footer}>
+            {footerExtra}
+            <Button label={nextLabel} onPress={onNext} disabled={nextDisabled} loading={nextLoading} />
+          </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }

@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -90,9 +90,10 @@ export function LogOneRepMaxSheet({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={() => onClose(false)}>
-      <Pressable style={styles.backdrop} onPress={() => onClose(false)} accessibilityLabel="Close" />
-      <View style={[styles.sheet, { backgroundColor: theme.background, borderColor: theme.surfaceBorder }]}>
-        <SafeAreaView edges={['bottom']}>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Pressable style={styles.backdrop} onPress={() => onClose(false)} accessibilityLabel="Close" />
+        <View style={[styles.sheet, { backgroundColor: theme.background, borderColor: theme.surfaceBorder }]}>
+          <SafeAreaView edges={['bottom']}>
           <View style={styles.sheetHeader}>
             <ThemedText style={styles.sheetTitle} numberOfLines={1}>
               1RM test · {exerciseName}
@@ -143,13 +144,17 @@ export function LogOneRepMaxSheet({
           <View style={styles.actions}>
             <Button label="Save 1RM" onPress={() => void onSave()} loading={saving} />
           </View>
-        </SafeAreaView>
-      </View>
+          </SafeAreaView>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(10,18,13,0.45)',

@@ -596,6 +596,7 @@ export default function WorkoutSessionScreen() {
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => void repeatLast()}
+                  hitSlop={10}
                   style={({ pressed }) => [pressed && styles.pressed]}>
                   <ThemedText style={[styles.repeatLink, { color: theme.tint }]}>
                     Repeat last workout
@@ -700,6 +701,7 @@ export default function WorkoutSessionScreen() {
                                       onPress={() =>
                                         setOneRmTarget({ exerciseId: block.exerciseId, name: block.name })
                                       }
+                                      hitSlop={10}
                                       style={({ pressed }) => [pressed && styles.pressed]}>
                                       <ThemedText style={[styles.pbChipLabel, { color: theme.tint }]}>
                                         Log 1RM test

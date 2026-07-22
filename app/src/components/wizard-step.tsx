@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -79,7 +79,11 @@ export function WizardStep({
           </ThemedText>
         </View>
 
-        <View style={styles.body}>{children}</View>
+        {/* Tapping anywhere that isn't itself a touchable dismisses the
+            keyboard — inner touchables still claim their own taps first. */}
+        <Pressable style={styles.body} onPress={Keyboard.dismiss}>
+          {children}
+        </Pressable>
 
         <View style={styles.footer}>
           {footerExtra}

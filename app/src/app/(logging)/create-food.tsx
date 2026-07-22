@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useRef, useState, type RefObject } from 'react';
+import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -30,6 +30,9 @@ export default function CreateFoodScreen() {
   const [fibre, setFibre] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const nameInputRef = useRef<TextInput>(null);
+  const servingInputRef = useRef<TextInput>(null);
 
   const onSave = async () => {
     if (!token) return;
@@ -102,47 +105,53 @@ export default function CreateFoodScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <FieldCard label="Name">
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Homemade granola"
-              placeholderTextColor={theme.textMuted}
-              style={[styles.fieldInput, { color: theme.text }]}
-            />
-          </FieldCard>
+          {/* Tapping anywhere that isn't itself a touchable dismisses the
+              keyboard — inner touchables still claim their own taps first. */}
+          <Pressable style={styles.scrollGap} onPress={Keyboard.dismiss}>
+            <FieldCard label="Name" focusRef={nameInputRef}>
+              <TextInput
+                ref={nameInputRef}
+                value={name}
+                onChangeText={setName}
+                placeholder="Homemade granola"
+                placeholderTextColor={theme.textMuted}
+                style={[styles.fieldInput, { color: theme.text }]}
+              />
+            </FieldCard>
 
-          <View style={styles.row}>
-            <View style={styles.rowItem}>
-              <FieldCard label="Serving size">
-                <TextInput
-                  value={serving}
-                  onChangeText={setServing}
-                  keyboardType="decimal-pad"
-                  style={[styles.fieldInput, { color: theme.text }]}
-                />
-              </FieldCard>
+            <View style={styles.row}>
+              <View style={styles.rowItem}>
+                <FieldCard label="Serving size" focusRef={servingInputRef}>
+                  <TextInput
+                    ref={servingInputRef}
+                    value={serving}
+                    onChangeText={setServing}
+                    keyboardType="decimal-pad"
+                    style={[styles.fieldInput, { color: theme.text }]}
+                  />
+                </FieldCard>
+              </View>
+              <View style={styles.rowItem}>
+                <FieldCard label="Unit">
+                  <ThemedText style={styles.fieldStatic}>grams</ThemedText>
+                </FieldCard>
+              </View>
             </View>
-            <View style={styles.rowItem}>
-              <FieldCard label="Unit">
-                <ThemedText style={styles.fieldStatic}>grams</ThemedText>
-              </FieldCard>
-            </View>
-          </View>
 
-          <ThemedText style={styles.sectionHeader}>PER SERVING</ThemedText>
+            <ThemedText style={styles.sectionHeader}>PER SERVING</ThemedText>
 
-          <MacroFieldRow label="Calories" value={kcal} onChangeText={setKcal} bold />
-          <MacroFieldRow label="Protein" dot="tint" value={protein} onChangeText={setProtein} bold unit="g" />
-          <MacroFieldRow label="Carbs" dot="macroCarbs" value={carbs} onChangeText={setCarbs} unit="g" />
-          <MacroFieldRow label="Fat" dot="macroFat" value={fat} onChangeText={setFat} unit="g" />
-          <MacroFieldRow label="Fibre" hint="optional" value={fibre} onChangeText={setFibre} unit="g" muted />
+            <MacroFieldRow label="Calories" value={kcal} onChangeText={setKcal} bold />
+            <MacroFieldRow label="Protein" dot="tint" value={protein} onChangeText={setProtein} bold unit="g" />
+            <MacroFieldRow label="Carbs" dot="macroCarbs" value={carbs} onChangeText={setCarbs} unit="g" />
+            <MacroFieldRow label="Fat" dot="macroFat" value={fat} onChangeText={setFat} unit="g" />
+            <MacroFieldRow label="Fibre" hint="optional" value={fibre} onChangeText={setFibre} unit="g" muted />
 
-          {error && (
-            <ThemedText type="small" themeColor="danger" style={styles.errorText}>
-              {error}
-            </ThemedText>
-          )}
+            {error && (
+              <ThemedText type="small" themeColor="danger" style={styles.errorText}>
+                {error}
+              </ThemedText>
+            )}
+          </Pressable>
         </ScrollView>
 
         <View style={styles.footer}>
@@ -153,13 +162,24 @@ export default function CreateFoodScreen() {
   );
 }
 
-function FieldCard({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldCard({
+  label,
+  children,
+  focusRef,
+}: {
+  label: string;
+  children: React.ReactNode;
+  /** When the card wraps a TextInput, tapping the label/card focuses it. */
+  focusRef?: RefObject<TextInput | null>;
+}) {
   const theme = useTheme();
   return (
-    <View style={[styles.fieldCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+    <Pressable
+      style={[styles.fieldCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+      onPress={() => focusRef?.current?.focus()}>
       <ThemedText style={[styles.fieldLabel, { color: theme.textMuted }]}>{label}</ThemedText>
       {children}
-    </View>
+    </Pressable>
   );
 }
 
@@ -183,8 +203,11 @@ function MacroFieldRow({
   muted?: boolean;
 }) {
   const theme = useTheme();
+  const inputRef = useRef<TextInput>(null);
   return (
-    <View style={[styles.macroRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+    <Pressable
+      style={[styles.macroRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+      onPress={() => inputRef.current?.focus()}>
       <View style={styles.macroLabelWrap}>
         {dot && <View style={[styles.macroDot, { backgroundColor: theme[dot] }]} />}
         <ThemedText
@@ -199,6 +222,7 @@ function MacroFieldRow({
       </View>
       <View style={styles.macroValueWrap}>
         <TextInput
+          ref={inputRef}
           value={value}
           onChangeText={onChangeText}
           keyboardType="decimal-pad"
@@ -208,7 +232,7 @@ function MacroFieldRow({
         />
         {unit && <ThemedText style={[styles.macroUnit, { color: theme.textMuted }]}>{unit}</ThemedText>}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -241,6 +265,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 22,
     paddingBottom: Spacing.three,
+  },
+  scrollGap: {
     gap: 10,
   },
   fieldCard: {

@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { OnboardingStep } from '@/components/onboarding-step';
 import { ThemedText } from '@/components/themed-text';
@@ -23,6 +23,9 @@ export default function TargetsScreen() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const kcalInputRef = useRef<TextInput>(null);
+  const fibreInputRef = useRef<TextInput>(null);
 
   const fetchTargets = useCallback(async () => {
     if (!token) return;
@@ -115,8 +118,11 @@ export default function TargetsScreen() {
       {targets ? (
         <>
           <View style={[styles.hero, { backgroundColor: theme.heroSurface, borderColor: theme.surfaceBorder }]}>
-            <View style={[styles.ring, { borderColor: theme.tint }]}>
+            <Pressable
+              style={[styles.ring, { borderColor: theme.tint }]}
+              onPress={() => kcalInputRef.current?.focus()}>
               <TextInput
+                ref={kcalInputRef}
                 value={targets.kcal}
                 onChangeText={setTarget('kcal')}
                 keyboardType="number-pad"
@@ -125,7 +131,7 @@ export default function TargetsScreen() {
               <ThemedText style={[styles.kcalLabel, { color: theme.onHeroMuted }]}>
                 KCAL / DAY
               </ThemedText>
-            </View>
+            </Pressable>
           </View>
 
           <View style={styles.macroRow}>
@@ -134,12 +140,15 @@ export default function TargetsScreen() {
             <MacroCard label="Fat" dot="macroFat" value={targets.fat} onChangeText={setTarget('fat')} />
           </View>
 
-          <View style={[styles.fibreRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+          <Pressable
+            style={[styles.fibreRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+            onPress={() => fibreInputRef.current?.focus()}>
             <ThemedText type="small" themeColor="textSecondary" style={styles.fibreLabel}>
               Fibre
             </ThemedText>
             <View style={styles.fibreValue}>
               <TextInput
+                ref={fibreInputRef}
                 value={targets.fibre}
                 onChangeText={setTarget('fibre')}
                 keyboardType="decimal-pad"
@@ -147,7 +156,7 @@ export default function TargetsScreen() {
               />
               <ThemedText style={[styles.unit, { color: theme.textMuted }]}>g</ThemedText>
             </View>
-          </View>
+          </Pressable>
 
           <View style={[styles.banner, { backgroundColor: theme.tintSoft }]}>
             <View style={[styles.bannerIcon, { backgroundColor: theme.tint }]}>
@@ -186,14 +195,18 @@ function MacroCard({
   onChangeText: (t: string) => void;
 }) {
   const theme = useTheme();
+  const inputRef = useRef<TextInput>(null);
   return (
-    <View style={[styles.macroCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+    <Pressable
+      style={[styles.macroCard, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+      onPress={() => inputRef.current?.focus()}>
       <View style={styles.macroHeader}>
         <View style={[styles.macroDot, { backgroundColor: theme[dot] }]} />
         <ThemedText style={[styles.macroLabel, { color: theme.textSecondary }]}>{label}</ThemedText>
       </View>
       <View style={styles.macroValue}>
         <TextInput
+          ref={inputRef}
           value={value}
           onChangeText={onChangeText}
           keyboardType="decimal-pad"
@@ -201,7 +214,7 @@ function MacroCard({
         />
         <ThemedText style={[styles.unit, { color: theme.textMuted }]}>g</ThemedText>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

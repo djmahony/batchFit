@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Keyboard, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -103,52 +103,56 @@ export default function ProfileSettingsScreen() {
           contentContainerStyle={styles.body}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <ThemedText style={styles.sectionHeader}>SEX</ThemedText>
-          <Segmented
-            options={[
-              { label: 'Male', value: 'male' },
-              { label: 'Female', value: 'female' },
-            ]}
-            value={sex}
-            onChange={setSex}
-          />
+          {/* Tapping anywhere that isn't itself a touchable dismisses the
+              keyboard — inner touchables still claim their own taps first. */}
+          <Pressable style={styles.scrollGap} onPress={Keyboard.dismiss}>
+            <ThemedText style={styles.sectionHeader}>SEX</ThemedText>
+            <Segmented
+              options={[
+                { label: 'Male', value: 'male' },
+                { label: 'Female', value: 'female' },
+              ]}
+              value={sex}
+              onChange={setSex}
+            />
 
-          <ThemedText style={styles.sectionHeader}>BODY</ThemedText>
-          <FieldRow label="Height" value={heightCm} onChangeText={setHeightCm} unit="cm" />
-          <FieldRow label="Current weight" value={weight} onChangeText={setWeight} unit={weightUnit} />
-          <FieldRow label="Goal weight" value={goalWeight} onChangeText={setGoalWeight} unit={weightUnit} />
+            <ThemedText style={styles.sectionHeader}>BODY</ThemedText>
+            <FieldRow label="Height" value={heightCm} onChangeText={setHeightCm} unit="cm" />
+            <FieldRow label="Current weight" value={weight} onChangeText={setWeight} unit={weightUnit} />
+            <FieldRow label="Goal weight" value={goalWeight} onChangeText={setGoalWeight} unit={weightUnit} />
 
-          <ThemedText style={styles.sectionHeader}>ACTIVITY</ThemedText>
-          {ACTIVITY_OPTIONS.map((option) => {
-            const selected = activityLevel === option.value;
-            return (
-              <Pressable
-                key={option.value}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                onPress={() => setActivityLevel(option.value)}
-                style={[
-                  styles.activityRow,
-                  {
-                    backgroundColor: theme.surface,
-                    borderColor: selected ? theme.tint : theme.surfaceBorder,
-                    borderWidth: selected ? 1.5 : 1,
-                  },
-                ]}>
-                <ThemedText
-                  style={[styles.activityLabel, selected && styles.activityLabelSelected]}>
-                  {option.label}
-                </ThemedText>
-                {selected && <Ionicons name="checkmark" size={16} color={theme.tint} />}
-              </Pressable>
-            );
-          })}
+            <ThemedText style={styles.sectionHeader}>ACTIVITY</ThemedText>
+            {ACTIVITY_OPTIONS.map((option) => {
+              const selected = activityLevel === option.value;
+              return (
+                <Pressable
+                  key={option.value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  onPress={() => setActivityLevel(option.value)}
+                  style={[
+                    styles.activityRow,
+                    {
+                      backgroundColor: theme.surface,
+                      borderColor: selected ? theme.tint : theme.surfaceBorder,
+                      borderWidth: selected ? 1.5 : 1,
+                    },
+                  ]}>
+                  <ThemedText
+                    style={[styles.activityLabel, selected && styles.activityLabelSelected]}>
+                    {option.label}
+                  </ThemedText>
+                  {selected && <Ionicons name="checkmark" size={16} color={theme.tint} />}
+                </Pressable>
+              );
+            })}
 
-          {error && (
-            <ThemedText type="small" themeColor="danger" style={styles.errorText}>
-              {error}
-            </ThemedText>
-          )}
+            {error && (
+              <ThemedText type="small" themeColor="danger" style={styles.errorText}>
+                {error}
+              </ThemedText>
+            )}
+          </Pressable>
         </ScrollView>
 
         <View style={styles.footer}>
@@ -187,6 +191,8 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: 22,
     paddingBottom: Spacing.three,
+  },
+  scrollGap: {
     gap: 9,
   },
   sectionHeader: {

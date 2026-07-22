@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Keyboard, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -88,37 +88,41 @@ export default function TargetsSettingsScreen() {
           contentContainerStyle={styles.body}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          <ThemedText style={styles.sectionHeader}>GOAL</ThemedText>
-          <Segmented
-            options={[
-              { label: 'Lose', value: 'lose' },
-              { label: 'Maintain', value: 'maintain' },
-              { label: 'Build', value: 'build' },
-            ]}
-            value={goal}
-            onChange={setGoal}
-          />
-          {goal !== 'maintain' && (
-            <FieldRow
-              label={goal === 'lose' ? 'Lose per week' : 'Gain per week'}
-              value={rate}
-              onChangeText={setRate}
-              unit="kg"
+          {/* Tapping anywhere that isn't itself a touchable dismisses the
+              keyboard — inner touchables still claim their own taps first. */}
+          <Pressable style={styles.scrollGap} onPress={Keyboard.dismiss}>
+            <ThemedText style={styles.sectionHeader}>GOAL</ThemedText>
+            <Segmented
+              options={[
+                { label: 'Lose', value: 'lose' },
+                { label: 'Maintain', value: 'maintain' },
+                { label: 'Build', value: 'build' },
+              ]}
+              value={goal}
+              onChange={setGoal}
             />
-          )}
+            {goal !== 'maintain' && (
+              <FieldRow
+                label={goal === 'lose' ? 'Lose per week' : 'Gain per week'}
+                value={rate}
+                onChangeText={setRate}
+                unit="kg"
+              />
+            )}
 
-          <ThemedText style={styles.sectionHeader}>DAILY TARGETS</ThemedText>
-          <FieldRow label="Calories" value={kcal} onChangeText={setKcal} unit="kcal" bold />
-          <FieldRow label="Protein" dot="tint" value={protein} onChangeText={setProtein} unit="g" bold />
-          <FieldRow label="Carbs" dot="macroCarbs" value={carbs} onChangeText={setCarbs} unit="g" />
-          <FieldRow label="Fat" dot="macroFat" value={fat} onChangeText={setFat} unit="g" />
-          <FieldRow label="Fibre" value={fibre} onChangeText={setFibre} unit="g" />
+            <ThemedText style={styles.sectionHeader}>DAILY TARGETS</ThemedText>
+            <FieldRow label="Calories" value={kcal} onChangeText={setKcal} unit="kcal" bold />
+            <FieldRow label="Protein" dot="tint" value={protein} onChangeText={setProtein} unit="g" bold />
+            <FieldRow label="Carbs" dot="macroCarbs" value={carbs} onChangeText={setCarbs} unit="g" />
+            <FieldRow label="Fat" dot="macroFat" value={fat} onChangeText={setFat} unit="g" />
+            <FieldRow label="Fibre" value={fibre} onChangeText={setFibre} unit="g" />
 
-          {error && (
-            <ThemedText type="small" themeColor="danger" style={styles.errorText}>
-              {error}
-            </ThemedText>
-          )}
+            {error && (
+              <ThemedText type="small" themeColor="danger" style={styles.errorText}>
+                {error}
+              </ThemedText>
+            )}
+          </Pressable>
         </ScrollView>
 
         <View style={styles.footer}>
@@ -145,14 +149,18 @@ export function FieldRow({
   bold?: boolean;
 }) {
   const theme = useTheme();
+  const inputRef = useRef<TextInput>(null);
   return (
-    <View style={[styles.fieldRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}>
+    <Pressable
+      style={[styles.fieldRow, { backgroundColor: theme.surface, borderColor: theme.surfaceBorder }]}
+      onPress={() => inputRef.current?.focus()}>
       <View style={styles.fieldLabelWrap}>
         {dot && <View style={[styles.fieldDot, { backgroundColor: theme[dot] }]} />}
         <ThemedText style={[styles.fieldLabel, bold && styles.fieldLabelBold]}>{label}</ThemedText>
       </View>
       <View style={styles.fieldValueWrap}>
         <TextInput
+          ref={inputRef}
           value={value}
           onChangeText={onChangeText}
           keyboardType="decimal-pad"
@@ -162,7 +170,7 @@ export function FieldRow({
         />
         {unit && <ThemedText style={[styles.fieldUnit, { color: theme.textMuted }]}>{unit}</ThemedText>}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -194,6 +202,8 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: 22,
     paddingBottom: Spacing.three,
+  },
+  scrollGap: {
     gap: 9,
   },
   sectionHeader: {

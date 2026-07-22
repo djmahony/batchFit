@@ -34,6 +34,74 @@ describe('POST /workouts', () => {
     expect(second.status).toBe(200);
     expect(second.body.workout.id).toBe(first.body.workout.id);
   });
+
+  it('defaults the date to today, or accepts an explicit one', async () => {
+    const token = await registerAndGetToken();
+
+    const defaulted = await request(app).post('/workouts').set('Authorization', `Bearer ${token}`);
+    expect(defaulted.body.workout.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+    // Finish it so a second POST starts a fresh session rather than reusing it.
+    await request(app)
+      .post(`/workouts/${defaulted.body.workout.id}/finish`)
+      .set('Authorization', `Bearer ${token}`);
+
+    const explicit = await request(app)
+      .post('/workouts')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-06-15' });
+    expect(explicit.status).toBe(201);
+    expect(explicit.body.workout.date).toBe('2026-06-15');
+
+    const bad = await request(app)
+      .post('/workouts')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: 'not-a-date' });
+    expect(bad.status).toBe(400);
+  });
+});
+
+describe('PATCH /workouts/:id', () => {
+  it('changes the date on a finished or unfinished session alike', async () => {
+    const token = await registerAndGetToken();
+    const started = await request(app).post('/workouts').set('Authorization', `Bearer ${token}`);
+    const id = started.body.workout.id;
+
+    const whileUnfinished = await request(app)
+      .patch(`/workouts/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-06-01' });
+    expect(whileUnfinished.status).toBe(200);
+    expect(whileUnfinished.body.workout.date).toBe('2026-06-01');
+
+    await request(app).post(`/workouts/${id}/finish`).set('Authorization', `Bearer ${token}`);
+
+    const afterFinish = await request(app)
+      .patch(`/workouts/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '2026-05-20' });
+    expect(afterFinish.status).toBe(200);
+    expect(afterFinish.body.workout.date).toBe('2026-05-20');
+  });
+
+  it('rejects a bad date and 404s for another user', async () => {
+    const token = await registerAndGetToken();
+    const otherToken = await registerAndGetToken('other@example.com');
+    const started = await request(app).post('/workouts').set('Authorization', `Bearer ${token}`);
+    const id = started.body.workout.id;
+
+    const bad = await request(app)
+      .patch(`/workouts/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ date: '15 June' });
+    expect(bad.status).toBe(400);
+
+    const foreign = await request(app)
+      .patch(`/workouts/${id}`)
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ date: '2026-06-01' });
+    expect(foreign.status).toBe(404);
+  });
 });
 
 describe('PUT /workouts/:id', () => {
@@ -167,6 +235,24 @@ describe('POST /workouts/:id/finish', () => {
       .post(`/workouts/${id}/finish`)
       .set('Authorization', `Bearer ${token}`);
     expect(again.status).toBe(409);
+  });
+
+  it('still allows editing exercises after finishing — history is never read-only', async () => {
+    const token = await registerAndGetToken();
+    const squat = await seedSquat();
+    const started = await request(app).post('/workouts').set('Authorization', `Bearer ${token}`);
+    const id = started.body.workout.id;
+
+    await request(app).post(`/workouts/${id}/finish`).set('Authorization', `Bearer ${token}`);
+
+    const edited = await request(app)
+      .put(`/workouts/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ exercises: [{ exerciseId: squat.id, sets: [{ weightKg: 80, reps: 5 }] }] });
+
+    expect(edited.status).toBe(200);
+    expect(edited.body.workout.finishedAt).not.toBeNull();
+    expect(edited.body.workout.exercises[0].sets[0].weightKg).toBe(80);
   });
 });
 

@@ -26,6 +26,13 @@ type SetInput = {
 };
 type ExerciseInput = { exerciseId: string; sets: SetInput[] };
 
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
+const localToday = () => {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+};
+
 const isNonNegative = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0;
 
 function validateSet(set: SetInput): string | null {
@@ -44,9 +51,15 @@ function validateSet(set: SetInput): string | null {
   return null;
 }
 
-// POST /workouts — start a session. If an unfinished one exists it's returned
-// instead (200), so a double-tap or app restart never forks the workout.
+// POST /workouts — start a session on a given date (defaults to today). If an
+// unfinished one exists it's returned instead (200), so a double-tap or app
+// restart never forks the workout. Body: { date? }
 workoutsRouter.post('/', async (req, res) => {
+  const { date = localToday() } = req.body ?? {};
+  if (typeof date !== 'string' || !DAY_KEY.test(date)) {
+    return res.status(400).json({ error: 'date must be "YYYY-MM-DD"' });
+  }
+
   const existing = await prisma.workout.findFirst({
     where: { userId: req.userId, finishedAt: null },
     include: workoutInclude,
@@ -54,7 +67,7 @@ workoutsRouter.post('/', async (req, res) => {
   if (existing) return res.status(200).json({ workout: existing });
 
   const workout = await prisma.workout.create({
-    data: { userId: req.userId! },
+    data: { userId: req.userId!, date },
     include: workoutInclude,
   });
   res.status(201).json({ workout });
@@ -74,7 +87,7 @@ workoutsRouter.get('/', async (req, res) => {
       ...(status === 'finished' ? { finishedAt: { not: null } } : {}),
     },
     include: workoutInclude,
-    orderBy: { startedAt: 'desc' },
+    orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
   });
   res.json({ workouts });
 });
@@ -86,7 +99,7 @@ workoutsRouter.get('/last', async (req, res) => {
   const workout = await prisma.workout.findFirst({
     where: { userId: req.userId, finishedAt: { not: null } },
     include: workoutInclude,
-    orderBy: { startedAt: 'desc' },
+    orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
   });
   if (!workout) return res.status(404).json({ error: 'no finished workouts yet' });
   res.json({ workout });
@@ -100,6 +113,28 @@ workoutsRouter.get('/:id', async (req, res) => {
   });
   if (!workout) return res.status(404).json({ error: 'workout not found' });
   res.json({ workout });
+});
+
+// PATCH /workouts/:id — change which day the session is logged against.
+// Editable at any time, on any session (finished or not) — sessions have no
+// other timing info to keep consistent. Body: { date }
+workoutsRouter.patch('/:id', async (req, res) => {
+  const workout = await prisma.workout.findFirst({
+    where: { id: req.params.id, userId: req.userId },
+  });
+  if (!workout) return res.status(404).json({ error: 'workout not found' });
+
+  const { date } = req.body ?? {};
+  if (typeof date !== 'string' || !DAY_KEY.test(date)) {
+    return res.status(400).json({ error: 'date must be "YYYY-MM-DD"' });
+  }
+
+  const updated = await prisma.workout.update({
+    where: { id: workout.id },
+    data: { date },
+    include: workoutInclude,
+  });
+  res.json({ workout: updated });
 });
 
 // PUT /workouts/:id — replace the session's blocks + sets in one go (the app

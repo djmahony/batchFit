@@ -253,7 +253,12 @@ model Workout {
   id         String    @id @default(cuid())
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  startedAt  DateTime  @default(now())
+  /// Day key ("YYYY-MM-DD") the session is logged against — user-editable,
+  /// defaults to today at creation. Sessions aren't timed: no start/end clock,
+  /// just a day. `createdAt` (below) is the real creation instant, kept only
+  /// as a tiebreaker for same-day ordering and the "Morning/Afternoon/Evening
+  /// workout" title heuristic — never shown or editable as a time itself.
+  date       String
   finishedAt DateTime?
 
   exercises WorkoutExercise[]
@@ -261,7 +266,7 @@ model Workout {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, startedAt])
+  @@index([userId, date])
 }
 
 /// One exercise block within a session, in order. The exercise name is

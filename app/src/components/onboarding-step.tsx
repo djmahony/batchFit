@@ -44,7 +44,7 @@ export function OnboardingStep({
     <ThemedView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.safe}>
           <View style={styles.header}>
             {step > 0 ? (

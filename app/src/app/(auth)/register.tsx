@@ -48,7 +48,7 @@ export default function RegisterScreen() {
     <ThemedView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <SafeAreaView style={styles.safeArea}>
           {/* Tapping anywhere that isn't itself a touchable dismisses the
               keyboard — inner touchables (fields, buttons, the link) still

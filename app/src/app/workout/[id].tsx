@@ -792,6 +792,7 @@ export default function WorkoutSessionScreen() {
                     <Pressable
                       accessibilityRole="button"
                       onPress={() => addSet(blockIndex)}
+                      hitSlop={10}
                       style={({ pressed }) => [styles.addSetLink, pressed && styles.pressed]}>
                       <ThemedText style={[styles.addSetText, { color: theme.tint }]}>
                         + Add set
@@ -857,6 +858,7 @@ export default function WorkoutSessionScreen() {
                   <Pressable
                     accessibilityRole="button"
                     onPress={() => setSelection(null)}
+                    hitSlop={10}
                     style={({ pressed }) => [styles.doneLink, pressed && styles.pressed]}>
                     <ThemedText style={[styles.doneLinkText, { color: theme.tint }]}>Done</ThemedText>
                   </Pressable>
@@ -1049,6 +1051,7 @@ const styles = StyleSheet.create({
   },
   addSetLink: {
     paddingTop: 2,
+    paddingHorizontal: 4,
   },
   addExerciseRow: {
     borderWidth: 1.5,

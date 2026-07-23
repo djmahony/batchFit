@@ -25,6 +25,7 @@ export function Button({ label, onPress, variant = 'primary', disabled, loading 
         accessibilityState={{ disabled: isDisabled }}
         onPress={onPress}
         disabled={isDisabled}
+        hitSlop={10}
         style={({ pressed }) => [
           styles.link,
           { borderBottomColor: theme.border, opacity: isDisabled ? 0.5 : pressed ? 0.6 : 1 },
@@ -75,6 +76,9 @@ const styles = StyleSheet.create({
   link: {
     alignSelf: 'center',
     borderBottomWidth: 1.5,
+    // Only paddingBottom affects where the underline sits relative to the
+    // text — paddingTop is purely extra (invisible) tap area above it.
+    paddingTop: 8,
     paddingBottom: 1,
   },
   linkLabel: {

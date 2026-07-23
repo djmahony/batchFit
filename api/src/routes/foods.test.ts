@@ -373,6 +373,55 @@ describe('GET /foods/barcode/:code', () => {
     expect(networkError.status).toBe(404);
   });
 
+  it('rejects a blank barcode with 400', async () => {
+    const token = await registerAndGetToken('blank@example.com');
+    const res = await request(app)
+      .get('/foods/barcode/%20%20')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(400);
+  });
+
+  it("never leaks another user's private food when a fresh OFF lookup collides with it", async () => {
+    const ownerToken = await registerAndGetToken('privateowner@example.com');
+    const scannerToken = await registerAndGetToken('scanner2@example.com');
+
+    // The owner already has a private (unshared) entry for this barcode —
+    // e.g. their own "not found on OFF" manual fallback.
+    await request(app)
+      .post('/foods')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ ...oats, name: "Owner's private entry", barcode: '666777888' });
+
+    // A different user scans the same barcode. It's invisible to them, so
+    // this hits the "not found locally" path and queries Open Food Facts —
+    // which succeeds, but creating the shared row collides with the
+    // existing (private, globally-unique) barcode.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        json: async () => ({
+          status: 1,
+          product: {
+            product_name: 'Some Product',
+            nutriments: {
+              'energy-kcal_100g': 200,
+              proteins_100g: 5,
+              fat_100g: 5,
+              carbohydrates_100g: 20,
+            },
+          },
+        }),
+      }),
+    );
+
+    const res = await request(app)
+      .get('/foods/barcode/666777888')
+      .set('Authorization', `Bearer ${scannerToken}`);
+
+    // Must not leak the owner's private food — 404, not their data.
+    expect(res.status).toBe(404);
+  });
+
   it('rejects a request with no token with 401', async () => {
     const res = await request(app).get('/foods/barcode/123');
     expect(res.status).toBe(401);

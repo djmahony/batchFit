@@ -15,7 +15,7 @@ export default function BatchScanIngredientScreen() {
   const { addIngredient } = useBatchDraft();
 
   const onScanned = async (code: string) => {
-    if (!token) return;
+    if (!token) throw new Error('You need to be logged in to do this.');
     try {
       const res = await api.lookupFoodBarcode(token, code);
       addIngredient(res.food);

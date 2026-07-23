@@ -56,7 +56,10 @@ foodsRouter.get('/recent', async (req, res) => {
 // the same product, by anyone, never leaves our database. 404 means "not
 // found anywhere" — the client falls back to manual entry.
 foodsRouter.get('/barcode/:code', async (req, res) => {
-  const code = req.params.code;
+  const code = req.params.code.trim();
+  if (code === '') {
+    return res.status(400).json({ error: 'barcode is required' });
+  }
 
   const cached = await prisma.food.findFirst({
     where: { barcode: code, ...visibleTo(req.userId!) },
@@ -105,9 +108,13 @@ foodsRouter.get('/barcode/:code', async (req, res) => {
     });
     res.status(201).json({ food });
   } catch {
-    // Another request cached the same barcode first (unique constraint) —
-    // that row is just as good as the one we would have created.
-    const existing = await prisma.food.findFirst({ where: { barcode: code } });
+    // Another request cached the same barcode first (unique constraint), or
+    // it collided with someone else's *private* food (barcode is globally
+    // unique regardless of visibility) — only ever return a match actually
+    // visible to this caller, same as the cache check above.
+    const existing = await prisma.food.findFirst({
+      where: { barcode: code, ...visibleTo(req.userId!) },
+    });
     if (existing) return res.json({ food: existing });
     res.status(404).json({ error: 'not found' });
   }

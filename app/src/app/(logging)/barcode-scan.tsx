@@ -15,7 +15,7 @@ export default function BarcodeScanScreen() {
   const date = params.date ?? todayKey();
 
   const onScanned = async (code: string) => {
-    if (!token) return;
+    if (!token) throw new Error('You need to be logged in to do this.');
     try {
       const res = await api.lookupFoodBarcode(token, code);
       // Replace (not push) — going back from the quantity screen should

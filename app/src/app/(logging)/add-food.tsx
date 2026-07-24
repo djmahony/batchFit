@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -17,7 +18,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type Batch, type Food, type Meal } from '@/lib/api';
+import { api, ApiError, type Batch, type ExternalFood, type Food, type Meal } from '@/lib/api';
 import { todayKey } from '@/lib/dates';
 
 const MEAL_LABELS: Record<Meal, string> = {
@@ -46,6 +47,11 @@ export default function AddFoodScreen() {
   const [foods, setFoods] = useState<Food[] | null>(null);
   const [batches, setBatches] = useState<Batch[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Open Food Facts text search, shown alongside local results while typing.
+  // null = loading, [] = loaded empty. Kept separate from `foods`/`error` so a
+  // slow or failed external search never blocks the local results.
+  const [externalFoods, setExternalFoods] = useState<ExternalFood[] | null>([]);
+  const [committingCode, setCommittingCode] = useState<string | null>(null);
 
   const trimmed = query.trim();
 
@@ -73,11 +79,31 @@ export default function AddFoodScreen() {
     }
   }, [token, trimmed, tab]);
 
+  const loadExternal = useCallback(async () => {
+    if (!token || trimmed === '') return;
+    setExternalFoods(null);
+    try {
+      const res = await api.searchExternalFoods(token, trimmed);
+      setExternalFoods(res.foods);
+    } catch {
+      setExternalFoods([]);
+    }
+  }, [token, trimmed]);
+
   // Debounce so we don't hit the API per keystroke.
   useEffect(() => {
     const timer = setTimeout(() => void load(), trimmed === '' ? 0 : 250);
     return () => clearTimeout(timer);
   }, [load, trimmed]);
+
+  useEffect(() => {
+    if (trimmed === '') {
+      setExternalFoods([]);
+      return;
+    }
+    const timer = setTimeout(() => void loadExternal(), 250);
+    return () => clearTimeout(timer);
+  }, [loadExternal, trimmed]);
 
   const openFood = (food: Food) => {
     router.push({ pathname: '/food/[id]', params: { id: food.id, meal, date } });
@@ -85,6 +111,22 @@ export default function AddFoodScreen() {
 
   const openBatch = (batch: Batch) => {
     router.push({ pathname: '/log-portion/[id]', params: { id: batch.id, meal, date } });
+  };
+
+  const pickExternal = async (external: ExternalFood) => {
+    if (!token || committingCode) return;
+    setCommittingCode(external.code);
+    try {
+      const res = await api.lookupFoodBarcode(token, external.code);
+      openFood(res.food);
+    } catch (e) {
+      Alert.alert(
+        'Couldn’t add that food',
+        e instanceof ApiError ? e.message : 'Something went wrong. Please try again.',
+      );
+    } finally {
+      setCommittingCode(null);
+    }
   };
 
   const showingPrepped = trimmed === '' && tab === 'prepped';
@@ -220,17 +262,26 @@ export default function AddFoodScreen() {
               </ThemedText>
             }
             ListFooterComponent={
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push({ pathname: '/create-food', params: { meal, date } })}
-                style={({ pressed }) => [styles.createLink, pressed && styles.pressed]}>
-                <ThemedText type="small" themeColor="textSecondary">
-                  No match?{' '}
-                  <ThemedText type="small" style={[styles.createLinkStrong, { color: theme.tint }]}>
-                    Create a custom food
+              <>
+                {trimmed !== '' && (
+                  <ExternalFoodsSection
+                    foods={externalFoods}
+                    committingCode={committingCode}
+                    onPress={(f) => void pickExternal(f)}
+                  />
+                )}
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => router.push({ pathname: '/create-food', params: { meal, date } })}
+                  style={({ pressed }) => [styles.createLink, pressed && styles.pressed]}>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    No match?{' '}
+                    <ThemedText type="small" style={[styles.createLinkStrong, { color: theme.tint }]}>
+                      Create a custom food
+                    </ThemedText>
                   </ThemedText>
-                </ThemedText>
-              </Pressable>
+                </Pressable>
+              </>
             }
           />
         )}
@@ -304,6 +355,95 @@ function FoodRow({ food, onPress }: { food: Food; onPress: () => void }) {
         <View style={[styles.addBubble, { backgroundColor: theme.tintSoft }]}>
           <Ionicons name="add" size={14} color={theme.tint} />
         </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function ExternalFoodsSection({
+  foods,
+  committingCode,
+  onPress,
+}: {
+  foods: ExternalFood[] | null;
+  committingCode: string | null;
+  onPress: (food: ExternalFood) => void;
+}) {
+  const theme = useTheme();
+
+  if (foods === null) {
+    return (
+      <View style={styles.externalLoading}>
+        <ActivityIndicator color={theme.tint} />
+      </View>
+    );
+  }
+  if (foods.length === 0) return null;
+
+  return (
+    <View style={styles.externalSection}>
+      <ThemedText type="small" themeColor="textSecondary" style={styles.externalHeading}>
+        From Open Food Facts
+      </ThemedText>
+      {foods.map((food) => (
+        <ExternalFoodRow
+          key={food.code}
+          food={food}
+          busy={committingCode === food.code}
+          onPress={() => onPress(food)}
+        />
+      ))}
+    </View>
+  );
+}
+
+function ExternalFoodRow({
+  food,
+  busy,
+  onPress,
+}: {
+  food: ExternalFood;
+  busy: boolean;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={busy}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.foodRow,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <View style={styles.foodText}>
+        <View style={styles.batchNameRow}>
+          <ThemedText style={styles.foodName} numberOfLines={1}>
+            {food.name}
+          </ThemedText>
+          <View style={[styles.batchTag, { backgroundColor: theme.textSecondary }]}>
+            <ThemedText style={styles.batchTagText}>OFF</ThemedText>
+          </View>
+        </View>
+        <ThemedText style={[styles.foodMeta, { color: theme.textMuted }]} numberOfLines={1}>
+          {food.brand ? `${food.brand} · ` : ''}per 100g · {Math.round(food.protein)}g protein
+        </ThemedText>
+      </View>
+      <View style={styles.foodRight}>
+        {busy ? (
+          <ActivityIndicator color={theme.textSecondary} />
+        ) : (
+          <>
+            <ThemedText style={[styles.foodKcal, { color: theme.textSecondary }]}>
+              {Math.round(food.kcal)}
+            </ThemedText>
+            <View style={[styles.addBubble, { backgroundColor: theme.tintSoft }]}>
+              <Ionicons name="add" size={14} color={theme.tint} />
+            </View>
+          </>
+        )}
       </View>
     </Pressable>
   );
@@ -452,6 +592,21 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  externalLoading: {
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+  },
+  externalSection: {
+    gap: 8,
+    marginBottom: Spacing.two,
+  },
+  externalHeading: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
   createLink: {
     alignItems: 'center',

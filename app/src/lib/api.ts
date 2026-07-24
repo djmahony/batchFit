@@ -95,6 +95,14 @@ export type Food = Macros & {
   ownerId: string | null;
 };
 
+/** An Open Food Facts search hit — not yet in our database. Picking one
+ *  commits it via `lookupFoodBarcode`, which caches it and returns a `Food`. */
+export type ExternalFood = Macros & {
+  code: string;
+  name: string;
+  brand: string | null;
+};
+
 /** One diary line. Macros are snapshotted for the logged quantity at log time. */
 export type LogEntry = Macros & {
   id: string;
@@ -367,6 +375,10 @@ export const api = {
   searchFoods: (token: string, query = '') =>
     request<{ foods: Food[] }>(`/foods?query=${encodeURIComponent(query)}`, { token }),
   recentFoods: (token: string) => request<{ foods: Food[] }>('/foods/recent', { token }),
+  /** Live Open Food Facts product search — results aren't cached yet; pick
+   *  one and pass its `code` to `lookupFoodBarcode` to commit it. */
+  searchExternalFoods: (token: string, query: string) =>
+    request<{ foods: ExternalFood[] }>(`/foods/search-external?query=${encodeURIComponent(query)}`, { token }),
   food: (token: string, id: string) => request<{ food: Food }>(`/foods/${id}`, { token }),
   /** Look up a scanned barcode — a cached match returns 200, a fresh Open
    *  Food Facts hit 201; a 404 (via ApiError) means fall back to manual entry. */

@@ -120,6 +120,55 @@ foodsRouter.get('/barcode/:code', async (req, res) => {
   }
 });
 
+// GET /foods/search-external?query= — live product search against Open Food
+// Facts (not our own database), so the picker can surface branded products we
+// haven't cached yet. Results are transient — nothing is written to our
+// database here. Picking one commits it via GET /foods/barcode/:code, the
+// same cache-on-first-use path a barcode scan uses.
+foodsRouter.get('/search-external', async (req, res) => {
+  const query = typeof req.query.query === 'string' ? req.query.query.trim() : '';
+  if (query === '') return res.json({ foods: [] });
+
+  let hits: unknown[] = [];
+  try {
+    const offRes = await fetch(
+      `https://search.openfoodfacts.org/search?q=${encodeURIComponent(query)}&page_size=15&langs=en&fields=product_name,brands,code,nutriments`,
+    );
+    const body = await offRes.json();
+    if (Array.isArray(body?.hits)) hits = body.hits;
+  } catch {
+    // Network failure or bad response — surface no external results.
+  }
+
+  const isNum = (n: unknown): n is number => typeof n === 'number' && Number.isFinite(n) && n >= 0;
+  const foods = hits
+    .map((hit) => {
+      const h = hit as Record<string, unknown>;
+      const name = typeof h.product_name === 'string' ? h.product_name.trim() : '';
+      const code = typeof h.code === 'string' ? h.code.trim() : '';
+      const nutriments = (h.nutriments ?? {}) as Record<string, unknown>;
+      const kcal = nutriments['energy-kcal_100g'];
+      const protein = nutriments['proteins_100g'];
+      const fat = nutriments['fat_100g'];
+      const carbs = nutriments['carbohydrates_100g'];
+      const fibre = nutriments['fiber_100g'];
+      if (name === '' || code === '' || !isNum(kcal) || !isNum(protein) || !isNum(fat) || !isNum(carbs)) {
+        return null;
+      }
+      // Unlike the single-product endpoint, search-a-licious returns `brands`
+      // as an array, not a comma-separated string.
+      const brands = h.brands;
+      const brand =
+        Array.isArray(brands) && typeof brands[0] === 'string' && brands[0].trim() !== ''
+          ? brands[0].trim()
+          : null;
+      return { code, name, brand, kcal, protein, fat, carbs, fibre: isNum(fibre) ? fibre : 0 };
+    })
+    .filter((f): f is NonNullable<typeof f> => f !== null);
+
+  res.json({ foods });
+});
+
 // GET /foods/:id — a single visible food (reference or the caller's own).
 foodsRouter.get('/:id', async (req, res) => {
   const food = await prisma.food.findFirst({

@@ -19,7 +19,7 @@ import { api, ApiError, type Meal } from '@/lib/api';
 export default function CreateFoodScreen() {
   const theme = useTheme();
   const { token } = useAuth();
-  const params = useLocalSearchParams<{ meal?: Meal; date?: string }>();
+  const params = useLocalSearchParams<{ meal?: Meal; date?: string; barcode?: string }>();
 
   const [name, setName] = useState('');
   const [serving, setServing] = useState('100');
@@ -69,6 +69,7 @@ export default function CreateFoodScreen() {
         carbs: toPer100(values.carbs),
         fat: toPer100(values.fat),
         fibre: toPer100(fibreValue),
+        ...(params.barcode ? { barcode: params.barcode } : {}),
       });
       // Straight into the quantity screen, pre-filled with one serving.
       router.replace({
@@ -109,6 +110,11 @@ export default function CreateFoodScreen() {
           {/* Tapping anywhere that isn't itself a touchable dismisses the
               keyboard — inner touchables still claim their own taps first. */}
           <Pressable style={styles.scrollGap} onPress={Keyboard.dismiss}>
+            {params.barcode && (
+              <ThemedText type="small" themeColor="textSecondary" style={styles.barcodeNote}>
+                Not on Open Food Facts yet — fill this in and we'll remember it next time you scan.
+              </ThemedText>
+            )}
             <FieldCard label="Name" focusRef={nameInputRef}>
               <TextInput
                 ref={nameInputRef}
@@ -305,6 +311,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 0.5,
     marginTop: 2,
+  },
+  barcodeNote: {
+    lineHeight: 18,
   },
   macroRow: {
     borderRadius: 13,

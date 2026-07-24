@@ -91,6 +91,7 @@ export type Food = Macros & {
   id: string;
   name: string;
   brand: string | null;
+  barcode: string | null;
   ownerId: string | null;
 };
 
@@ -367,7 +368,11 @@ export const api = {
     request<{ foods: Food[] }>(`/foods?query=${encodeURIComponent(query)}`, { token }),
   recentFoods: (token: string) => request<{ foods: Food[] }>('/foods/recent', { token }),
   food: (token: string, id: string) => request<{ food: Food }>(`/foods/${id}`, { token }),
-  createFood: (token: string, input: Macros & { name: string; brand?: string }) =>
+  /** Look up a scanned barcode — a cached match returns 200, a fresh Open
+   *  Food Facts hit 201; a 404 (via ApiError) means fall back to manual entry. */
+  lookupFoodBarcode: (token: string, code: string) =>
+    request<{ food: Food }>(`/foods/barcode/${encodeURIComponent(code)}`, { token }),
+  createFood: (token: string, input: Macros & { name: string; brand?: string; barcode?: string }) =>
     request<{ food: Food }>('/foods', { method: 'POST', body: input, token }),
   addDiaryEntry: (token: string, input: { date: string; meal: Meal; foodId: string; quantity: number }) =>
     request<{ entry: LogEntry }>('/diary', { method: 'POST', body: input, token }),

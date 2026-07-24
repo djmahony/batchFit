@@ -427,3 +427,106 @@ describe('GET /foods/barcode/:code', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('GET /foods/search-external', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('returns an empty list for a blank query without calling Open Food Facts', async () => {
+    const token = await registerAndGetToken('blankquery@example.com');
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const res = await request(app)
+      .get('/foods/search-external?query=%20')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([]);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('maps Open Food Facts search hits, taking the first of the brands array and defaulting missing fibre', async () => {
+    const token = await registerAndGetToken('search@example.com');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        json: async () => ({
+          hits: [
+            {
+              code: '7777777777777',
+              product_name: 'Cheddar mild',
+              brands: ['Dairy Co', 'Other Brand'],
+              nutriments: {
+                'energy-kcal_100g': 416,
+                proteins_100g: 25,
+                fat_100g: 35,
+                carbohydrates_100g: 0.5,
+                // fiber_100g deliberately omitted — should default to 0.
+              },
+            },
+          ],
+        }),
+      }),
+    );
+
+    const res = await request(app)
+      .get('/foods/search-external?query=cheddar')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([
+      {
+        code: '7777777777777',
+        name: 'Cheddar mild',
+        brand: 'Dairy Co',
+        kcal: 416,
+        protein: 25,
+        fat: 35,
+        carbs: 0.5,
+        fibre: 0,
+      },
+    ]);
+  });
+
+  it('silently drops hits missing a name, code, or required macros', async () => {
+    const token = await registerAndGetToken('incomplete@example.com');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        json: async () => ({
+          hits: [
+            { code: '1', product_name: '', nutriments: { 'energy-kcal_100g': 100, proteins_100g: 1, fat_100g: 1, carbohydrates_100g: 1 } },
+            { code: '', product_name: 'No code', nutriments: { 'energy-kcal_100g': 100, proteins_100g: 1, fat_100g: 1, carbohydrates_100g: 1 } },
+            { code: '2', product_name: 'Missing macros', nutriments: { 'energy-kcal_100g': 100 } },
+          ],
+        }),
+      }),
+    );
+
+    const res = await request(app)
+      .get('/foods/search-external?query=x')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([]);
+  });
+
+  it('returns an empty list if Open Food Facts errors', async () => {
+    const token = await registerAndGetToken('offdown@example.com');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
+
+    const res = await request(app)
+      .get('/foods/search-external?query=cheddar')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.foods).toEqual([]);
+  });
+
+  it('rejects a request with no token with 401', async () => {
+    const res = await request(app).get('/foods/search-external?query=cheddar');
+    expect(res.status).toBe(401);
+  });
+});

@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
@@ -11,7 +11,7 @@ import { Fonts, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth';
 import { useBatchDraft } from '@/context/batch-draft';
 import { useTheme } from '@/hooks/use-theme';
-import { api, ApiError, type Food } from '@/lib/api';
+import { api, ApiError, type ExternalFood, type Food } from '@/lib/api';
 
 /**
  * Add-ingredient search, pushed from the "+ Add ingredient" row on the batch
@@ -28,6 +28,9 @@ export default function BatchAddIngredientScreen() {
   // "search for..." empty state immediately rather than a spinner flash.
   const [foods, setFoods] = useState<Food[] | null>([]);
   const [error, setError] = useState<string | null>(null);
+  // Open Food Facts text search, shown alongside local results while typing.
+  const [externalFoods, setExternalFoods] = useState<ExternalFood[] | null>([]);
+  const [committingCode, setCommittingCode] = useState<string | null>(null);
 
   const trimmed = query.trim();
 
@@ -44,6 +47,17 @@ export default function BatchAddIngredientScreen() {
     }
   }, [token, trimmed]);
 
+  const loadExternal = useCallback(async () => {
+    if (!token || trimmed === '') return;
+    setExternalFoods(null);
+    try {
+      const res = await api.searchExternalFoods(token, trimmed);
+      setExternalFoods(res.foods);
+    } catch {
+      setExternalFoods([]);
+    }
+  }, [token, trimmed]);
+
   useEffect(() => {
     if (trimmed === '') {
       setError(null);
@@ -54,9 +68,34 @@ export default function BatchAddIngredientScreen() {
     return () => clearTimeout(timer);
   }, [load, trimmed]);
 
+  useEffect(() => {
+    if (trimmed === '') {
+      setExternalFoods([]);
+      return;
+    }
+    const timer = setTimeout(() => void loadExternal(), 250);
+    return () => clearTimeout(timer);
+  }, [loadExternal, trimmed]);
+
   const pick = (food: Food) => {
     addIngredient(food);
     router.back();
+  };
+
+  const pickExternal = async (external: ExternalFood) => {
+    if (!token || committingCode) return;
+    setCommittingCode(external.code);
+    try {
+      const res = await api.lookupFoodBarcode(token, external.code);
+      pick(res.food);
+    } catch (e) {
+      Alert.alert(
+        'Couldn’t add that ingredient',
+        e instanceof ApiError ? e.message : 'Something went wrong. Please try again.',
+      );
+    } finally {
+      setCommittingCode(null);
+    }
   };
 
   return (
@@ -127,6 +166,15 @@ export default function BatchAddIngredientScreen() {
                 {trimmed === '' ? 'Search for what went in the pot.' : 'Nothing matched that.'}
               </ThemedText>
             }
+            ListFooterComponent={
+              trimmed !== '' ? (
+                <ExternalFoodsSection
+                  foods={externalFoods}
+                  committingCode={committingCode}
+                  onPress={(f) => void pickExternal(f)}
+                />
+              ) : null
+            }
           />
         )}
       </SafeAreaView>
@@ -157,6 +205,89 @@ function FoodRow({ food, onPress }: { food: Food; onPress: () => void }) {
       <View style={[styles.addBubble, { backgroundColor: theme.tintSoft }]}>
         <Ionicons name="add" size={14} color={theme.tint} />
       </View>
+    </Pressable>
+  );
+}
+
+function ExternalFoodsSection({
+  foods,
+  committingCode,
+  onPress,
+}: {
+  foods: ExternalFood[] | null;
+  committingCode: string | null;
+  onPress: (food: ExternalFood) => void;
+}) {
+  const theme = useTheme();
+
+  if (foods === null) {
+    return (
+      <View style={styles.externalLoading}>
+        <ActivityIndicator color={theme.tint} />
+      </View>
+    );
+  }
+  if (foods.length === 0) return null;
+
+  return (
+    <View style={styles.externalSection}>
+      <ThemedText type="small" themeColor="textSecondary" style={styles.externalHeading}>
+        From Open Food Facts
+      </ThemedText>
+      {foods.map((food) => (
+        <ExternalFoodRow
+          key={food.code}
+          food={food}
+          busy={committingCode === food.code}
+          onPress={() => onPress(food)}
+        />
+      ))}
+    </View>
+  );
+}
+
+function ExternalFoodRow({
+  food,
+  busy,
+  onPress,
+}: {
+  food: ExternalFood;
+  busy: boolean;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={busy}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.foodRow,
+        { backgroundColor: theme.surface, borderColor: theme.surfaceBorder },
+        pressed && styles.pressed,
+      ]}>
+      <View style={styles.foodText}>
+        <View style={styles.batchNameRow}>
+          <ThemedText style={styles.foodName} numberOfLines={1}>
+            {food.name}
+          </ThemedText>
+          <View style={[styles.batchTag, { backgroundColor: theme.textSecondary }]}>
+            <ThemedText style={styles.batchTagText}>OFF</ThemedText>
+          </View>
+        </View>
+        <ThemedText style={[styles.foodMeta, { color: theme.textMuted }]} numberOfLines={1}>
+          {food.brand ? `${food.brand} · ` : ''}
+          {Math.round(food.kcal)} kcal / 100g
+        </ThemedText>
+      </View>
+      {busy ? (
+        <ActivityIndicator color={theme.textSecondary} />
+      ) : (
+        <View style={[styles.addBubble, { backgroundColor: theme.tintSoft }]}>
+          <Ionicons name="add" size={14} color={theme.tint} />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -247,12 +378,45 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemibold,
     fontSize: 13.5,
     lineHeight: 18,
+    flexShrink: 1,
+  },
+  batchNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  batchTag: {
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 5,
+  },
+  batchTagText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 8.5,
+    lineHeight: 11,
+    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
   foodMeta: {
     fontFamily: Fonts.body,
     fontSize: 11,
     lineHeight: 15,
     marginTop: 1,
+  },
+  externalLoading: {
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+  },
+  externalSection: {
+    gap: 8,
+    marginTop: 2,
+  },
+  externalHeading: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
   addBubble: {
     width: 26,
